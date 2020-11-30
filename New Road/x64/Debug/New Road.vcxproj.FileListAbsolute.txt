@@ -1,0 +1,2 @@
+C:\Users\g19016\Documents\ゲーム制作\New Road\x64\Debug\New Road.exe
+C:\Users\g19016\Documents\ゲーム制作\New Road\x64\Debug\New Road.pdb
