@@ -38,6 +38,8 @@
 #define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\strat背景.png")
 #define IMAGE_TITLE_ROGO_PATH	TEXT(".\\IMAGE\\titlerogo.png")
 #define IMAGE_TITLE_START_PATH	TEXT(".\\IMAGE\\title_start1.png")
+#define IMAGE_TITLE_RNK	TEXT(".\\IMAGE\\title_start1.png")
+
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
 
@@ -106,6 +108,7 @@ enum GAME_MAP_KIND_PR
 
 enum GAME_SCENE {
 	GAME_SCENE_START,
+	GAME_SCENE_EXPO,
 	GAME_SCENE_PLAY,
 	GAME_SCENE_END,
 };
@@ -242,6 +245,8 @@ int waitCnt = 0;
 
 int DrCharCnt = 0;
 
+int ExDrawCnt = 1;
+
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
 
@@ -355,6 +360,10 @@ VOID MY_START(VOID);
 VOID MY_START_PROC(VOID);
 VOID MY_START_DRAW(VOID);
 
+VOID MY_EXPO(VOID);
+VOID MY_EXPO_PROC(VOID);
+VOID MY_EXPO_DRAW(VOID);
+
 VOID MY_PLAY(VOID);
 VOID MY_PLAY_PROC(VOID);
 VOID MY_PLAY_DRAW(VOID);
@@ -443,6 +452,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{
 		case GAME_SCENE_START:
 			MY_START();
+			break;
+		case GAME_SCENE_EXPO:
+			MY_EXPO();
 			break;
 		case GAME_SCENE_PLAY:
 			MY_PLAY();
@@ -722,17 +734,18 @@ VOID MY_START_PROC(VOID)
 		SetMousePoint(player.image.x, player.image.y);
 
 		GameEndKind = GAME_END_FAIL;
-
-		
 	}
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
 		CLICK_M = TRUE;
-		GameScene = GAME_SCENE_PLAY;
+		//GameScene = GAME_SCENE_PLAY;
+		GameScene = GAME_SCENE_EXPO;
 		MusicPass = TRUE;
 		MY_MAP_RELOAD = TRUE;
 	}
 
+
+	//後ろ歩く処理
 	if (ImageChar[1].IsDraw == FALSE && MY_CHAR_MOVE_ST == TRUE) {
 		ImageChar[1].IsDraw = TRUE;
 		MY_CHAR_MOVE_ST = FALSE;
@@ -839,6 +852,89 @@ VOID MY_START_DRAW(VOID)
 		ImageTitleRNK.rate = 1.0;
 	}
 	//DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
+	return;
+}
+
+VOID MY_EXPO(VOID)
+{
+	MY_EXPO_PROC();
+	MY_EXPO_DRAW();
+
+	return;
+}
+
+VOID MY_EXPO_PROC(VOID) {
+	if (CheckSoundMem(BGM_TITLE.handle) == 0)
+	{
+		ChangeVolumeSoundMem(255 * 50 / 100, BGM_TITLE.handle);
+		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
+	}
+
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN)) {
+		if (CLICK_M == TRUE)
+		{
+			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			CLICK_M = FALSE;
+		}
+	}
+
+	switch (ExDrawCnt)
+	{
+	case 1:
+		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
+			ExDrawCnt = 2;
+			CLICK_M = TRUE;
+		}
+		break;
+	case 2:
+		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
+			ExDrawCnt = 3;
+			CLICK_M = TRUE;
+		}
+		break;
+	case 3:
+		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
+			ExDrawCnt = 1;
+			CLICK_M = TRUE;
+
+			if (CheckSoundMem(BGM_TITLE.handle) != 0)
+			{
+				StopSoundMem(BGM_TITLE.handle);
+			}
+			GameScene = GAME_SCENE_PLAY;
+		}
+		break;
+	}
+
+	return;
+}
+
+VOID MY_EXPO_DRAW(VOID) {
+	switch (ExDrawCnt)
+	{
+	case 1:
+		DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
+		break;
+	case 2:
+		DrawGraph(ImageBackENDF.image.x, ImageBackENDF.image.y, ImageBackENDF.image.handle, TRUE);
+		break;
+	case 3:
+		DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
+		break;
+	}
+	DrawRotaGraph(
+		ImageEndROGO.image.x, ImageEndROGO.image.y,
+		ImageEndROGO.rate,
+		ImageEndROGO.angle,
+		ImageEndROGO.image.handle, TRUE);
+
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
+		ImageEndROGO.rate = 0.8;
+
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+		FALL_RESON = FALSE;
+		ImageEndROGO.rate = 1.0;
+	}
 	return;
 }
 
@@ -1336,6 +1432,20 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleSTART.angle = 0;
 	ImageTitleSTART.rate = 1.0;
 
+//ランキング選択
+	strcpy_s(ImageTitleRNK.image.path, IMAGE_TITLE_START_PATH);
+	ImageTitleRNK.image.handle = LoadGraph(ImageTitleRNK.image.path);
+	if (ImageTitleRNK.image.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_START_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageTitleRNK.image.handle, &ImageTitleRNK.image.width, &ImageTitleRNK.image.height);
+	ImageTitleRNK.image.x = GAME_WIDTH / 2;
+	ImageTitleRNK.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + 64;
+	ImageTitleRNK.angle = 0;
+	ImageTitleRNK.rate = 1.0;
+
 //動く画像（タイトル）
 	strcpy_s(ImageChar[0].image.path, IMAGE_CHAR_PATH);			//パスの設定
 	strcpy_s(ImageChar[1].image.path, IMAGE_CHAR_1_PATH);		//パスの設定(背景画像反転)
@@ -1523,6 +1633,7 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(ImageTitleBK.handle);
 	DeleteGraph(ImageTitleROGO.image.handle);
 	DeleteGraph(ImageTitleSTART.image.handle);
+	DeleteGraph(ImageTitleRNK.image.handle);
 	DeleteGraph(ImageEndCOMP.image.handle);
 	DeleteGraph(ImageEndFAIL.image.handle);
 	DeleteGraph(ImageEndROGO.image.handle);

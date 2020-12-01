@@ -1,7 +1,7 @@
 ﻿  main.cpp
-C:\Users\g19016\Documents\ゲーム制作\New Road\main.cpp(1175,14): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\Users\g19016\Documents\ゲーム制作\New Road\main.cpp(1264,15): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\Users\g19016\Documents\ゲーム制作\New Road\main.cpp(1277,16): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\Users\g19016\Documents\ゲーム制作\New Road\main.cpp(1355,19): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\Users\g19016\Documents\ゲーム制作\New Road\main.cpp(1641): warning C4715: 'MY_DIRECTION': 値を返さないコントロール パスがあります。
-  New Road.vcxproj -> C:\Users\g19016\Documents\ゲーム制作\New Road\x64\Debug\New Road.exe
+C:\github\作品ⅢGitHub\New Road\main.cpp(1271,14): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1360,15): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1373,16): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1465,19): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1752): warning C4715: 'MY_DIRECTION': 値を返さないコントロール パスがあります。
+  New Road.vcxproj -> C:\github\作品ⅢGitHub\New Road\x64\Debug\New Road.exe
