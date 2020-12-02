@@ -33,6 +33,8 @@
 
 #define IMAGE_CHAR_NUM			3	
 
+#define IMAGE_EXPO_BACK TEXT(".\\IMAGE\\îwåi1.png")
+
 #define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
 
 #define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\stratîwåi.png")
@@ -287,6 +289,7 @@ IMAGE_ROTA ImageTitleROGO;
 IMAGE_BLINK ImageTitleSTART;
 IMAGE_BLINK ImageTitleRNK;
 
+IMAGE ImageEXPOBK;
 
 IMAGE_BLINK ImageEndCOMP;
 IMAGE_BLINK ImageEndFAIL;
@@ -913,13 +916,13 @@ VOID MY_EXPO_DRAW(VOID) {
 	switch (ExDrawCnt)
 	{
 	case 1:
-		DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
+		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 		break;
 	case 2:
-		DrawGraph(ImageBackENDF.image.x, ImageBackENDF.image.y, ImageBackENDF.image.handle, TRUE);
+		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 		break;
 	case 3:
-		DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
+		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 		break;
 	}
 	DrawRotaGraph(
@@ -1446,6 +1449,18 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleRNK.angle = 0;
 	ImageTitleRNK.rate = 1.0;
 
+//ÉQÅ[ÉÄê‡ñæ
+	strcpy_s(ImageEXPOBK.path, IMAGE_EXPO_BACK);
+	ImageEXPOBK.handle = LoadGraph(ImageEXPOBK.path);
+	if (ImageEXPOBK.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_EXPO_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageEXPOBK.handle, &ImageEXPOBK.width, &ImageEXPOBK.height);
+	ImageEXPOBK.x = GAME_WIDTH / 2 - ImageEXPOBK.width / 2;
+	ImageEXPOBK.y = GAME_HEIGHT / 2 - ImageEXPOBK.height / 2;
+
 //ìÆÇ≠âÊëúÅiÉ^ÉCÉgÉãÅj
 	strcpy_s(ImageChar[0].image.path, IMAGE_CHAR_PATH);			//ÉpÉXÇÃê›íË
 	strcpy_s(ImageChar[1].image.path, IMAGE_CHAR_1_PATH);		//ÉpÉXÇÃê›íË(îwåiâÊëúîΩì])
@@ -1631,6 +1646,7 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(player.image.handle);
 
 	DeleteGraph(ImageTitleBK.handle);
+	DeleteGraph(ImageEXPOBK.handle);
 	DeleteGraph(ImageTitleROGO.image.handle);
 	DeleteGraph(ImageTitleSTART.image.handle);
 	DeleteGraph(ImageTitleRNK.image.handle);
