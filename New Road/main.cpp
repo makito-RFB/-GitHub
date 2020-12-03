@@ -18,6 +18,10 @@
 #define FONT_TANU_PATH    TEXT(".\\FONT\\TanukiMagic.ttf")
 #define FONT_TANU_NAME    TEXT("たぬき油性マジック")	
 
+//#define FONT_TANU_PATH    TEXT(".\\FONT\\SoukouMincho.ttf")
+//#define FONT_TANU_NAME    TEXT("装甲明朝")	
+
+
 #define FONT_INSTALL_ERR_TITLE	TEXT("フォントインストールエラー")
 #define FONT_CREATE_ERR_TITLE	TEXT("フォント作成エラー")
 
@@ -403,6 +407,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	if (MY_FONT_INSTALL_ONCE() == FALSE) { return -1; }
 	if (MY_FONT_CREATE() == FALSE) { return -1; }
+
+	ChangeFont("たぬき油性マジック", DX_CHARSET_DEFAULT);
+	ChangeFontType(DX_FONTTYPE_ANTIALIASING_8X8);
 
 	SetMouseDispFlag(TRUE);
 
@@ -917,6 +924,7 @@ VOID MY_EXPO_DRAW(VOID) {
 	{
 	case 1:
 		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+		DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
 		break;
 	case 2:
 		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
@@ -992,7 +1000,7 @@ VOID MY_PLAY_PROC(VOID)
 		MY_MAP_RELOAD = FALSE;
 	}
 
-	if (mouse.Button[MOUSE_INPUT_RIGHT] == TRUE)
+	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
 		iPOINT R_ClickPt = mouse.Point;
 
@@ -1009,7 +1017,9 @@ VOID MY_PLAY_PROC(VOID)
 
 			SetMouseDispFlag(TRUE);
 
-			GameScene = GAME_SCENE_START;
+			GameEndKind = GAME_END_COMP;
+
+			GameScene = GAME_SCENE_END;
 			return;
 
 		}
@@ -1217,6 +1227,7 @@ VOID MY_PLAY_PROC(VOID)
 
 VOID MY_PLAY_DRAW(VOID)
 {
+	static int StrWidth = 0;
 	DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1231,13 +1242,14 @@ VOID MY_PLAY_DRAW(VOID)
 		}
 	}
 
+	SetFontSize(25);
 
 	if (time >= 60 || mintime >= 1) {
-		DrawFormatString(0, 10, GetColor(255, 255, 255), "TIME:%d分%.2f秒", mintime, time);
+		DrawFormatString(0, 5, GetColor(255, 255, 255), "TIME:%d分%.2f秒", mintime, time);
 	}
 	else
 	{
-		DrawFormatString(0, 10, GetColor(255, 255, 255), "TIME:%.2f秒", time);
+		DrawFormatString(0, 5, GetColor(255, 255, 255), "TIME:%.2f秒", time);
 
 	}
 
@@ -1269,9 +1281,9 @@ VOID MY_PLAY_DRAW(VOID)
 	//当たり判定の描画（デバッグ用）
 	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
-	SetFontSize(20);
-	DrawString(68, GAME_HEIGHT - 32, "! 移動キー：W【↑】A【←】S【↓】D【→】|　タイトルに戻る【右クリック】!", GetColor(255, 255, 255));
-	SetFontSize(16.5);
+	SetFontSize(30);
+	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
+	DrawString((GAME_WIDTH - StrWidth )/ 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
 	return;
 }
 
@@ -1344,6 +1356,7 @@ VOID MY_END_PROC(VOID)
 
 VOID MY_END_DRAW(VOID)
 {
+	static int StrDraw = 0;
 	MY_PLAY_DRAW();
 
 	switch (GameEndKind)
@@ -1355,10 +1368,14 @@ VOID MY_END_DRAW(VOID)
 		
 		SetFontSize(64);
 
-		if (mintime >= 1)
-			DrawFormatString(GAME_WIDTH / 4 - 64, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%d分%.2f秒", mintime, time);
-		else
-			DrawFormatString(GAME_WIDTH / 4 - 64, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%.2f秒", time);
+		if (mintime >= 1) {
+			StrDraw = GetDrawStringWidth("・%d分%.2f秒", -1);
+			DrawFormatString((GAME_WIDTH - StrDraw) / 2 , GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%d分%.2f秒", mintime, time);
+		}
+		else {
+			StrDraw = GetDrawStringWidth("・%.2f秒", -1);
+			DrawFormatString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%.2f秒", time);
+		}
 
 		SetFontSize(16.5);
 
@@ -1372,7 +1389,8 @@ VOID MY_END_DRAW(VOID)
 		if (FALL_RESON == TRUE) {
 			SetFontSize(64);
 
-			DrawString(GAME_WIDTH / 2 - 320, GAME_HEIGHT / 4 * 3, "ゴールが塞がれました", GetColor(255, 0, 0));
+			StrDraw = GetDrawStringWidth("ゴールが塞がれました", -1);
+			DrawString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 * 3, "ゴールが塞がれました", GetColor(255, 0, 0));
 			SetFontSize(16.5);
 
 		}
