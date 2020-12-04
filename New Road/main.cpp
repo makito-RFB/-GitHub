@@ -97,7 +97,7 @@ enum GAME_MAP_KIND
 	l = 4,  //動く壁
 	t = 9,	//通路
 	s = 5,	//スタート
-	g = 3	//ゴール
+	g = 3	//アイテム
 };	
 
 enum GAME_MAP_KIND_PR
@@ -109,7 +109,7 @@ enum GAME_MAP_KIND_PR
 	lp = 4,  //動く壁
 	tp = 9,	//通路
 	sp = 5,	//スタート
-	gp = 3	//ゴール
+	gp = 3	//アイテム
 };
 
 enum GAME_SCENE {
@@ -314,13 +314,13 @@ MUSIC BGM_FAIL;
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4
-		m,m,m,m,m,m,m,m,m,m,m,m,m,g,m,	// 0
+		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,k,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,k,	// 2
 		k,l,t,t,t,k,t,k,t,t,l,t,l,t,k,	// 3
 		k,t,t,l,t,k,t,k,l,k,l,l,k,t,k,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,k,	// 5
-		k,t,t,k,t,l,t,k,l,t,t,t,k,t,k,	// 6
+		k,t,t,k,t,l,t,k,l,t,g,t,k,t,k,	// 6
 		k,s,t,k,t,k,t,l,t,t,l,t,t,t,k,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
 };
@@ -328,13 +328,13 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 //マップ初期化用のバックアップ
 GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,
-		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,gp,mp,	// 0
+		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
 		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,kp,	// 1
 		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,kp,	// 2
 		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,kp,	// 3
 		kp,tp,tp,lp,tp,kp,tp,kp,lp,lp,kp,lp,kp,tp,kp,	// 4
 		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,kp,	// 5
-		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,tp,tp,kp,tp,kp,	// 6
+		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,tp,kp,	// 6
 		kp,sp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,kp,	// 7
 		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
 };
@@ -388,6 +388,8 @@ VOID MY_DELETE_MUSIC(VOID);
 BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT);
 BOOL MY_CHECK_RECT_COLL(RECT, RECT);
 
+VOID MAP_LOAD(VOID);
+
 CHAR MY_DIRECTION(double, double, double, double);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -426,25 +428,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				startPt.x = mapChip.width * yoko + mapChip.width / 2;
 				startPt.y = mapChip.height * tate + mapChip.height / 2;
 			}
-
-			if (mapData[tate][yoko] == g)
-			{
-				GoalRect.left = mapChip.width * yoko;
-				GoalRect.top = mapChip.height * tate;
-				GoalRect.right = mapChip.width * (yoko + 1);
-				GoalRect.bottom = mapChip.height * (tate + 1);
-			}
 		}
 	}
 
 	if (startPt.x == -1 && startPt.y == -1)
 	{
 		MessageBox(GetMainWindowHandle(), START_ERR_CAPTION, START_ERR_TITLE, MB_OK);	return -1;
-	}
-
-	if (GoalRect.left == -1)
-	{
-		MessageBox(GetMainWindowHandle(), GOAL_ERR_CAPTION, GOAL_ERR_TITLE, MB_OK);	return -1;
 	}
 
 	while (TRUE)
@@ -966,6 +955,8 @@ VOID MY_PLAY_PROC(VOID)
 		PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP);
 	}
 
+	MAP_LOAD();
+
 	//タイマ処理
 	if (timeCnt >= 60)
 	{
@@ -982,23 +973,7 @@ VOID MY_PLAY_PROC(VOID)
 	timeCnt++;
 
 	//マップ初期化
-	if (MY_MAP_RELOAD == TRUE) {
-		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-		{
-			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-			{
-				if (mapDataPR[tate][yoko] == lp) {
-					mapData[tate][yoko] = l;
-					map[tate][yoko].kind = l;
-				}
-				else if (mapDataPR[tate][yoko] == tp) {
-					mapData[tate][yoko] = t;
-					map[tate][yoko].kind = t;
-				}
-			}
-		}
-		MY_MAP_RELOAD = FALSE;
-	}
+
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
@@ -1132,7 +1107,7 @@ VOID MY_PLAY_PROC(VOID)
 					break;
 
 				}
-				for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+			/*	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 				{
 					for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 					{
@@ -1155,7 +1130,7 @@ VOID MY_PLAY_PROC(VOID)
 							}
 						}
 					}
-				}
+				}*/
 
 			}
 			if (IsReMove == TRUE)
@@ -1190,7 +1165,7 @@ VOID MY_PLAY_PROC(VOID)
 
 	if (MY_CHECK_RECT_COLL(PlayerRect, GoalRect) == TRUE)
 	{
-		if (CheckSoundMem(BGM.handle) != 0)
+		/*if (CheckSoundMem(BGM.handle) != 0)
 		{
 			StopSoundMem(BGM.handle);
 		}
@@ -1201,7 +1176,11 @@ VOID MY_PLAY_PROC(VOID)
 
 		GameScene = GAME_SCENE_END;
 
-		return;
+		return;*/
+		int y = GoalRect.top / mapChip.height;
+		int x = GoalRect.left / mapChip.width;
+		mapData[y][x] = t;
+		map[y][x].kind = t;
 	}
 
 	if (player.image.x > GAME_WIDTH || player.image.y > GAME_HEIGHT
@@ -1746,6 +1725,7 @@ BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT player)
 				if (map[tate][yoko].kind == l) { return TRUE; }
 				if (map[tate][yoko].kind == m) { return TRUE; }
 				if (map[tate][yoko].kind == r) { return TRUE; }
+				//if (map[tate][yoko].kind == g) { return TRUE; }
 
 			}
 		}
@@ -1782,5 +1762,44 @@ CHAR MY_DIRECTION(double x, double y, double oldx, double oldy)
 			return 'W';
 		else
 			return 'S';
+	}
+}
+
+VOID MAP_LOAD(VOID)
+{
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			if (mapData[tate][yoko] == g)
+			{
+				GoalRect.left = mapChip.width * yoko;
+				GoalRect.top = mapChip.height * tate;
+				GoalRect.right = mapChip.width * (yoko + 1);
+				GoalRect.bottom = mapChip.height * (tate + 1);
+			}
+		}
+	}
+
+	if (MY_MAP_RELOAD == TRUE) {
+		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+		{
+			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+			{
+				if (mapDataPR[tate][yoko] == lp) {
+					mapData[tate][yoko] = l;
+					map[tate][yoko].kind = l;
+				}
+				else if (mapDataPR[tate][yoko] == tp) {
+					mapData[tate][yoko] = t;
+					map[tate][yoko].kind = t;
+				}
+				else if (mapDataPR[tate][yoko] == gp) {
+					mapData[tate][yoko] = g;
+					map[tate][yoko].kind = g;
+				}
+			}
+		}
+		MY_MAP_RELOAD = FALSE;
 	}
 }
