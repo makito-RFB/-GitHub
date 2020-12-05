@@ -66,7 +66,7 @@
 #define MUSIC_BGM_FAIL_PATH		TEXT(".\\MUSIC\\FALL.mp3")					//フォールトBGM
 
 #define GAME_MAP_TATE_MAX	9	//マップの縦の数
-#define GAME_MAP_YOKO_MAX	15	//マップの横の数
+#define GAME_MAP_YOKO_MAX	18	//マップの横の数
 #define GAME_MAP_KIND_MAX	2	//マップの種類の数
 
 #define GAME_MAP_PATH			TEXT(".\\IMAGE\\MAP\\map.png")
@@ -238,6 +238,7 @@ typedef struct STRUCT_MAP
 	int y;
 	int width;
 	int height;
+	//BOOL IsDraw;
 }MAP;
 
 int StartTimeFps;
@@ -269,7 +270,7 @@ FONT FontTanu32;
 int GameScene;
 
 int GameEndKind;
-RECT GoalRect = { -1,-1, -1, -1 };
+RECT itemRect = { -1,-1, -1, -1 };
 
 BOOL MY_KEY_TF = TRUE;
 
@@ -312,31 +313,31 @@ MUSIC BGM_TITLE;
 MUSIC BGM_COMP;
 MUSIC BGM_FAIL;
 
-GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
-	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4
-		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		k,t,t,t,l,t,t,l,t,t,l,k,t,t,k,	// 1
-		k,t,t,l,t,l,t,l,t,k,t,t,l,t,k,	// 2
-		k,l,t,t,t,k,t,k,t,t,l,t,l,t,k,	// 3
-		k,t,t,l,t,k,t,k,l,k,l,l,k,t,k,	// 4
-		k,l,l,t,l,t,t,k,t,t,l,t,k,t,k,	// 5
-		k,t,t,k,t,l,t,k,l,t,g,t,k,t,k,	// 6
-		k,s,t,k,t,k,t,l,t,t,l,t,t,t,k,	// 7
-		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
+GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
+	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
+		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
+		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
+		k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
+		k,t,t,l,t,k,t,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
+		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
+		k,s,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
+		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
 };
 
 //マップ初期化用のバックアップ
 GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,
-		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
-		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,kp,	// 1
-		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,kp,	// 2
-		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,kp,	// 3
-		kp,tp,tp,lp,tp,kp,tp,kp,lp,lp,kp,lp,kp,tp,kp,	// 4
-		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,kp,	// 5
-		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,tp,kp,	// 6
-		kp,sp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,kp,	// 7
-		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
+		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
+		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
+		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
+		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
+		kp,tp,tp,lp,tp,kp,tp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
+		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
+		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
+		kp,sp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
+		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
 };
 
 GAME_MAP_KIND mapDataInit[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
@@ -972,7 +973,23 @@ VOID MY_PLAY_PROC(VOID)
 	time += 0.016;
 	timeCnt++;
 
-	//マップ初期化
+	////マップ移動
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		//マップを移動当たり判定も移動
+	//			/*map[tate][yoko].x,*/
+	//		map[tate][yoko].x -= 1;
+	//		mapColl[tate][yoko].left -= 1;
+	//		mapColl[tate][yoko].right -= 1;
+	//		if (map[tate][yoko].x >= GAME_WIDTH)
+	//		{
+	//			map[tate][yoko].IsDraw = FALSE;
+	//		}
+	//	}
+
+	//}
 
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
@@ -1049,6 +1066,13 @@ VOID MY_PLAY_PROC(VOID)
 
 	BOOL IsMove = TRUE;
 
+	RECT PlayerRect;
+	int CollRange = 5;
+	PlayerRect.left = player.image.x + player.image.width / 2 - CollRange;
+	PlayerRect.top = player.image.y + player.image.height / 2 - CollRange;
+	PlayerRect.right = player.image.x + player.image.width / 2 + CollRange;
+	PlayerRect.bottom = player.image.y + player.image.height / 2 + CollRange;
+
 
 	if (MY_CHECK_MAP1_PLAYER_COLL(player.coll) == TRUE)
 	{
@@ -1057,7 +1081,7 @@ VOID MY_PLAY_PROC(VOID)
 		newX = (player.CenterX - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 
-		if (mapData[newY][newX] == l || map[newY][newX].kind == l)
+		if (player.CenterX == l || map[newY][newX].kind == l)
 		{
 			//マップの更新
 			BOOL IsReMove = FALSE;
@@ -1107,30 +1131,30 @@ VOID MY_PLAY_PROC(VOID)
 					break;
 
 				}
-			/*	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-				{
-					for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+				/*	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 					{
-						if (mapData[tate][yoko] == g) {
-							if (mapData[tate + 1][yoko] == l) {
-								if (CheckSoundMem(BGM.handle) != 0)
-								{
-									StopSoundMem(BGM.handle);
+						for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+						{
+							if (mapData[tate][yoko] == g) {
+								if (mapData[tate + 1][yoko] == l) {
+									if (CheckSoundMem(BGM.handle) != 0)
+									{
+										StopSoundMem(BGM.handle);
+									}
+
+									FALL_RESON = TRUE;
+
+									SetMouseDispFlag(TRUE);
+
+									GameEndKind = GAME_END_FAIL;
+
+									GameScene = GAME_SCENE_END;
+
+									return;
 								}
-
-								FALL_RESON = TRUE;
-
-								SetMouseDispFlag(TRUE);
-
-								GameEndKind = GAME_END_FAIL;
-
-								GameScene = GAME_SCENE_END;
-
-								return;
 							}
 						}
-					}
-				}*/
+					}*/
 
 			}
 			if (IsReMove == TRUE)
@@ -1140,12 +1164,34 @@ VOID MY_PLAY_PROC(VOID)
 				map[newY][newX].kind = t;
 				IsReMove = FALSE;
 			}//マップ更新ここまで
+
+			
 		}
 
-		//元の位置に戻る
+		////元の位置に戻る
 		player.CenterX = player.collBeforePt.x;
 		player.CenterY = player.collBeforePt.y;
 	}
+
+	//if (MY_CHECK_RECT_COLL(PlayerRect, itemRect) == TRUE)
+	//{
+	//	/*if (CheckSoundMem(BGM.handle) != 0)
+	//	{
+	//		StopSoundMem(BGM.handle);
+	//	}
+
+	//	SetMouseDispFlag(TRUE);
+
+	//	GameEndKind = GAME_END_COMP;
+
+	//	GameScene = GAME_SCENE_END;
+
+	//	return;*/
+	//	int y = itemRect.top / mapChip.height;
+	//	int x = itemRect.left / mapChip.width;
+	//	mapData[y][x] = t;
+	//	map[y][x].kind = t;
+	//}
 
 	if (IsMove == TRUE)
 	{
@@ -1154,33 +1200,6 @@ VOID MY_PLAY_PROC(VOID)
 
 		player.collBeforePt.x = player.CenterX;
 		player.collBeforePt.y = player.CenterY;
-	}
-
-	RECT PlayerRect;
-	int CollRange = 5;
-	PlayerRect.left = player.image.x + player.image.width / 2 - CollRange;
-	PlayerRect.top = player.image.y + player.image.height / 2 - CollRange;
-	PlayerRect.right = player.image.x + player.image.width / 2 + CollRange;
-	PlayerRect.bottom = player.image.y + player.image.height / 2 + CollRange;
-
-	if (MY_CHECK_RECT_COLL(PlayerRect, GoalRect) == TRUE)
-	{
-		/*if (CheckSoundMem(BGM.handle) != 0)
-		{
-			StopSoundMem(BGM.handle);
-		}
-
-		SetMouseDispFlag(TRUE);
-
-		GameEndKind = GAME_END_COMP;
-
-		GameScene = GAME_SCENE_END;
-
-		return;*/
-		int y = GoalRect.top / mapChip.height;
-		int x = GoalRect.left / mapChip.width;
-		mapData[y][x] = t;
-		map[y][x].kind = t;
 	}
 
 	if (player.image.x > GAME_WIDTH || player.image.y > GAME_HEIGHT
@@ -1214,12 +1233,14 @@ VOID MY_PLAY_DRAW(VOID)
 		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 		{
 			DrawGraph(
-				map[tate][yoko].x,
+				map[tate][yoko].x-1,
 				map[tate][yoko].y,
 				mapChip.handle[map[tate][yoko].kind],
 				TRUE);
 		}
 	}
+
+	
 
 	SetFontSize(25);
 
@@ -1725,7 +1746,7 @@ BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT player)
 				if (map[tate][yoko].kind == l) { return TRUE; }
 				if (map[tate][yoko].kind == m) { return TRUE; }
 				if (map[tate][yoko].kind == r) { return TRUE; }
-				//if (map[tate][yoko].kind == g) { return TRUE; }
+				if (map[tate][yoko].kind == g) { return TRUE; }
 
 			}
 		}
@@ -1773,10 +1794,10 @@ VOID MAP_LOAD(VOID)
 		{
 			if (mapData[tate][yoko] == g)
 			{
-				GoalRect.left = mapChip.width * yoko;
-				GoalRect.top = mapChip.height * tate;
-				GoalRect.right = mapChip.width * (yoko + 1);
-				GoalRect.bottom = mapChip.height * (tate + 1);
+				itemRect.left = mapChip.width * yoko;
+				itemRect.top = mapChip.height * tate;
+				itemRect.right = mapChip.width * (yoko + 1);
+				itemRect.bottom = mapChip.height * (tate + 1);
 			}
 		}
 	}
