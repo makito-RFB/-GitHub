@@ -42,7 +42,7 @@
 #define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
 
 #define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\stratîwåi.png")
-#define IMAGE_TITLE_ROGO_PATH	TEXT(".\\IMAGE\\titlerogo.png")
+#define IMAGE_TITLE_ROGO_PATH	TEXT(".\\IMAGE\\rogo2.png")
 #define IMAGE_TITLE_START_PATH	TEXT(".\\IMAGE\\title_start1.png")
 #define IMAGE_TITLE_RNK	TEXT(".\\IMAGE\\title_start1.png")
 
@@ -1476,7 +1476,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	}
 	GetGraphSize(ImageTitleRNK.image.handle, &ImageTitleRNK.image.width, &ImageTitleRNK.image.height);
 	ImageTitleRNK.image.x = GAME_WIDTH / 2;
-	ImageTitleRNK.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + 64;
+	ImageTitleRNK.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + ImageTitleSTART.image.height + 40;
 	ImageTitleRNK.angle = 0;
 	ImageTitleRNK.rate = 1.0;
 
