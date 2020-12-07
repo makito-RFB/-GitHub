@@ -254,6 +254,8 @@ int DrCharCnt = 0;
 
 int ExDrawCnt = 1;
 
+int ITEMCnt = 0;
+
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
 
@@ -901,6 +903,7 @@ VOID MY_EXPO_PROC(VOID) {
 			{
 				StopSoundMem(BGM_TITLE.handle);
 			}
+			ITEMCnt = 0;
 			GameScene = GAME_SCENE_PLAY;
 		}
 		break;
@@ -1081,7 +1084,7 @@ VOID MY_PLAY_PROC(VOID)
 		newX = (player.CenterX - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 
-		if (player.CenterX == l || map[newY][newX].kind == l)
+		if (map[newY][newX].kind == l)
 		{
 			//マップの更新
 			BOOL IsReMove = FALSE;
@@ -1155,7 +1158,11 @@ VOID MY_PLAY_PROC(VOID)
 							}
 						}
 					}*/
-
+				if (ITEMCnt > 0)
+				{
+					IsReMove = TRUE;
+					ITEMCnt--;
+				}
 			}
 			if (IsReMove == TRUE)
 			{
@@ -1173,28 +1180,32 @@ VOID MY_PLAY_PROC(VOID)
 		player.CenterY = player.collBeforePt.y;
 	}
 
-	//if (MY_CHECK_RECT_COLL(PlayerRect, itemRect) == TRUE)
-	//{
-	//	/*if (CheckSoundMem(BGM.handle) != 0)
-	//	{
-	//		StopSoundMem(BGM.handle);
-	//	}
-
-	//	SetMouseDispFlag(TRUE);
-
-	//	GameEndKind = GAME_END_COMP;
-
-	//	GameScene = GAME_SCENE_END;
-
-	//	return;*/
-	//	int y = itemRect.top / mapChip.height;
-	//	int x = itemRect.left / mapChip.width;
-	//	mapData[y][x] = t;
-	//	map[y][x].kind = t;
-	//}
+	/*if (MY_CHECK_RECT_COLL(PlayerRect, itemRect) == TRUE)*/
+	
 
 	if (IsMove == TRUE)
 	{
+		int x = (player.CenterX - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+		int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+		if (map[y][x].kind == g)
+		{
+			/*if (CheckSoundMem(BGM.handle) != 0)
+			{
+				StopSoundMem(BGM.handle);
+			}
+
+			SetMouseDispFlag(TRUE);
+
+			GameEndKind = GAME_END_COMP;
+
+			GameScene = GAME_SCENE_END;
+
+			return;*/
+		
+			mapData[y][x] = t;
+			map[y][x].kind = t;
+			ITEMCnt++;
+		}
 		player.image.x = player.CenterX - player.image.width / 2;
 		player.image.y = player.CenterY - player.image.height / 2;
 
@@ -1252,6 +1263,8 @@ VOID MY_PLAY_DRAW(VOID)
 		DrawFormatString(0, 5, GetColor(255, 255, 255), "TIME:%.2f秒", time);
 
 	}
+
+	DrawFormatString(0, 35, GetColor(255, 255, 255), "アイテム:%d個", ITEMCnt);
 
 	////当たり判定の描画（デバッグ用）
 	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1746,7 +1759,7 @@ BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT player)
 				if (map[tate][yoko].kind == l) { return TRUE; }
 				if (map[tate][yoko].kind == m) { return TRUE; }
 				if (map[tate][yoko].kind == r) { return TRUE; }
-				if (map[tate][yoko].kind == g) { return TRUE; }
+				//if (map[tate][yoko].kind == g) { return TRUE; }
 
 			}
 		}
