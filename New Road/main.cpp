@@ -6,7 +6,7 @@
 #define GAME_COLOR	   32
 
 #define GAME_WINDOW_BAR		0
-#define GAME_WINDOW_NAME	"–À˜H@’Eo"
+#define GAME_WINDOW_NAME	"New Road"
 
 #define GAME_FPS	60
 
@@ -37,9 +37,11 @@
 
 #define IMAGE_CHAR_NUM			3	
 
-#define IMAGE_EXPO_BACK TEXT(".\\IMAGE\\”wŒi1.png")
+#define IMAGE_EXPO_BACK TEXT(".\\IMAGE\\à–¾”wŒi.png")
 
 #define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
+
+#define PLAYER_MOVE_COLLTIME 0.25 //•b
 
 #define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\strat”wŒi.png")
 #define IMAGE_TITLE_ROGO_PATH	TEXT(".\\IMAGE\\rogo2.png")
@@ -394,6 +396,8 @@ BOOL MY_CHECK_RECT_COLL(RECT, RECT);
 VOID MAP_LOAD(VOID);
 
 CHAR MY_DIRECTION(double, double, double, double);
+
+VOID TEXT_DRAW(int);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -917,7 +921,6 @@ VOID MY_EXPO_DRAW(VOID) {
 	{
 	case 1:
 		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
-		DrawString(0, 0, "ƒXƒ^[ƒg‰æ–Ê(ƒGƒ“ƒ^[ƒL[‚ð‰Ÿ‚µ‚Ä‰º‚³‚¢)", GetColor(255, 255, 255));
 		break;
 	case 2:
 		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
@@ -926,6 +929,9 @@ VOID MY_EXPO_DRAW(VOID) {
 		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 		break;
 	}
+
+	TEXT_DRAW(ExDrawCnt);
+
 	DrawRotaGraph(
 		ImageEndROGO.image.x, ImageEndROGO.image.y,
 		ImageEndROGO.rate,
@@ -952,6 +958,7 @@ VOID MY_PLAY(VOID)
 
 VOID MY_PLAY_PROC(VOID)
 {
+	static int colltime = 0;
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
 		ChangeVolumeSoundMem(255 * 50 / 100, BGM.handle);
@@ -1054,9 +1061,16 @@ VOID MY_PLAY_PROC(VOID)
 
 	//ˆê‰ñ‚Ì“ü—Í”»’èi—£‚µ‚½‚Æ‚«j
 	if (MY_KEY_TF == FALSE) {
-		if (MY_KEY_UP(KEY_INPUT_W) || MY_KEY_UP(KEY_INPUT_A) || MY_KEY_UP(KEY_INPUT_S) || MY_KEY_UP(KEY_INPUT_D)) {
-			MY_KEY_TF = TRUE;
+		if (colltime > PLAYER_MOVE_COLLTIME * GAME_FPS)
+		{
+			if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
+			else {
+				MY_KEY_TF = TRUE;
+				colltime = 0;
+			}
 		}
+		else
+			colltime++;
 	}
 
 	player.coll.left = player.CenterX - mapChip.width / 2 + 5;
@@ -1836,4 +1850,9 @@ VOID MAP_LOAD(VOID)
 		}
 		MY_MAP_RELOAD = FALSE;
 	}
+}
+
+VOID TXET_DRAW(int n)
+{
+	
 }
