@@ -1,5 +1,7 @@
 #include "DxLib.h"
 #include "resource.h"
+#include <stdlib.h>
+#include <string.h>
 
 #define GAME_WIDTH     960
 #define GAME_HEIGHT    576
@@ -397,7 +399,7 @@ VOID MAP_LOAD(VOID);
 
 CHAR MY_DIRECTION(double, double, double, double);
 
-VOID TEXT_DRAW(int);
+char* TXET_DRAW(int);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -917,20 +919,29 @@ VOID MY_EXPO_PROC(VOID) {
 }
 
 VOID MY_EXPO_DRAW(VOID) {
+	static int StrDraw = 0;
+	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+
 	switch (ExDrawCnt)
 	{
 	case 1:
-		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+
 		break;
 	case 2:
-		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+	
 		break;
 	case 3:
-		DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+	
 		break;
 	}
 
-	TEXT_DRAW(ExDrawCnt);
+	char* str = NULL;
+	SetFontSize(44);
+	str = TXET_DRAW(ExDrawCnt);
+	StrDraw = GetDrawStringWidth(str, -1);
+	DrawString((GAME_WIDTH - StrDraw) / 2, 10, str, GetColor(255, 0, 0));
+
+	//printf("str = %s\n", str);
 
 	DrawRotaGraph(
 		ImageEndROGO.image.x, ImageEndROGO.image.y,
@@ -945,6 +956,9 @@ VOID MY_EXPO_DRAW(VOID) {
 		FALL_RESON = FALSE;
 		ImageEndROGO.rate = 1.0;
 	}
+
+	free(str);
+
 	return;
 }
 
@@ -1172,7 +1186,9 @@ VOID MY_PLAY_PROC(VOID)
 							}
 						}
 					}*/
-				if (ITEMCnt > 0)
+
+			//障害物をアイテムで破壊
+				if (ITEMCnt > 0 && IsReMove == FALSE)
 				{
 					IsReMove = TRUE;
 					ITEMCnt--;
@@ -1215,11 +1231,12 @@ VOID MY_PLAY_PROC(VOID)
 			GameScene = GAME_SCENE_END;
 
 			return;*/
-		
+		//アイテム取得とアイテムの当たり判定削除
 			mapData[y][x] = t;
 			map[y][x].kind = t;
 			ITEMCnt++;
 		}
+	//プレイヤー前の位置書き換え
 		player.image.x = player.CenterX - player.image.width / 2;
 		player.image.y = player.CenterY - player.image.height / 2;
 
@@ -1278,7 +1295,7 @@ VOID MY_PLAY_DRAW(VOID)
 
 	}
 
-	DrawFormatString(0, 35, GetColor(255, 255, 255), "アイテム:%d個", ITEMCnt);
+	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(255, 255, 255), "アイテム:%d個", ITEMCnt);
 
 	////当たり判定の描画（デバッグ用）
 	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1356,18 +1373,18 @@ VOID MY_END_PROC(VOID)
 		return;
 	}
 
-	switch (GameEndKind)
-	{
-	case GAME_END_COMP:
+	//switch (GameEndKind)
+	//{
+	//case GAME_END_COMP:
 
-		if (CheckSoundMem(BGM_COMP.handle) == 0 && MusicPass1 == TRUE)
-		{
-			ChangeVolumeSoundMem(255 * 50 / 100, BGM_COMP.handle);
-			PlaySoundMem(BGM_COMP.handle, DX_PLAYTYPE_LOOP);
-		}
-		break;
+	//	if (CheckSoundMem(BGM_COMP.handle) == 0 && MusicPass1 == TRUE)
+	//	{
+	//		ChangeVolumeSoundMem(255 * 50 / 100, BGM_COMP.handle);
+	//		PlaySoundMem(BGM_COMP.handle, DX_PLAYTYPE_LOOP);
+	//	}
+	//	break;
 
-	case GAME_END_FAIL:
+	//case GAME_END_FAIL:
 
 		if (CheckSoundMem(BGM_FAIL.handle) == 0 && MusicPass1 == TRUE)
 		{
@@ -1375,8 +1392,8 @@ VOID MY_END_PROC(VOID)
 			PlaySoundMem(BGM_FAIL.handle, DX_PLAYTYPE_LOOP);
 		}
 
-		break;
-	}
+	//	break;
+	//}
 
 	return;
 }
@@ -1384,45 +1401,52 @@ VOID MY_END_PROC(VOID)
 VOID MY_END_DRAW(VOID)
 {
 	static int StrDraw = 0;
+	static double Score = 0;
 	MY_PLAY_DRAW();
 
-	switch (GameEndKind)
-	{
-	case GAME_END_COMP:
-		DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
+	//switch (GameEndKind)
+	//{
+	//case GAME_END_COMP:
+	//	DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
 
-		DrawGraph(ImageEndCOMP.image.x, ImageEndCOMP.image.y, ImageEndCOMP.image.handle, TRUE);
-		
-		SetFontSize(64);
+	//	DrawGraph(ImageEndCOMP.image.x, ImageEndCOMP.image.y, ImageEndCOMP.image.handle, TRUE);
+	//	
+	//	SetFontSize(64);
 
-		if (mintime >= 1) {
-			StrDraw = GetDrawStringWidth("・%d分%.2f秒", -1);
-			DrawFormatString((GAME_WIDTH - StrDraw) / 2 , GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%d分%.2f秒", mintime, time);
-		}
-		else {
-			StrDraw = GetDrawStringWidth("・%.2f秒", -1);
-			DrawFormatString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%.2f秒", time);
-		}
+	//	//if (mintime >= 1) {
+	//	//	StrDraw = GetDrawStringWidth("・%d分%.2f秒", -1);
+	//	//	DrawFormatString((GAME_WIDTH - StrDraw) / 2 , GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%d分%.2f秒", mintime, time);
+	//	//}
+	//	//else {
+	//	//	StrDraw = GetDrawStringWidth("・%.2f秒", -1);
+	//	//	DrawFormatString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "・%.2f秒", time);
+	//	//}
+	//
 
-		SetFontSize(16.5);
+	//	SetFontSize(16.5);
 
-		break;
+	//	break;
 
-	case GAME_END_FAIL:
+	//case GAME_END_FAIL:
 		DrawGraph(ImageBackENDF.image.x, ImageBackENDF.image.y, ImageBackENDF.image.handle, TRUE);
 
 		DrawGraph(ImageEndFAIL.image.x, ImageEndFAIL.image.y, ImageEndFAIL.image.handle, TRUE);
 	
-		if (FALL_RESON == TRUE) {
-			SetFontSize(64);
+		
+		SetFontSize(64);
 
-			StrDraw = GetDrawStringWidth("ゴールが塞がれました", -1);
-			DrawString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 * 3, "ゴールが塞がれました", GetColor(255, 0, 0));
-			SetFontSize(16.5);
+		StrDraw = GetDrawStringWidth("画面から出てしまいました", -1);
+		DrawString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 * 3, "画面から出てしまいました", GetColor(255, 0, 0));
 
-		}
-		break;
-	}
+		Score = time * 10 + mintime * 600 + 20;
+
+		StrDraw = GetDrawFormatStringWidth("スコア: %.2f",Score, -1);
+		DrawFormatString((GAME_WIDTH - StrDraw) / 2, GAME_HEIGHT / 4 - 64 , GetColor(255, 255, 255), "スコア: %.2f", Score);
+
+		SetFontSize(16.5);
+
+	//	break;
+	//}
 
 	DrawRotaGraph(
 		ImageEndROGO.image.x, ImageEndROGO.image.y,
@@ -1852,7 +1876,29 @@ VOID MAP_LOAD(VOID)
 	}
 }
 
-VOID TXET_DRAW(int n)
+char* TXET_DRAW(int n)
 {
+	char* cp = NULL;
+
 	
+
+
+	cp = (char*)malloc(sizeof(char) * 30);
+
+	if (cp == NULL) {
+		printf("配列作成失敗\n");
+	}
+
+	switch (n)
+	{
+	case 1:
+		strcpy_s(cp, 22, "ゲームのルールと目標");		break;
+	case 2:
+		strcpy_s(cp, 30, "操作説明とアイテムについいて");		break;
+	case 3:
+		strcpy_s(cp, 16, "導入ストーリー");		break;
+	}
+
+	return cp;
+
 }
