@@ -50,6 +50,7 @@
 #define IMAGE_NEXT_ROGO_PATH		TEXT(".\\IMAGE\\NEXT.png")
 #define IMAGE_TITLE_START_PATH	TEXT(".\\IMAGE\\GAME_start.png")
 #define IMAGE_TITLE_RNK	TEXT(".\\IMAGE\\ranking.png")
+#define IMAGE_TITLE_CHI	TEXT(".\\IMAGE\\Choies.png")
 
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
@@ -329,10 +330,10 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
 		k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
-		k,t,t,l,t,k,t,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
 		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
-		k,s,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
+		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
 };
 
@@ -343,10 +344,10 @@ GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
 		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
 		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
-		kp,tp,tp,lp,tp,kp,tp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
+		kp,tp,tp,lp,tp,kp,sp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
 		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
 		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
-		kp,sp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
+		kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
 		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
 };
 
@@ -407,7 +408,7 @@ char* TXET_DRAW(int);
 
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
-
+VOID GAME_STR(VOID);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -726,11 +727,6 @@ VOID MY_START_PROC(VOID)
 
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
 	{
-		if (CLICK_M == TRUE)
-		{
-			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
-			CLICK_M = FALSE;
-		}
 		if (CheckSoundMem(BGM_TITLE.handle) != 0)
 		{
 			StopSoundMem(BGM_TITLE.handle);
@@ -753,12 +749,40 @@ VOID MY_START_PROC(VOID)
 	}
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
-		CLICK_M = TRUE;
 		//GameScene = GAME_SCENE_PLAY;
 		GameScene = GAME_SCENE_EXPO;
 		MusicPass = TRUE;
 		MY_MAP_RELOAD = TRUE;
 	}
+
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
+	{
+
+		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		{
+			StopSoundMem(BGM_TITLE.handle);
+			MusicPass = FALSE;
+		}
+	}
+
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
+
+	}
+
+//選択音
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
+	{
+		if (CLICK_M == TRUE)
+		{
+			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			CLICK_M = FALSE;
+		}
+	}
+
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+		CLICK_M = TRUE;
+	}
+	
 
 
 	//後ろ歩く処理
@@ -853,11 +877,14 @@ VOID MY_START_DRAW(VOID)
 	if (Kchoice == TRUE) {
 		ImageTitleSTART.rate = 1.2; 
 		ImageTitleRNK.rate = 1.0;
-
+		ImageChoiser.x = ImageTitleSTART.image.x + ImageTitleSTART.image.width / 2 + 32;
+		ImageChoiser.y = ImageTitleSTART.image.y + ImageTitleSTART.image.height / 4 - ImageChoiser.height / 2 ;
 	}
 	else {
 		ImageTitleSTART.rate = 1.0;
 		ImageTitleRNK.rate = 1.2;
+		ImageChoiser.x = ImageTitleRNK.image.x + ImageTitleRNK.image.width / 2 + 32;
+		ImageChoiser.y = ImageTitleRNK.image.y + ImageTitleRNK.image.height / 4 - ImageChoiser.height / 2;
 	}
 
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
@@ -905,13 +932,13 @@ VOID MY_EXPO_PROC(VOID) {
 			CLICK_M = TRUE;
 		}
 		break;
-	case 2:
+	case 3:
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 3;
 			CLICK_M = TRUE;
 		}
 		break;
-	case 3:
+	case 2:
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 1;
 			CLICK_M = TRUE;
@@ -942,7 +969,7 @@ VOID MY_EXPO_DRAW(VOID) {
 		GAME_PILOT();
 		break;
 	case 3:
-	
+		GAME_STR();
 		break;
 	}
 
@@ -1510,15 +1537,15 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleRNK.rate = 1.0;
 
 //選択印
-	strcpy_s(ImageChoiser.path, IMAGE_NEXT_ROGO_PATH);
+	strcpy_s(ImageChoiser.path, IMAGE_TITLE_CHI);
 	ImageChoiser.handle = LoadGraph(ImageChoiser.path);
 	if (ImageChoiser.handle == -1)
 	{
-		MessageBox(GetMainWindowHandle(), IMAGE_NEXT_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_CHI, IMAGE_LOAD_ERR_TITLE, MB_OK);
 		return FALSE;
 	}
 	GetGraphSize(ImageChoiser.handle, &ImageChoiser.width, &ImageChoiser.height);
-	ImageChoiser.x = ImageTitleSTART.image.x + ImageTitleSTART.image.width / 2 + 64;
+	ImageChoiser.x = ImageTitleSTART.image.x + ImageTitleSTART.image.width / 2 + 32;
 	ImageChoiser.y = ImageTitleSTART.image.y + ImageTitleSTART.image.height / 4 - ImageChoiser.height / 2;
 
 
@@ -1916,7 +1943,7 @@ char* TXET_DRAW(int n)
 	case 2:
 		strcpy_s(cp, 30, "操作説明とアイテムについいて");		break;
 	case 3:
-		strcpy_s(cp, 16, "導入ストーリー");		break;
+		strcpy_s(cp, 16, "ストーリー");		break;
 	}
 
 	return cp;
@@ -1929,8 +1956,8 @@ VOID GAME_RULE(VOID)
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "ゲーム目標", GetColor(0, 0, 0));
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(0, 0, 0));
 	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 10, "誰よりも長く生き残り、\n高スコアを叩きだせ！", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 10, "このゲームにゴールはない！\n可動障害物を動かし・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "迫りくる障害物を避け・壊し\n高スコアを叩きだせ！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "このゲームにゴールはない！\n可動障害物を動かし・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ", GetColor(0, 0, 0));
 
 	return;
 }
@@ -1939,9 +1966,21 @@ VOID GAME_PILOT(VOID)
 {
 	SetFontSize(32);
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5, "アイテムについて", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(0, 0, 0));
 	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 10, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」\nその他選択は「エンターキー」", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」\nその他選択は「エンターキー」", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
+
+	return;
+}
+
+VOID GAME_STR(VOID)
+{
+	SetFontSize(32);
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "はじまりの物語", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(0, 0, 0));
+	SetFontSize(25);
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "あなたは謎の空間に飛ばされ\n", GetColor(0, 0, 0));
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
 
 	return;
