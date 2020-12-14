@@ -309,6 +309,7 @@ IMAGE_BLINK ImageEndWD;
 
 IMAGE_BLINK ImageNextROGO;
 IMAGE_BLINK ImageEndROGO;
+IMAGE ImageChoiser;
 
 IMAGE_WORK ImageWork;
 
@@ -403,6 +404,10 @@ VOID MAP_LOAD(VOID);
 CHAR MY_DIRECTION(double, double, double, double);
 
 char* TXET_DRAW(int);
+
+VOID GAME_RULE(VOID);
+VOID GAME_PILOT(VOID);
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -842,10 +847,13 @@ VOID MY_START_DRAW(VOID)
 		ImageTitleRNK.angle,
 		ImageTitleRNK.image.handle, TRUE);
 
+	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
+
 
 	if (Kchoice == TRUE) {
-		ImageTitleSTART.rate = 1.2;
+		ImageTitleSTART.rate = 1.2; 
 		ImageTitleRNK.rate = 1.0;
+
 	}
 	else {
 		ImageTitleSTART.rate = 1.0;
@@ -928,10 +936,10 @@ VOID MY_EXPO_DRAW(VOID) {
 	switch (ExDrawCnt)
 	{
 	case 1:
-
+		GAME_RULE();
 		break;
 	case 2:
-	
+		GAME_PILOT();
 		break;
 	case 3:
 	
@@ -1403,7 +1411,7 @@ VOID MY_END_PROC(VOID)
 
 VOID MY_END_DRAW(VOID)
 {
-	static double Score = 0;
+	static float Score = 0;
 	MY_PLAY_DRAW();
 
 	switch (GameEndKind)
@@ -1500,6 +1508,19 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleRNK.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + ImageTitleSTART.image.height + 40;
 	ImageTitleRNK.angle = 0;
 	ImageTitleRNK.rate = 1.0;
+
+//選択印
+	strcpy_s(ImageChoiser.path, IMAGE_NEXT_ROGO_PATH);
+	ImageChoiser.handle = LoadGraph(ImageChoiser.path);
+	if (ImageChoiser.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_NEXT_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageChoiser.handle, &ImageChoiser.width, &ImageChoiser.height);
+	ImageChoiser.x = ImageTitleSTART.image.x + ImageTitleSTART.image.width / 2 + 64;
+	ImageChoiser.y = ImageTitleSTART.image.y + ImageTitleSTART.image.height / 4 - ImageChoiser.height / 2;
+
 
 //ゲーム説明
 	strcpy_s(ImageEXPOBK.path, IMAGE_EXPO_BACK);
@@ -1720,6 +1741,7 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(ImageEndWD.image.handle);
 	DeleteGraph(ImageEndROGO.image.handle);
 	DeleteGraph(ImageNextROGO.image.handle);
+	DeleteGraph(ImageChoiser.handle);
 
 
 	for (int i_num = 0; i_num < MAP_DIV_NUM; i_num++) { DeleteGraph(mapChip.handle[i_num]); }
@@ -1899,4 +1921,28 @@ char* TXET_DRAW(int n)
 
 	return cp;
 
+}
+
+VOID GAME_RULE(VOID)
+{
+	SetFontSize(32);
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "ゲーム目標", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(0, 0, 0));
+	SetFontSize(25);
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 10, "誰よりも長く生き残り、\n高スコアを叩きだせ！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 10, "このゲームにゴールはない！\n可動障害物を動かし・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ", GetColor(0, 0, 0));
+
+	return;
+}
+
+VOID GAME_PILOT(VOID)
+{
+	SetFontSize(32);
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5, "アイテムについて", GetColor(0, 0, 0));
+	SetFontSize(25);
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 10, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」\nその他選択は「エンターキー」", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
+
+	return;
 }
