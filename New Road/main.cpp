@@ -30,6 +30,7 @@
 #define IMAGE_LOAD_ERR_TITLE	TEXT("画像読み込みエラー")
 
 #define IMAGE_BACK_PATH       TEXT(".\\IMAGE\\背景1.png")
+#define IMAGE_SHADOW_PATH       TEXT(".\\IMAGE\\かげ.png")
 #define IMAGE_BACK_ENDC_PATH	  TEXT(".\\IMAGE\\背景CONP.png")
 #define IMAGE_BACK_ENDF_PATH	  TEXT(".\\IMAGE\\背景FALL.png")
 
@@ -245,7 +246,7 @@ typedef struct STRUCT_MAP
 	int y;
 	int width;
 	int height;
-	//BOOL IsDraw;
+	BOOL IsDraw;
 }MAP;
 
 int StartTimeFps;
@@ -269,8 +270,10 @@ char OldAllKeyState[256] = { '\0' };
 char direc; //向きのやつ
 
 int timeCnt = 0;
-double time = 0;
-int mintime = 0;
+float time = 0;
+float mintime = 0;
+
+float MAPmoveCnt = 0;
 
 MOUSE mouse;
 
@@ -296,7 +299,7 @@ BOOL CLICK_M = TRUE;
 IMAGE_BACK ImageBack;
 IMAGE_BACK ImageBackEND;
 IMAGE_BACK ImageBackENDF;
-
+IMAGE_BACK ImageShadow;
 
 IMAGE ImageTitleBK;
 IMAGE_ROTA ImageTitleROGO;
@@ -1053,6 +1056,9 @@ VOID MY_PLAY_PROC(VOID)
 
 	//}
 
+	//player.CenterX -= 1;
+
+	//MAPmoveCnt++;
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
@@ -1147,7 +1153,7 @@ VOID MY_PLAY_PROC(VOID)
 	{
 		IsMove = FALSE;
 
-		newX = (player.CenterX - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+		newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 
 		if (map[newY][newX].kind == l)
@@ -1313,27 +1319,32 @@ VOID MY_PLAY_DRAW(VOID)
 		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 		{
 			DrawGraph(
-				map[tate][yoko].x-1,
+				map[tate][yoko].x,
 				map[tate][yoko].y,
 				mapChip.handle[map[tate][yoko].kind],
 				TRUE);
 		}
 	}
 
-	
+	//プレイヤーを描画する
+	DrawGraph(player.image.x, player.image.y, player.image.handle, TRUE);
 
+	//shadow
+	/*DrawGraph(ImageShadow.image.x, ImageShadow.image.y, ImageShadow.image.handle, TRUE);*/
+
+	//タイマーとアイテム描画
 	SetFontSize(25);
 
 	if (time >= 60 || mintime >= 1) {
-		DrawFormatString(0, 5, GetColor(255, 255, 255), "TIME:%d分%.2f秒", mintime, time);
+		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%d分%.2f秒", mintime, time);
 	}
 	else
 	{
-		DrawFormatString(0, 5, GetColor(255, 255, 255), "TIME:%.2f秒", time);
+		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%.2f秒", time);
 
 	}
 
-	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(255, 255, 255), "アイテム:%d個", ITEMCnt);
+	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
 	////当たり判定の描画（デバッグ用）
 	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1357,11 +1368,11 @@ VOID MY_PLAY_DRAW(VOID)
 	////ゴールの描画（デバッグ用）
 	//DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
 
-	//プレイヤーのを描画する
-	DrawGraph(player.image.x, player.image.y, player.image.handle, TRUE);
 
 	//当たり判定の描画（デバッグ用）
 	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+
+
 
 	SetFontSize(30);
 	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
@@ -1660,6 +1671,20 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageBack.image.y = 0 - ImageBack.image.height * 0;
 	ImageBack.IsDraw = FALSE;
 
+//shadow
+	strcpy_s(ImageShadow.image.path, IMAGE_SHADOW_PATH);
+	ImageShadow.image.handle = LoadGraph(ImageShadow.image.path);
+	if (ImageShadow.image.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_SHADOW_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageShadow.image.handle, &ImageShadow.image.width, &ImageShadow.image.height);
+	ImageShadow.image.x = GAME_WIDTH / 2 - ImageShadow.image.width / 2;
+	ImageShadow.image.y = 0 - ImageShadow.image.height * 0;
+	ImageShadow.IsDraw = FALSE;
+
+
 //背景画像END
 	strcpy_s(ImageBackEND.image.path, IMAGE_BACK_ENDC_PATH);
 	ImageBackEND.image.handle = LoadGraph(ImageBackEND.image.path);
@@ -1751,6 +1776,7 @@ VOID MY_DELETE_IMAGE(VOID)
 {
 
 	DeleteGraph(ImageBack.image.handle);
+	DeleteGraph(ImageShadow.image.handle);
 
 	for (int num = 0; num < IMAGE_CHAR_NUM; num++)
 	{
