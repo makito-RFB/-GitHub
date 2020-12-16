@@ -1014,6 +1014,8 @@ VOID MY_PLAY(VOID)
 VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
+	//player.collBeforePt.x -= 1; //スクロール時の過去位置の誤差修正
+
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
 		ChangeVolumeSoundMem(255 * 50 / 100, BGM.handle);
@@ -1038,27 +1040,28 @@ VOID MY_PLAY_PROC(VOID)
 	time += 0.016;
 	timeCnt++;
 
-	////マップ移動
-	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	//{
-	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-	//	{
-	//		//マップを移動当たり判定も移動
-	//			/*map[tate][yoko].x,*/
-	//		map[tate][yoko].x -= 1;
-	//		mapColl[tate][yoko].left -= 1;
-	//		mapColl[tate][yoko].right -= 1;
-	//		if (map[tate][yoko].x >= GAME_WIDTH)
-	//		{
-	//			map[tate][yoko].IsDraw = FALSE;
-	//		}
-	//	}
+	//マップ移動
 
-	//}
-
-	//player.CenterX -= 1;
-
-	//MAPmoveCnt++;
+//	player.CenterX -= 1;
+//
+//	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+//	{
+//		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+//		{
+//			//マップを移動当たり判定も移動
+//				/*map[tate][yoko].x,*/
+//			map[tate][yoko].x -= 1;
+//			mapColl[tate][yoko].left -= 1;
+//			mapColl[tate][yoko].right -= 1;
+//			if (map[tate][yoko].x >= GAME_WIDTH)
+//			{
+//				map[tate][yoko].IsDraw = FALSE;
+//			}
+//		}
+//
+//	}
+//
+//　MAPmoveCnt++;
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
@@ -1153,7 +1156,7 @@ VOID MY_PLAY_PROC(VOID)
 	{
 		IsMove = FALSE;
 
-		newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+		newX = ((player.CenterX/* + MAPmoveCnt*/) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH; //移動のプラス
 		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 
 		if (map[newY][newX].kind == l)
@@ -1250,7 +1253,7 @@ VOID MY_PLAY_PROC(VOID)
 		}
 
 		////元の位置に戻る
-		player.CenterX = player.collBeforePt.x;
+		player.CenterX = player.collBeforePt.x/* - 1*/;
 		player.CenterY = player.collBeforePt.y;
 	}
 
@@ -1259,7 +1262,7 @@ VOID MY_PLAY_PROC(VOID)
 
 	if (IsMove == TRUE)
 	{
-		int x = (player.CenterX - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+		int x = ((player.CenterX/* + MAPmoveCnt*/) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
 		int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 		if (map[y][x].kind == g)
 		{
@@ -1330,7 +1333,7 @@ VOID MY_PLAY_DRAW(VOID)
 	DrawGraph(player.image.x, player.image.y, player.image.handle, TRUE);
 
 	//shadow
-	/*DrawGraph(ImageShadow.image.x, ImageShadow.image.y, ImageShadow.image.handle, TRUE);*/
+	DrawGraph(ImageShadow.image.x, ImageShadow.image.y, ImageShadow.image.handle, TRUE);
 
 	//タイマーとアイテム描画
 	SetFontSize(25);
@@ -1365,11 +1368,11 @@ VOID MY_PLAY_DRAW(VOID)
 	//	}
 	//}
 
-	////ゴールの描画（デバッグ用）
-	//DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+	//////ゴールの描画（デバッグ用）
+	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
 
 
-	//当たり判定の描画（デバッグ用）
+	////当たり判定の描画（デバッグ用）
 	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
