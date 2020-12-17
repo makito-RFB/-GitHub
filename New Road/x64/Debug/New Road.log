@@ -1,21 +1,19 @@
 ﻿  main.cpp
-C:\github\作品ⅢGitHub\New Road\main.cpp(1031,15): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1040,15): warning C4305: '+=': 'double' から 'float' へ切り詰めます。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1160,62): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1266,9): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1482,14): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1595,19): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1987,38): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1989,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1989,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1990,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2001,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2001,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2002,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2002,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2013,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2013,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2014,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2014,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1915): warning C4715: 'MY_DIRECTION': 値を返さないコントロール パスがあります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1042,15): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1051,15): warning C4305: '+=': 'double' から 'float' へ切り詰めます。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1493,14): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1606,19): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2026,38): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2028,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2028,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2029,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2040,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2040,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2041,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2041,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2052,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2052,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2053,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2053,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1954): warning C4715: 'MY_DIRECTION': 値を返さないコントロール パスがあります。
   New Road.vcxproj -> C:\github\作品ⅢGitHub\New Road\x64\Debug\New Road.exe

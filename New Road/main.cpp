@@ -41,6 +41,9 @@
 #define IMAGE_CHAR_NUM			3	
 
 #define IMAGE_EXPO_BACK TEXT(".\\IMAGE\\説明背景.png")
+#define IMAGE_EX_NEWS1 TEXT(".\\IMAGE\\ルー説.png")
+#define IMAGE_EX_NEWS2 TEXT(".\\IMAGE\\操説.png")
+
 
 #define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
 
@@ -94,7 +97,7 @@
 #define GOAL_ERR_CAPTION	TEXT("ゴール位置が決まっていません")
 
 #define MOUSE_R_CLICK_TITLE		TEXT("ゲーム中断")
-#define MOUSE_R_CLICK_CAPTION	TEXT("ゲームを中断し、タイトル画面に戻りますか？")
+#define MOUSE_R_CLICK_CAPTION	TEXT("ゲームを中断し、脱出しますか？")
 
 enum GAME_MAP_KIND
 {
@@ -308,8 +311,11 @@ IMAGE_BLINK ImageTitleRNK;
 
 IMAGE ImageEXPOBK;
 
-IMAGE_BLINK ImageEndFAIL;
-IMAGE_BLINK ImageEndWD;
+IMAGE_BACK ImageExNews1;
+IMAGE_BACK ImageExNews2;
+
+IMAGE_BACK ImageEndFAIL;
+IMAGE_BACK ImageEndWD;
 
 IMAGE_BLINK ImageNextROGO;
 IMAGE_BLINK ImageEndROGO;
@@ -876,6 +882,7 @@ VOID MY_START_DRAW(VOID)
 
 	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
 
+//上下選択の動き
 
 	if (Kchoice == TRUE) {
 		ImageTitleSTART.rate = 1.2; 
@@ -895,10 +902,12 @@ VOID MY_START_DRAW(VOID)
 			ImageTitleSTART.rate = 0.8;
 		else 
 			ImageTitleRNK.rate = 0.8;
+		ImageChoiser.x -= 32;
 	}
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 		ImageTitleSTART.rate = 1.0;
 		ImageTitleRNK.rate = 1.0;
+		ImageChoiser.x += 32;
 	}
 	//DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
 	return;
@@ -935,11 +944,11 @@ VOID MY_EXPO_PROC(VOID) {
 			CLICK_M = TRUE;
 		}
 		break;
-	case 3:
-		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
-			ExDrawCnt = 3;
-			CLICK_M = TRUE;
-		}
+	//case 3:
+	//	if (MY_KEY_UP(KEY_INPUT_RETURN)) {
+	//		ExDrawCnt = 3;
+	//		CLICK_M = TRUE;
+	//	}  //ここパス
 		break;
 	case 2:
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
@@ -967,13 +976,15 @@ VOID MY_EXPO_DRAW(VOID) {
 	{
 	case 1:
 		GAME_RULE();
+		DrawGraph(ImageExNews1.image.x, ImageExNews1.image.y, ImageExNews1.image.handle, TRUE);
 		break;
 	case 2:
 		GAME_PILOT();
+		DrawGraph(ImageExNews2.image.x, ImageExNews2.image.y, ImageExNews2.image.handle, TRUE);
 		break;
-	case 3:
-		GAME_STR();
-		break;
+	//case 3:
+	//	GAME_STR();
+	//	break;　　//ここパス
 	}
 
 	char* str = NULL;
@@ -1049,7 +1060,6 @@ VOID MY_PLAY_PROC(VOID)
 //		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 //		{
 //			//マップを移動当たり判定も移動
-//				/*map[tate][yoko].x,*/
 //			map[tate][yoko].x -= 1;
 //			mapColl[tate][yoko].left -= 1;
 //			mapColl[tate][yoko].right -= 1;
@@ -1380,6 +1390,8 @@ VOID MY_PLAY_DRAW(VOID)
 	SetFontSize(30);
 	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
 	DrawString((GAME_WIDTH - StrWidth )/ 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
+	SetFontSize(20);
+	DrawString((GAME_WIDTH - GetDrawStringWidth("※制作途中のため「画面端に出る」もしくは「停止画面」から脱出してください※", -1)) / 2, GAME_HEIGHT - 64, "※制作途中のため画面端に出るもしくは停止画面からゴールへ行ってください※", GetColor(255, 0, 0));
 	return;
 }
 
@@ -1730,6 +1742,32 @@ BOOL MY_LOAD_IMAGE(VOID)
 	player.CenterY = player.image.y + player.image.height / 2;
 	player.speed = CHARA_SPEED_LOW;
 
+//説明画像１
+	strcpy_s(ImageExNews1.image.path, IMAGE_EX_NEWS1);
+	ImageExNews1.image.handle = LoadGraph(ImageExNews1.image.path);
+	if (ImageExNews1.image.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS1, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageExNews1.image.handle, &ImageExNews1.image.width, &ImageExNews1.image.height);
+	ImageExNews1.image.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
+	ImageExNews1.image.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
+	ImageExNews1.IsDraw = FALSE;
+
+//説明画像2
+	strcpy_s(ImageExNews2.image.path, IMAGE_EX_NEWS2);
+	ImageExNews2.image.handle = LoadGraph(ImageExNews2.image.path);
+	if (ImageExNews2.image.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS2, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageExNews2.image.handle, &ImageExNews2.image.width, &ImageExNews2.image.height);
+	ImageExNews2.image.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH /4 - 2);
+	ImageExNews2.image.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
+	ImageExNews2.IsDraw = FALSE;
+
 //マップの画像を分割する
 	int mapRes = LoadDivGraph(
 		GAME_MAP_PATH,
@@ -1798,6 +1836,8 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(ImageEndROGO.image.handle);
 	DeleteGraph(ImageNextROGO.image.handle);
 	DeleteGraph(ImageChoiser.handle);
+	DeleteGraph(ImageExNews1.image.handle);
+	DeleteGraph(ImageExNews2.image.handle);
 
 
 	for (int i_num = 0; i_num < MAP_DIV_NUM; i_num++) { DeleteGraph(mapChip.handle[i_num]); }
@@ -1982,11 +2022,11 @@ char* TXET_DRAW(int n)
 VOID GAME_RULE(VOID)
 {
 	SetFontSize(32);
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "ゲーム目標", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "ゲーム目標", GetColor(160, 0, 80));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(160, 0, 80));
 	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "迫りくる障害物を避け・壊し\n高スコアを叩きだせ！", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "このゲームにゴールはない！\n可動障害物を動かし・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "長く生き残り、\n高スコアを叩きだせ！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "流れるマップの障害物を\n避けて・動かして・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ", GetColor(0, 0, 0));
 
 	return;
 }
@@ -1994,8 +2034,8 @@ VOID GAME_RULE(VOID)
 VOID GAME_PILOT(VOID)
 {
 	SetFontSize(32);
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(160, 0, 80));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(160, 0, 80));
 	SetFontSize(25);
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」\nその他選択は「エンターキー」", GetColor(0, 0, 0));
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
@@ -2007,10 +2047,10 @@ VOID GAME_STR(VOID)
 {
 	SetFontSize(32);
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "はじまりの物語", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "　", GetColor(0, 0, 0));
 	SetFontSize(25);
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "あなたは謎の空間に飛ばされ\n", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "　", GetColor(0, 0, 0));
 
 	return;
 }
