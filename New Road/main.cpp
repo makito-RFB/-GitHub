@@ -1025,7 +1025,7 @@ VOID MY_PLAY(VOID)
 VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
-	//player.collBeforePt.x -= 1; //スクロール時の過去位置の誤差修正
+	player.collBeforePt.x -= 1; //スクロール時の過去位置の誤差修正
 
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
@@ -1053,25 +1053,25 @@ VOID MY_PLAY_PROC(VOID)
 
 	//マップ移動
 
-//	player.CenterX -= 1;
-//
-//	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-//	{
-//		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-//		{
-//			//マップを移動当たり判定も移動
-//			map[tate][yoko].x -= 1;
-//			mapColl[tate][yoko].left -= 1;
-//			mapColl[tate][yoko].right -= 1;
-//			if (map[tate][yoko].x >= GAME_WIDTH)
-//			{
-//				map[tate][yoko].IsDraw = FALSE;
-//			}
-//		}
-//
-//	}
-//
-//　MAPmoveCnt++;
+	player.CenterX -= 1;
+
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			//マップを移動当たり判定も移動
+			map[tate][yoko].x -= 1;
+			mapColl[tate][yoko].left -= 1;
+			mapColl[tate][yoko].right -= 1;
+			//if (map[tate][yoko].x >= GAME_WIDTH)
+			//{
+			//	map[tate][yoko].IsDraw = FALSE;
+			//}
+		}
+
+	}
+
+	MAPmoveCnt++;
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
@@ -1166,7 +1166,7 @@ VOID MY_PLAY_PROC(VOID)
 	{
 		IsMove = FALSE;
 
-		newX = ((player.CenterX/* + MAPmoveCnt*/) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH; //移動のプラス
+		newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH; //移動のプラス
 		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 
 		if (map[newY][newX].kind == l)
@@ -1219,30 +1219,7 @@ VOID MY_PLAY_PROC(VOID)
 					break;
 
 				}
-				/*	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-					{
-						for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-						{
-							if (mapData[tate][yoko] == g) {
-								if (mapData[tate + 1][yoko] == l) {
-									if (CheckSoundMem(BGM.handle) != 0)
-									{
-										StopSoundMem(BGM.handle);
-									}
 
-									FALL_RESON = TRUE;
-
-									SetMouseDispFlag(TRUE);
-
-									GameEndKind = GAME_END_FAIL;
-
-									GameScene = GAME_SCENE_END;
-
-									return;
-								}
-							}
-						}
-					}*/
 
 			//障害物をアイテムで破壊
 				if (ITEMCnt > 0 && IsReMove == FALSE)
@@ -1272,22 +1249,11 @@ VOID MY_PLAY_PROC(VOID)
 
 	if (IsMove == TRUE)
 	{
-		int x = ((player.CenterX/* + MAPmoveCnt*/) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
+		int x = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
 		int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 		if (map[y][x].kind == g)
 		{
-			/*if (CheckSoundMem(BGM.handle) != 0)
-			{
-				StopSoundMem(BGM.handle);
-			}
 
-			SetMouseDispFlag(TRUE);
-
-			GameEndKind = GAME_END_COMP;
-
-			GameScene = GAME_SCENE_END;
-
-			return;*/
 		//アイテム取得とアイテムの当たり判定削除
 			mapData[y][x] = t;
 			map[y][x].kind = t;
@@ -1988,6 +1954,20 @@ VOID MAP_LOAD(VOID)
 				}
 			}
 		}
+	//位置初期化
+		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+		{
+			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+			{
+				//マップを移動当たり判定も移動
+				map[tate][yoko].x += MAPmoveCnt;
+				mapColl[tate][yoko].left += MAPmoveCnt;
+				mapColl[tate][yoko].right += MAPmoveCnt;
+
+			}
+
+		}
+		MAPmoveCnt = 0;
 		MY_MAP_RELOAD = FALSE;
 	}
 }
