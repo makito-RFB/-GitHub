@@ -1,7 +1,7 @@
 #include "DxLib.h"
 #include "resource.h"
-#include <stdlib.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <string.h>
 
 #define GAME_WIDTH     960
 #define GAME_HEIGHT    576
@@ -59,7 +59,7 @@
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
 
-
+#define SCROLL_SPEED 1
 
 #define IMAGE_END_FAIL_PATH		TEXT(".\\IMAGE\\失敗.png")
 #define IMAGE_END_WITHDRAWAL_PATH		TEXT(".\\IMAGE\\成功.png")
@@ -335,11 +335,21 @@ MUSIC BGM_FAIL;
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
+		//m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		//k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
+		//k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
+		//k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
+		//k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		//k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
+		//k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
+		//k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
+		//r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
+
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
 		k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
-		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		k,t,t,t,t,t,s,t,t,t,t,t,t,t,t,t,k,t,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
 		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
 		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
@@ -349,11 +359,21 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 //マップ初期化用のバックアップ
 GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,
+		//mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
+		//kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
+		//kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
+		//kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
+		//kp,tp,tp,lp,tp,kp,sp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
+		//kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
+		//kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
+		//kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
+		//rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
+
 		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
 		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
 		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
 		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
-		kp,tp,tp,lp,tp,kp,sp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
+		kp,tp,tp,tp,tp,tp,sp,tp,tp,tp,tp,tp,tp,tp,tp,tp,kp,tp,	// 4
 		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
 		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
 		kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
@@ -410,10 +430,11 @@ BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT);
 BOOL MY_CHECK_RECT_COLL(RECT, RECT);
 
 VOID MAP_LOAD(VOID);
+VOID MAP_DRAW(IMAGE_BACK ImageBack);
 
 CHAR MY_DIRECTION(double, double, double, double);
 
-char* TXET_DRAW(int);
+char* TEXT_DRAW(int);
 
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
@@ -989,11 +1010,9 @@ VOID MY_EXPO_DRAW(VOID) {
 
 	char* str = NULL;
 	SetFontSize(44);
-	str = TXET_DRAW(ExDrawCnt);
+	str = TEXT_DRAW(ExDrawCnt);
 	StrDraw = GetDrawStringWidth(str, -1);
 	DrawString((GAME_WIDTH - StrDraw) / 2, 10, str, GetColor(255, 0, 0));
-
-	//printf("str = %s\n", str);
 
 	DrawRotaGraph(
 		ImageNextROGO.image.x, ImageNextROGO.image.y,
@@ -1025,7 +1044,7 @@ VOID MY_PLAY(VOID)
 VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
-	player.collBeforePt.x -= 1; //スクロール時の過去位置の誤差修正
+	player.collBeforePt.x -= SCROLL_SPEED; //スクロール時の過去位置の誤差修正
 
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
@@ -1053,16 +1072,16 @@ VOID MY_PLAY_PROC(VOID)
 
 	//マップ移動
 
-	player.CenterX -= 1;
+	player.CenterX -= SCROLL_SPEED;
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 	{
 		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 		{
 			//マップを移動当たり判定も移動
-			map[tate][yoko].x -= 1;
-			mapColl[tate][yoko].left -= 1;
-			mapColl[tate][yoko].right -= 1;
+			map[tate][yoko].x -= SCROLL_SPEED;
+			mapColl[tate][yoko].left -= SCROLL_SPEED;
+			mapColl[tate][yoko].right -= SCROLL_SPEED;
 			//if (map[tate][yoko].x >= GAME_WIDTH)
 			//{
 			//	map[tate][yoko].IsDraw = FALSE;
@@ -1072,6 +1091,25 @@ VOID MY_PLAY_PROC(VOID)
 	}
 
 	MAPmoveCnt++;
+
+
+	if (MAPmoveCnt >= MAP_DIV_WIDTH * 3)
+	{
+		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+		{
+			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+			{
+				//マップを移動当たり判定も移動
+				map[tate][yoko].x += MAPmoveCnt;
+				mapColl[tate][yoko].left += MAPmoveCnt;
+				mapColl[tate][yoko].right += MAPmoveCnt;
+
+			}
+		
+		}
+		MAPmoveCnt = 0;
+	}
+
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
@@ -1240,7 +1278,7 @@ VOID MY_PLAY_PROC(VOID)
 		}
 
 		////元の位置に戻る
-		player.CenterX = player.collBeforePt.x/* - 1*/;
+		player.CenterX = player.collBeforePt.x;
 		player.CenterY = player.collBeforePt.y;
 	}
 
@@ -1291,7 +1329,9 @@ VOID MY_PLAY_PROC(VOID)
 VOID MY_PLAY_DRAW(VOID)
 {
 	static int StrWidth = 0;
-	DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
+//背景スクロール
+	MAP_DRAW(ImageBack);
+	//DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 	{
@@ -1325,31 +1365,31 @@ VOID MY_PLAY_DRAW(VOID)
 
 	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
-	////当たり判定の描画（デバッグ用）
-	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	//{
-	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-	//	{
-	//		//壁ならば
-	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-	//		{
-	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-	//		}
+	//当たり判定の描画（デバッグ用）
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			//壁ならば
+			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+			{
+				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+			}
 
-	//		//通路ならば
-	//		if (mapData[tate][yoko] == t)
-	//		{
-	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-	//		}
-	//	}
-	//}
+			//通路ならば
+			if (mapData[tate][yoko] == t)
+			{
+				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+			}
+		}
+	}
 
-	//////ゴールの描画（デバッグ用）
-	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+	////ゴールの描画（デバッグ用）
+	//DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
 
 
-	////当たり判定の描画（デバッグ用）
-	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	//当たり判定の描画（デバッグ用）
+	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
@@ -1972,7 +2012,7 @@ VOID MAP_LOAD(VOID)
 	}
 }
 
-char* TXET_DRAW(int n)
+char* TEXT_DRAW(int n)
 {
 	char* cp = NULL;
 
@@ -2031,6 +2071,23 @@ VOID GAME_STR(VOID)
 	SetFontSize(25);
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "あなたは謎の空間に飛ばされ\n", GetColor(0, 0, 0));
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "　", GetColor(0, 0, 0));
+
+	return;
+}
+
+//背景スクロール
+VOID MAP_DRAW(IMAGE_BACK ImageBack)
+{
+	DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
+
+	//二枚目描画
+	DrawGraph(ImageBack.image.x - GAME_WIDTH, ImageBack.image.y, ImageBack.image.handle, TRUE);
+
+	//一番下までスクロールしたら初期値に戻す
+	if (ImageBack.image.x == GAME_WIDTH + 10)
+		ImageBack.image.x = 10;
+
+	ImageBack.image.x += SCROLL_SPEED;
 
 	return;
 }
