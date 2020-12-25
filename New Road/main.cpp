@@ -1,6 +1,6 @@
 #include "DxLib.h"
 #include "resource.h"
-//#include <stdlib.h>
+#include <random>
 //#include <string.h>
 
 #define GAME_WIDTH     960
@@ -79,6 +79,8 @@
 #define GAME_MAP_TATE_MAX	9	//マップの縦の数
 #define GAME_MAP_YOKO_MAX	18	//マップの横の数
 #define GAME_MAP_KIND_MAX	2	//マップの種類の数
+
+#define GAME_MAP_YOKO_NEW	15	//マップの更新横の数
 
 #define GAME_MAP_PATH			TEXT(".\\IMAGE\\MAP\\map.png")
 
@@ -380,6 +382,19 @@ GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
 };
 
+GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
+	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 1
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 2
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 3
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 4
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 5
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 6
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 7
+		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 8
+};
+
 GAME_MAP_KIND mapDataInit[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
 MAPCHIP mapChip;
 MAP map[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
@@ -431,6 +446,7 @@ BOOL MY_CHECK_RECT_COLL(RECT, RECT);
 
 VOID MAP_LOAD(VOID);
 VOID MAP_DRAW(IMAGE_BACK ImageBack);
+VOID ROCKETMAP(VOID);
 
 CHAR MY_DIRECTION(double, double, double, double);
 
@@ -439,6 +455,7 @@ char* TEXT_DRAW(int);
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
 VOID GAME_STR(VOID);
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -1107,6 +1124,7 @@ VOID MY_PLAY_PROC(VOID)
 			}
 		
 		}
+		ROCKETMAP();
 		MAPmoveCnt = 0;
 	}
 
@@ -2089,5 +2107,28 @@ VOID MAP_DRAW(IMAGE_BACK ImageBack)
 
 	ImageBack.image.x += SCROLL_SPEED;
 
+	return;
+}
+
+VOID ROCKETMAP(VOID)
+{
+	int plusYoko = 0;
+	int newMapYoko = 0;
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_NEW; yoko++)
+		{
+			plusYoko = yoko + 3;
+			//マップ移動更新
+			mapData[tate][yoko] = mapData[tate][plusYoko];	
+			map[tate][yoko].kind = map[tate][plusYoko].kind;
+		}
+		for (int yoko = GAME_MAP_YOKO_NEW; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			newMapYoko = yoko - GAME_MAP_YOKO_NEW;
+			mapData[tate][yoko] = mapDataNEW[tate][newMapYoko];
+			map[tate][yoko].kind = mapDataNEW[tate][newMapYoko];
+		}
+	}
 	return;
 }
