@@ -1,7 +1,7 @@
 #include "DxLib.h"
 #include "resource.h"
 #include <random>
-//#include <string.h>
+#include <stdlib.h>
 
 #define GAME_WIDTH     960
 #define GAME_HEIGHT    576
@@ -384,15 +384,24 @@ GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 
 GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ÉuÉçÉbÉNÇ√Ç¬
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 1
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 2
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 3
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 4
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 5
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 6
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 7
-		t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 8
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 1
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 2
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 3
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 4
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 5
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 6
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 7
+		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 8
+		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		t,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
+		t,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
+		t,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
+		t,t,t,t,t,t,s,t,t,t,t,t,t,t,t,t,k,t,	// 4
+		t,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
+		t,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
+		t,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
+		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
 };
 
 GAME_MAP_KIND mapDataInit[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
@@ -2114,6 +2123,8 @@ VOID ROCKETMAP(VOID)
 {
 	int plusYoko = 0;
 	int newMapYoko = 0;
+	int rndInt = 0;
+	rndInt = rand() % 5 + 1;
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 	{
 		for (int yoko = 0; yoko < GAME_MAP_YOKO_NEW; yoko++)
@@ -2125,7 +2136,7 @@ VOID ROCKETMAP(VOID)
 		}
 		for (int yoko = GAME_MAP_YOKO_NEW; yoko < GAME_MAP_YOKO_MAX; yoko++)
 		{
-			newMapYoko = yoko - GAME_MAP_YOKO_NEW;
+			newMapYoko = (yoko - GAME_MAP_YOKO_NEW) + rndInt * 3;
 			mapData[tate][yoko] = mapDataNEW[tate][newMapYoko];
 			map[tate][yoko].kind = mapDataNEW[tate][newMapYoko];
 		}
