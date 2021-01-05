@@ -130,6 +130,7 @@ enum GAME_SCENE {
 	GAME_SCENE_EXPO,
 	GAME_SCENE_PLAY,
 	GAME_SCENE_END,
+	GAME_SCENE_RNKING,
 };
 
 enum GAME_END {
@@ -337,67 +338,40 @@ MUSIC BGM_FAIL;
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
-		//m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		//k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
-		//k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
-		//k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
-		//k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
-		//k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
-		//k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
-		//k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
-		//r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
-
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
 		k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
-		k,t,t,t,t,t,s,t,t,t,t,t,t,t,t,t,k,t,	// 4
+		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
 		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
 		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
+
 };
 
 //マップ初期化用のバックアップ
 GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,
-		//mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
-		//kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
-		//kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
-		//kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
-		//kp,tp,tp,lp,tp,kp,sp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
-		//kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
-		//kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
-		//kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
-		//rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
-
 		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
 		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
 		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
 		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
-		kp,tp,tp,tp,tp,tp,sp,tp,tp,tp,tp,tp,tp,tp,tp,tp,kp,tp,	// 4
+		kp,tp,tp,lp,tp,kp,sp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
 		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
 		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
 		kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
 		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
+
 };
 
 GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 1
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 2
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 3
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 4
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 5
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 6
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 7
-		//t,t,t,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 8
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
 		t,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		t,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
 		t,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
-		t,t,t,t,t,t,s,t,t,t,t,t,t,t,t,t,k,t,	// 4
+		t,t,k,t,t,t,l,t,t,t,l,t,t,t,t,t,k,t,	// 4
 		t,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
 		t,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
 		t,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
@@ -443,6 +417,10 @@ VOID MY_PLAY_DRAW(VOID);
 VOID MY_END(VOID);
 VOID MY_END_PROC(VOID);
 VOID MY_END_DRAW(VOID);
+
+VOID MY_RNKING(VOID);
+VOID MY_RNKING_PROC(VOID);
+VOID MY_RNKING_DRAW(VOID);
 
 BOOL MY_LOAD_IMAGE(VOID);
 VOID MY_DELETE_IMAGE(VOID);
@@ -534,6 +512,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			break;
 		case GAME_SCENE_END:
 			MY_END();
+			break;
+		case GAME_SCENE_RNKING:
+			MY_RNKING();
 			break;
 		}
 
@@ -810,7 +791,7 @@ VOID MY_START_PROC(VOID)
 		MusicPass = TRUE;
 		MY_MAP_RELOAD = TRUE;
 	}
-
+//
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
 	{
 
@@ -822,7 +803,8 @@ VOID MY_START_PROC(VOID)
 	}
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
-
+		GameScene = GAME_SCENE_RNKING;
+		MusicPass = TRUE;
 	}
 
 //選択音
@@ -1539,6 +1521,31 @@ VOID MY_END_DRAW(VOID)
 		ImageEndROGO.rate = 1.0;
 	}
 	return;
+}
+
+VOID MY_RNKING(VOID)
+{
+	MY_RNKING_PROC();
+	MY_RNKING_DRAW();
+	return;
+}
+
+VOID MY_RNKING_PROC(VOID)
+{
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+
+		SetMouseDispFlag(TRUE);
+
+		GameScene = GAME_SCENE_START;
+
+		return;
+	}
+}
+
+VOID MY_RNKING_DRAW(VOID)
+{
+	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+
 }
 
 BOOL MY_LOAD_IMAGE(VOID)
