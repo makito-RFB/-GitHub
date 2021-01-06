@@ -131,6 +131,7 @@ enum GAME_SCENE {
 	GAME_SCENE_PLAY,
 	GAME_SCENE_END,
 	GAME_SCENE_RNKING,
+	GAME_SCENE_STOP,
 };
 
 enum GAME_END {
@@ -422,6 +423,10 @@ VOID MY_RNKING(VOID);
 VOID MY_RNKING_PROC(VOID);
 VOID MY_RNKING_DRAW(VOID);
 
+VOID MY_STOP(VOID);
+VOID MY_STOP_PROC(VOID);
+VOID MY_STOP_DRAW(VOID);
+
 BOOL MY_LOAD_IMAGE(VOID);
 VOID MY_DELETE_IMAGE(VOID);
 
@@ -515,6 +520,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			break;
 		case GAME_SCENE_RNKING:
 			MY_RNKING();
+			break;
+		case GAME_SCENE_STOP:
+			MY_STOP();
 			break;
 		}
 
@@ -787,9 +795,11 @@ VOID MY_START_PROC(VOID)
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
 		//GameScene = GAME_SCENE_PLAY;
-		GameScene = GAME_SCENE_EXPO;
 		MusicPass = TRUE;
+		CLICK_M = TRUE;
+		GameScene = GAME_SCENE_EXPO;
 		MY_MAP_RELOAD = TRUE;
+		return;
 	}
 //
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
@@ -803,8 +813,11 @@ VOID MY_START_PROC(VOID)
 	}
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
-		GameScene = GAME_SCENE_RNKING;
 		MusicPass = TRUE;
+		Kchoice = TRUE;
+		CLICK_M = TRUE;
+		GameScene = GAME_SCENE_RNKING;
+		return;
 	}
 
 //ëIëâπ
@@ -816,12 +829,6 @@ VOID MY_START_PROC(VOID)
 			CLICK_M = FALSE;
 		}
 	}
-
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
-		CLICK_M = TRUE;
-	}
-	
-
 
 	//å„ÇÎï‡Ç≠èàóù
 	if (ImageChar[1].IsDraw == FALSE && MY_CHAR_MOVE_ST == TRUE) {
@@ -957,20 +964,12 @@ VOID MY_EXPO_PROC(VOID) {
 		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
 	}
 
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN)) {
-		if (CLICK_M == TRUE)
-		{
-			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
-			CLICK_M = FALSE;
-		}
-	}
-
 	switch (ExDrawCnt)
 	{
 	case 1:
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
-			ExDrawCnt = 2;
 			CLICK_M = TRUE;
+			ExDrawCnt = 2;
 		}
 		break;
 	//case 3:
@@ -982,18 +981,25 @@ VOID MY_EXPO_PROC(VOID) {
 	case 2:
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 1;
-			CLICK_M = TRUE;
-
 			if (CheckSoundMem(BGM_TITLE.handle) != 0)
 			{
 				StopSoundMem(BGM_TITLE.handle);
 			}
 			ITEMCnt = 0;
+			CLICK_M = TRUE;
 			GameScene = GAME_SCENE_PLAY;
 		}
 		break;
 	}
 
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN)) {
+
+		if (CLICK_M == TRUE)
+		{
+			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			CLICK_M = FALSE;
+		}
+	}
 	return;
 }
 
@@ -1122,7 +1128,11 @@ VOID MY_PLAY_PROC(VOID)
 
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
-		iPOINT R_ClickPt = mouse.Point;
+		if (CheckSoundMem(BGM.handle) != 0)
+		{
+			StopSoundMem(BGM.handle);
+		}
+		/*iPOINT R_ClickPt = mouse.Point;
 
 		SetMouseDispFlag(TRUE);
 
@@ -1130,10 +1140,7 @@ VOID MY_PLAY_PROC(VOID)
 
 		if (Ret == IDYES)
 		{
-			if (CheckSoundMem(BGM.handle) != 0)
-			{
-				StopSoundMem(BGM.handle);
-			}
+			
 
 			SetMouseDispFlag(TRUE);
 
@@ -1148,7 +1155,10 @@ VOID MY_PLAY_PROC(VOID)
 			SetMousePoint(R_ClickPt.x, R_ClickPt.y);
 
 			SetMouseDispFlag(FALSE);
-		}
+		}*/
+
+
+		GameScene = GAME_SCENE_STOP;
 	}
 
 
@@ -2149,4 +2159,128 @@ VOID ROCKETMAP(VOID)
 		}
 	}
 	return;
+}
+
+
+//stopâÊñ èàóù
+VOID MY_STOP(VOID)
+{
+	MY_STOP_PROC();
+	MY_STOP_DRAW();
+	return;
+}
+
+VOID MY_STOP_PROC(VOID)
+{
+	static BOOL MusicPass = TRUE;
+	static BOOL check = TRUE;
+
+	if (CheckSoundMem(BGM_TITLE.handle) == 0 && MusicPass == TRUE)
+	{
+		ChangeVolumeSoundMem(255 * 50 / 100, BGM_TITLE.handle);
+		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
+	}
+//-----------------------
+	if (check == TRUE) {
+		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
+			Kchoice = !Kchoice;
+			check = FALSE;
+		}
+	}
+	if (MY_KEY_UP(KEY_INPUT_DOWN) == TRUE || MY_KEY_UP(KEY_INPUT_UP) == TRUE)
+		check = TRUE;
+//------------------------
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
+	{
+		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		{
+			StopSoundMem(BGM_TITLE.handle);
+			MusicPass = FALSE;
+		}
+	}
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
+		MusicPass = TRUE;
+		CLICK_M = TRUE;
+		GameScene = GAME_SCENE_END;
+		return;
+	}
+//-------------------------
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
+	{
+
+		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		{
+			StopSoundMem(BGM_TITLE.handle);
+			MusicPass = FALSE;
+		}
+	}
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
+		MusicPass = TRUE;
+		Kchoice = TRUE;
+		CLICK_M = TRUE;
+		GameScene = GAME_SCENE_PLAY;
+		return;
+	}
+
+//ëIëâπ
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
+	{
+		if (CLICK_M == TRUE)
+		{
+			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			CLICK_M = FALSE;
+		}
+	}
+	return;
+}
+
+VOID MY_STOP_DRAW(VOID)
+{
+	MY_PLAY_DRAW();
+//DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+	DrawGraph(ImageTitleBK.x, ImageTitleBK.y, ImageTitleBK.handle, TRUE);
+
+	DrawGraph(ImageTitleROGO.image.x, ImageTitleROGO.image.y, ImageTitleROGO.image.handle, TRUE);
+
+	DrawRotaGraph(
+		ImageTitleSTART.image.x, ImageTitleSTART.image.y,
+		ImageTitleSTART.rate,
+		ImageTitleSTART.angle,
+		ImageTitleSTART.image.handle, TRUE);
+
+	DrawRotaGraph(
+		ImageTitleRNK.image.x, ImageTitleRNK.image.y,
+		ImageTitleRNK.rate,
+		ImageTitleRNK.angle,
+		ImageTitleRNK.image.handle, TRUE);
+
+	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
+
+
+	if (Kchoice == TRUE) {
+		ImageTitleSTART.rate = 1.2;
+		ImageTitleRNK.rate = 1.0;
+		ImageChoiser.x = ImageTitleSTART.image.x + ImageTitleSTART.image.width / 2 + 32;
+		ImageChoiser.y = ImageTitleSTART.image.y + ImageTitleSTART.image.height / 4 - ImageChoiser.height / 2;
+	}
+	else {
+		ImageTitleSTART.rate = 1.0;
+		ImageTitleRNK.rate = 1.2;
+		ImageChoiser.x = ImageTitleRNK.image.x + ImageTitleRNK.image.width / 2 + 32;
+		ImageChoiser.y = ImageTitleRNK.image.y + ImageTitleRNK.image.height / 4 - ImageChoiser.height / 2;
+	}
+
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
+		if (Kchoice == TRUE)
+			ImageTitleSTART.rate = 0.8;
+		else
+			ImageTitleRNK.rate = 0.8;
+		ImageChoiser.x -= 32;
+	}
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+		ImageTitleSTART.rate = 1.0;
+		ImageTitleRNK.rate = 1.0;
+		ImageChoiser.x += 32;
+	}
+
 }
