@@ -110,6 +110,7 @@ enum GAME_MAP_KIND
 	l = 4,  //動く壁
 	t = 9,	//通路
 	s = 5,	//スタート
+	c = 6,  //コイン
 	g = 3	//アイテム
 };	
 
@@ -122,6 +123,7 @@ enum GAME_MAP_KIND_PR
 	lp = 4,  //動く壁
 	tp = 9,	//通路
 	sp = 5,	//スタート
+	cp = 6,  //コイン
 	gp = 3	//アイテム
 };
 
@@ -269,7 +271,7 @@ int DrCharCnt = 0;
 
 int ExDrawCnt = 1;
 
-int ITEMCnt = 0;
+int ITEMCnt = 0, COINCnt = 0;
 
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
@@ -342,7 +344,7 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
-		k,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
+		k,l,t,t,t,k,t,k,t,c,l,t,l,t,l,t,l,t,	// 3
 		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
 		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
@@ -353,12 +355,12 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 
 //マップ初期化用のバックアップ
 GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
-	//  0,1,2,3,4,5,6,7,8,9,0,1,2,
+	//  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7
 		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
 		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
 		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
-		kp,lp,tp,tp,tp,kp,tp,kp,tp,tp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
-		kp,tp,tp,lp,tp,kp,sp,kp,lp,lp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
+		kp,lp,tp,tp,tp,kp,tp,kp,tp,cp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
+		kp,tp,tp,lp,tp,kp,sp,kp,lp,kp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
 		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
 		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
 		kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
@@ -1308,14 +1310,25 @@ VOID MY_PLAY_PROC(VOID)
 	{
 		int x = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
 		int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
-		if (map[y][x].kind == g)
+		switch (map[y][x].kind)
 		{
-
-		//アイテム取得とアイテムの当たり判定削除
+		case g:
+			//アイテム取得とアイテムの当たり判定削除
 			mapData[y][x] = t;
 			map[y][x].kind = t;
 			ITEMCnt++;
+			break;
+		case c:
+			//コイン取得とコインの当たり判定削除
+			mapData[y][x] = t;
+			map[y][x].kind = t;
+			COINCnt++;
+			break;
+		default:
+			break;
+			
 		}
+	
 	//プレイヤー前の位置書き換え
 		player.image.x = player.CenterX - player.image.width / 2;
 		player.image.y = player.CenterY - player.image.height / 2;
@@ -1416,7 +1429,7 @@ VOID MY_PLAY_DRAW(VOID)
 	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
 	DrawString((GAME_WIDTH - StrWidth )/ 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
 	SetFontSize(20);
-	DrawString((GAME_WIDTH - GetDrawStringWidth("※制作途中のため「画面端に出る」もしくは「停止画面」から脱出してください※", -1)) / 2, GAME_HEIGHT - 64, "※制作途中のため画面端に出るもしくは停止画面からゴールへ行ってください※", GetColor(255, 0, 0));
+	//DrawString((GAME_WIDTH - GetDrawStringWidth("※制作途中のため「画面端に出る」もしくは「停止画面」から脱出してください※", -1)) / 2, GAME_HEIGHT - 64, "※制作途中のため画面端に出るもしくは停止画面からゴールへ行ってください※", GetColor(255, 0, 0));
 	return;
 }
 
@@ -1490,6 +1503,7 @@ VOID MY_END_PROC(VOID)
 VOID MY_END_DRAW(VOID)
 {
 	static float Score = 0;
+	static float TIMEScore = 0, COINScore = 0;
 	MY_PLAY_DRAW();
 
 	switch (GameEndKind)
@@ -1511,7 +1525,8 @@ VOID MY_END_DRAW(VOID)
 
 	SetFontSize(64);
 
-	Score = time * 10 + mintime * 600 + 20;
+	TIMEScore = time * 10 + mintime * 600 + 20;
+	COINScore = COINCnt / 10 * 
 
 	DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("スコア: %.2f", Score, -1)) / 2, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "スコア: %.2f", Score);
 
@@ -1531,31 +1546,6 @@ VOID MY_END_DRAW(VOID)
 		ImageEndROGO.rate = 1.0;
 	}
 	return;
-}
-
-VOID MY_RNKING(VOID)
-{
-	MY_RNKING_PROC();
-	MY_RNKING_DRAW();
-	return;
-}
-
-VOID MY_RNKING_PROC(VOID)
-{
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
-
-		SetMouseDispFlag(TRUE);
-
-		GameScene = GAME_SCENE_START;
-
-		return;
-	}
-}
-
-VOID MY_RNKING_DRAW(VOID)
-{
-	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
-
 }
 
 BOOL MY_LOAD_IMAGE(VOID)
@@ -2282,5 +2272,30 @@ VOID MY_STOP_DRAW(VOID)
 		ImageTitleRNK.rate = 1.0;
 		ImageChoiser.x += 32;
 	}
+
+}
+//ランキング
+VOID MY_RNKING(VOID)
+{
+	MY_RNKING_PROC();
+	MY_RNKING_DRAW();
+	return;
+}
+
+VOID MY_RNKING_PROC(VOID)
+{
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+
+		SetMouseDispFlag(TRUE);
+
+		GameScene = GAME_SCENE_START;
+
+		return;
+	}
+}
+
+VOID MY_RNKING_DRAW(VOID)
+{
+	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 
 }
