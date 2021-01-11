@@ -1,7 +1,9 @@
 #include "DxLib.h"
 #include "resource.h"
 #include <random>
+#include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define GAME_WIDTH     960
 #define GAME_HEIGHT    576
@@ -34,11 +36,14 @@
 #define IMAGE_BACK_ENDC_PATH	  TEXT(".\\IMAGE\\背景CONP.png")
 #define IMAGE_BACK_ENDF_PATH	  TEXT(".\\IMAGE\\背景FALL.png")
 
-#define IMAGE_CHAR_PATH       TEXT(".\\IMAGE\\char1.png")
+#define IMAGE_CHAR_PATH       TEXT(".\\IMAGE\\player.png")
 #define IMAGE_CHAR_1_PATH	  TEXT(".\\IMAGE\\char2.png")
 #define IMAGE_CHAR_2_PATH	  TEXT(".\\IMAGE\\char3.png")
 
-#define IMAGE_CHAR_NUM			3	
+#define IMAGE_CHAR_NUM			12	
+#define WORK_CHAR_NUM			3	
+#define CHAR_DIV_TATE		3
+#define CHAR_DIV_YOKO		4
 
 #define IMAGE_EXPO_BACK TEXT(".\\IMAGE\\説明背景.png")
 #define IMAGE_EX_NEWS1 TEXT(".\\IMAGE\\ルー説.png")
@@ -97,9 +102,15 @@
 
 #define GOAL_ERR_TITLE		TEXT("ゴール位置エラー")
 #define GOAL_ERR_CAPTION	TEXT("ゴール位置が決まっていません")
+//
+//#define MOUSE_R_CLICK_TITLE		TEXT("ゲーム中断")
+//#define MOUSE_R_CLICK_CAPTION	TEXT("ゲームを中断し、脱出しますか？")
 
-#define MOUSE_R_CLICK_TITLE		TEXT("ゲーム中断")
-#define MOUSE_R_CLICK_CAPTION	TEXT("ゲームを中断し、脱出しますか？")
+#define FILE_OPEN_TITLE		TEXT("ファイルオープンエラー")
+#define FILE_OPEN_CAPTION	TEXT("ファイルオープンエラー")
+#define FILE_RNK_PATH		TEXT("rnkingFile.txt")
+
+#define FILE_NUM 5
 
 enum GAME_MAP_KIND
 {
@@ -114,18 +125,18 @@ enum GAME_MAP_KIND
 	g = 3	//アイテム
 };	
 
-enum GAME_MAP_KIND_PR
-{
-	np = -1,	//(NONE)未定
-	kp = 0,	//壁
-	mp = 1,  //壁２
-	rp = 2,  //壁３
-	lp = 4,  //動く壁
-	tp = 9,	//通路
-	sp = 5,	//スタート
-	cp = 6,  //コイン
-	gp = 3	//アイテム
-};
+//enum GAME_MAP_KIND_PR
+//{
+//	np = -1,	//(NONE)未定
+//	kp = 0,	//壁
+//	mp = 1,  //壁２
+//	rp = 2,  //壁３
+//	lp = 4,  //動く壁
+//	tp = 9,	//通路
+//	sp = 5,	//スタート
+//	cp = 6,  //コイン
+//	gp = 3	//アイテム
+//};
 
 enum GAME_SCENE {
 	GAME_SCENE_START,
@@ -182,6 +193,7 @@ typedef struct STRUCT_IMAGE
 {
 	char path[PATH_MAX];
 	int handle;
+	int handle2[IMAGE_CHAR_NUM];
 	int x;
 	int y;
 	int width;
@@ -250,7 +262,6 @@ typedef struct STRUCT_MAP_IMAGE
 typedef struct STRUCT_MAP
 {
 	GAME_MAP_KIND kind;
-	GAME_MAP_KIND_PR kind2;
 	int x;
 	int y;
 	int width;
@@ -276,11 +287,13 @@ int ITEMCnt = 0, COINCnt = 0;
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
 
+
 char direc; //向きのやつ
 
 int timeCnt = 0;
 float time = 0;
 float mintime = 0;
+float fsArry[]{ 0,0,0,0,0 };
 
 float MAPmoveCnt = 0;
 
@@ -294,16 +307,15 @@ int GameEndKind;
 RECT itemRect = { -1,-1, -1, -1 };
 
 BOOL MY_KEY_TF = TRUE;
-
-bool Kchoice = TRUE;
-
+BOOL Kchoice = TRUE;
 BOOL MY_CHAR_MOVE_ST = TRUE;
-
 BOOL MY_MAP_RELOAD = TRUE;
-
 BOOL FALL_RESON = FALSE;
-
 BOOL CLICK_M = TRUE;
+BOOL RANKINGflag = TRUE;
+
+FILE* fp = NULL, * fp2 = NULL;
+errno_t error, error2;
 
 IMAGE_BACK ImageBack;
 IMAGE_BACK ImageBackEND;
@@ -331,6 +343,7 @@ IMAGE_WORK ImageWork;
 
 IMAGE_WORK ImageChar[IMAGE_CHAR_NUM];
 
+CHARA playerSt;
 CHARA player;
 
 MUSIC BGM;
@@ -354,17 +367,18 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 };
 
 //マップ初期化用のバックアップ
-GAME_MAP_KIND_PR mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
+GAME_MAP_KIND mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 	//  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7
-		mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,mp,	// 0
-		kp,tp,tp,tp,lp,tp,tp,lp,tp,tp,lp,kp,tp,tp,lp,kp,tp,tp,	// 1
-		kp,tp,lp,tp,tp,lp,tp,lp,tp,kp,tp,tp,lp,tp,tp,tp,lp,tp,	// 2
-		kp,lp,tp,tp,tp,kp,tp,kp,tp,cp,lp,tp,lp,tp,lp,tp,lp,tp,	// 3
-		kp,tp,tp,lp,tp,kp,sp,kp,lp,kp,kp,lp,kp,tp,kp,lp,kp,tp,	// 4
-		kp,lp,lp,tp,lp,tp,tp,kp,tp,tp,lp,tp,kp,tp,lp,tp,kp,tp,	// 5
-		kp,tp,tp,kp,tp,lp,tp,kp,kp,tp,gp,tp,kp,gp,gp,tp,kp,gp,	// 6
-		kp,tp,tp,kp,tp,kp,tp,lp,tp,tp,lp,tp,tp,tp,lp,tp,tp,tp,	// 7
-		rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,rp,	// 8
+		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
+		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
+		k,l,t,t,t,k,t,k,t,c,l,t,l,t,l,t,l,t,	// 3
+		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
+		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
+		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
+		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
+
 
 };
 
@@ -449,6 +463,7 @@ char* TEXT_DRAW(int);
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
 VOID GAME_STR(VOID);
+float* RANKIG_WRITE(float[], float);
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -800,6 +815,7 @@ VOID MY_START_PROC(VOID)
 		MusicPass = TRUE;
 		CLICK_M = TRUE;
 		GameScene = GAME_SCENE_EXPO;
+
 		MY_MAP_RELOAD = TRUE;
 		return;
 	}
@@ -864,21 +880,24 @@ VOID MY_START_PROC(VOID)
 		}
 		else if (ImageChar[0].IsDraw == TRUE || ImageChar[2].IsDraw == TRUE)//1
 		{
-			if (DrCharCnt == 1)
-			ImageChar[0].IsDraw = FALSE;
+			switch (DrCharCnt)
+			{
+			case 1:
+				ImageChar[0].IsDraw = FALSE;
+				break;
 
-			if (DrCharCnt == 0)
+			case 0:
 				ImageChar[2].IsDraw = FALSE;
-
+				break;
+			}
 			ImageChar[1].IsDraw = TRUE;
 		}
 		
-		for (int num = 0; num < IMAGE_CHAR_NUM; num++) {
-			ImageChar[num].image.x += 16;
 
-			if (ImageChar[num].image.x > GAME_WIDTH) {
-				ImageChar[num].image.x -= GAME_WIDTH + player.image.width;
-			}
+		playerSt.image.x += 16;
+
+		if (playerSt.image.x > GAME_WIDTH) {
+			playerSt.image.x -= GAME_WIDTH + player.image.width;
 		}
 		ImageWork.Cnt = 0;
 
@@ -888,7 +907,7 @@ VOID MY_START_PROC(VOID)
 	timeCnt = 0;
 	time = 0;
 	mintime = 0;
-
+	RANKINGflag = TRUE;
 	return;
 }
 
@@ -896,11 +915,12 @@ VOID MY_START_DRAW(VOID)
 {
 	DrawGraph(ImageTitleBK.x, ImageTitleBK.y, ImageTitleBK.handle, TRUE);
 
-	for (int num = 0; num < IMAGE_CHAR_NUM; num++)
+	for (int num = 0, Pnum = 0; num < WORK_CHAR_NUM; num++)
 	{
 		if (ImageChar[num].IsDraw == TRUE)
 		{
-			DrawGraph(ImageChar[num].image.x, ImageChar[num].image.y, ImageChar[num].image.handle, TRUE);
+			Pnum = num + 3;
+			DrawGraph(playerSt.image.x, playerSt.image.y, player.image.handle2[Pnum], TRUE);
 		}
 	}
 
@@ -1525,8 +1545,9 @@ VOID MY_END_DRAW(VOID)
 
 	SetFontSize(64);
 
-	TIMEScore = time * 10 + mintime * 600 + 20;
-	COINScore = COINCnt / 10 * 
+	TIMEScore = floor(100*(time * 10 + mintime * 600 + 20)) /100;
+	COINScore = COINCnt / 10 * 100;
+	Score = TIMEScore + COINScore;
 
 	DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("スコア: %.2f", Score, -1)) / 2, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "スコア: %.2f", Score);
 
@@ -1544,6 +1565,12 @@ VOID MY_END_DRAW(VOID)
 	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
 		FALL_RESON = FALSE;
 		ImageEndROGO.rate = 1.0;
+	}
+//ランキング描きこみ処理
+	if (RANKINGflag)
+	{
+		float *ptr = RANKIG_WRITE(fsArry, Score);
+		RANKINGflag = FALSE;
 	}
 	return;
 }
@@ -1632,33 +1659,30 @@ BOOL MY_LOAD_IMAGE(VOID)
 	strcpy_s(ImageChar[1].image.path, IMAGE_CHAR_1_PATH);		//パスの設定(背景画像反転)
 	strcpy_s(ImageChar[2].image.path, IMAGE_CHAR_2_PATH);			//パスの設定
 
-	for (int num = 0; num < IMAGE_CHAR_NUM; num++)
-	{
-		ImageChar[num].image.handle = LoadGraph(ImageChar[num].image.path);	//読み込み
-		if (ImageChar[num].image.handle == -1)
-		{
-			//エラーメッセージ表示
-			MessageBox(GetMainWindowHandle(), IMAGE_CHAR_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-			return FALSE;
-		}
-		//画像の幅と高さを取得
-		GetGraphSize(ImageChar[num].image.handle, &ImageChar[num].image.width, &ImageChar[num].image.height);
-		ImageWork.Cnt = 0.0;
-		ImageWork.CntMAX = IMAGE_TITLE_WORK_CNT_MAX;
 
-	}
 //キャラの設定
-	ImageChar[0].image.x = GAME_WIDTH / 2 - ImageChar[0].image.width / 2;	//左右中央揃え
-	ImageChar[0].image.y = GAME_HEIGHT - ImageChar[0].image.height;			//yは原点から
-	ImageChar[0].IsDraw = FALSE;
+	int charRes = LoadDivGraph(
+		IMAGE_CHAR_PATH,
+		IMAGE_CHAR_NUM, CHAR_DIV_TATE, CHAR_DIV_YOKO,
+		MAP_DIV_WIDTH, MAP_DIV_HEIGHT,
+		&player.image.handle2[0]);
 
-	ImageChar[1].image.x = GAME_WIDTH / 2 - ImageChar[1].image.width / 2;	//左右中央揃え
-	ImageChar[1].image.y = GAME_HEIGHT - ImageChar[1].image.height;			//yは原点から
-	ImageChar[1].IsDraw = FALSE;
-
-	ImageChar[2].image.x = GAME_WIDTH / 2 - ImageChar[2].image.width / 2;	//左右中央揃え
-	ImageChar[2].image.y = GAME_HEIGHT - ImageChar[2].image.height;			//yは原点から
-	ImageChar[2].IsDraw = FALSE;
+	if (charRes == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_CHAR_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	//画像の幅と高さを取得
+	GetGraphSize(player.image.handle2[0], &player.image.width, &player.image.height);
+	ImageWork.Cnt = 0.0;
+	ImageWork.CntMAX = IMAGE_TITLE_WORK_CNT_MAX;
+	for (int imageCharNUM = 0; imageCharNUM < WORK_CHAR_NUM; imageCharNUM++)
+	{
+		ImageChar[imageCharNUM].IsDraw = FALSE;
+	
+	}
+	playerSt.image.x = GAME_WIDTH / 2 - player.image.width / 2;	//左右中央揃え
+	playerSt.image.y = GAME_HEIGHT - player.image.height;			//yは原点から
 
 //エンドフォール
 	strcpy_s(ImageEndFAIL.image.path, IMAGE_END_FAIL_PATH);
@@ -1995,38 +2019,28 @@ CHAR MY_DIRECTION(double x, double y, double oldx, double oldy)
 
 VOID MAP_LOAD(VOID)
 {
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			if (mapData[tate][yoko] == g)
-			{
-				itemRect.left = mapChip.width * yoko;
-				itemRect.top = mapChip.height * tate;
-				itemRect.right = mapChip.width * (yoko + 1);
-				itemRect.bottom = mapChip.height * (tate + 1);
-			}
-		}
-	}
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		if (mapData[tate][yoko] == g)
+	//		{
+	//			itemRect.left = mapChip.width * yoko;
+	//			itemRect.top = mapChip.height * tate;
+	//			itemRect.right = mapChip.width * (yoko + 1);
+	//			itemRect.bottom = mapChip.height * (tate + 1);
+	//		}
+	//	}
+	//}
 
 	if (MY_MAP_RELOAD == TRUE) {
 		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 		{
 			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 			{
-				if (mapDataPR[tate][yoko] == lp) {
-					mapData[tate][yoko] = l;
-					map[tate][yoko].kind = l;
-				}
-				else if (mapDataPR[tate][yoko] == tp) {
-					mapData[tate][yoko] = t;
-					map[tate][yoko].kind = t;
-				}
-				else if (mapDataPR[tate][yoko] == gp) {
-					mapData[tate][yoko] = g;
-					map[tate][yoko].kind = g;
-				}
-			}
+					mapData[tate][yoko] = mapDataPR[tate][yoko];
+					map[tate][yoko].kind = mapDataPR[tate][yoko];
+			}		
 		}
 	//位置初期化
 		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -2150,6 +2164,47 @@ VOID ROCKETMAP(VOID)
 	}
 	return;
 }
+
+//スコア書き込み
+float* RANKIG_WRITE(float arr[], float s)
+{
+	int fCnt = 0;
+	float temp = 0;
+	error = fopen_s(&fp, FILE_RNK_PATH, "r");
+	if(!error && fp != NULL)
+	{
+		if (error == 0)
+		{
+			while (!feof(fp) && fCnt < FILE_NUM) {
+				fscanf_s(fp, "%f", &(arr[fCnt]));
+				fCnt++;
+			}
+		}
+		
+		fclose(fp);
+	}
+	fCnt = 0;
+
+	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
+		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
+		exit(EXIT_FAILURE);
+	}
+	if(!error2 && fp2!= NULL)
+	{
+		for (int i = 0; i < FILE_NUM; i++)
+		{
+			if (arr[i] <= s) {
+				temp = arr[i];
+				arr[i] = s;
+				s = temp;
+			}
+			fprintf(fp2, "%f \n", arr[i]);
+		}
+		fclose(fp2);
+	}
+	return arr;
+}
+
 
 
 //stop画面処理
@@ -2284,6 +2339,7 @@ VOID MY_RNKING(VOID)
 
 VOID MY_RNKING_PROC(VOID)
 {
+
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 
 		SetMouseDispFlag(TRUE);
@@ -2299,3 +2355,5 @@ VOID MY_RNKING_DRAW(VOID)
 	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 
 }
+
+
