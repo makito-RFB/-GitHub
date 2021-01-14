@@ -1,28 +1,28 @@
 ﻿  main.cpp
-C:\github\作品ⅢGitHub\New Road\main.cpp(1097,15): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1106,15): warning C4305: '+=': 'double' から 'float' へ切り詰めます。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1139,36): warning C4244: '+=': 'float' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1140,43): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1141,44): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1248,62): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1331,9): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1549,27): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1554,14): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(1677,18): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2051,36): warning C4244: '+=': 'float' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2052,43): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2053,44): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2094,38): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2096,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2096,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2097,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2108,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2108,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2109,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2109,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2120,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2120,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2121,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2121,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-C:\github\作品ⅢGitHub\New Road\main.cpp(2018): warning C4715: 'MY_DIRECTION': 値を返さないコントロール パスがあります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1106,15): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1115,15): warning C4305: '+=': 'double' から 'float' へ切り詰めます。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1148,36): warning C4244: '+=': 'float' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1149,43): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1150,44): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1257,62): warning C4244: '=': 'float' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1340,9): warning C4244: '初期化中': 'float' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1558,27): warning C4244: '=': 'int' から 'float' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1563,14): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(1694,18): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2068,36): warning C4244: '+=': 'float' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2069,43): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2070,44): warning C4244: '+=': 'float' から 'LONG' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2111,38): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2113,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2113,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2114,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2125,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2125,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2126,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2126,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2137,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2137,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2138,51): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2138,29): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+C:\github\作品ⅢGitHub\New Road\main.cpp(2035): warning C4715: 'MY_DIRECTION': 値を返さないコントロール パスがあります。
   New Road.vcxproj -> C:\github\作品ⅢGitHub\New Road\x64\Debug\New Road.exe

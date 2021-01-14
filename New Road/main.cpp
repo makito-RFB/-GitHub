@@ -1,5 +1,6 @@
 #include "DxLib.h"
 #include "resource.h"
+#include "RnkingRW.hpp"
 #include <random>
 #include <iostream>
 #include <stdlib.h>
@@ -269,6 +270,8 @@ typedef struct STRUCT_MAP
 	BOOL IsDraw;
 }MAP;
 
+
+
 int StartTimeFps;
 int CountFps;
 float CalcFps;
@@ -314,8 +317,8 @@ BOOL FALL_RESON = FALSE;
 BOOL CLICK_M = TRUE;
 BOOL RANKINGflag = TRUE;
 
-FILE* fp = NULL, * fp2 = NULL;
-errno_t error, error2;
+//FILE* fp = NULL, * fp2 = NULL;
+//errno_t error, error2;
 
 IMAGE_BACK ImageBack;
 IMAGE_BACK ImageBackEND;
@@ -814,6 +817,12 @@ VOID MY_START_PROC(VOID)
 		//GameScene = GAME_SCENE_PLAY;
 		MusicPass = TRUE;
 		CLICK_M = TRUE;
+
+		//タイマ初期化
+		timeCnt = 0;
+		time = 0;
+		mintime = 0;
+
 		GameScene = GAME_SCENE_EXPO;
 
 		MY_MAP_RELOAD = TRUE;
@@ -903,11 +912,11 @@ VOID MY_START_PROC(VOID)
 
 	}
 
-	//タイマ初期化
-	timeCnt = 0;
-	time = 0;
-	mintime = 0;
-	RANKINGflag = TRUE;
+	if (!RANKINGflag)
+	{
+		RANKINGflag = TRUE;
+	}
+
 	return;
 }
 
@@ -1569,7 +1578,15 @@ VOID MY_END_DRAW(VOID)
 //ランキング描きこみ処理
 	if (RANKINGflag)
 	{
-		float *ptr = RANKIG_WRITE(fsArry, Score);
+		R_WRITE ranking;
+		float* ptr = ranking.Rread(fsArry);
+
+		float* ptr2 = ranking.Rwrite(ptr, Score);
+		/*for (int i = 0; i < FILE_NUM; i++)
+		{
+			fsArry[i] = ptr2[i];
+		}*/
+		//float *ptr = RANKIG_WRITE(fsArry, Score);
 		RANKINGflag = FALSE;
 	}
 	return;
@@ -2166,44 +2183,44 @@ VOID ROCKETMAP(VOID)
 }
 
 //スコア書き込み
-float* RANKIG_WRITE(float arr[], float s)
-{
-	int fCnt = 0;
-	float temp = 0;
-	error = fopen_s(&fp, FILE_RNK_PATH, "r");
-	if(!error && fp != NULL)
-	{
-		if (error == 0)
-		{
-			while (!feof(fp) && fCnt < FILE_NUM) {
-				fscanf_s(fp, "%f", &(arr[fCnt]));
-				fCnt++;
-			}
-		}
-		
-		fclose(fp);
-	}
-	fCnt = 0;
-
-	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
-		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
-		exit(EXIT_FAILURE);
-	}
-	if(!error2 && fp2!= NULL)
-	{
-		for (int i = 0; i < FILE_NUM; i++)
-		{
-			if (arr[i] <= s) {
-				temp = arr[i];
-				arr[i] = s;
-				s = temp;
-			}
-			fprintf(fp2, "%f \n", arr[i]);
-		}
-		fclose(fp2);
-	}
-	return arr;
-}
+//float* RANKIG_WRITE(float arr[], float s)
+//{
+//	int fCnt = 0;
+//	float temp = 0;
+//	error = fopen_s(&fp, FILE_RNK_PATH, "r");
+//	if(!error && fp != NULL)
+//	{
+//		if (error == 0)
+//		{
+//			while (!feof(fp) && fCnt < FILE_NUM) {
+//				fscanf_s(fp, "%f", &(arr[fCnt]));
+//				fCnt++;
+//			}
+//		}
+//		
+//		fclose(fp);
+//	}
+//	fCnt = 0;
+//
+//	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
+//		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
+//		exit(EXIT_FAILURE);
+//	}
+//	if(!error2 && fp2!= NULL)
+//	{
+//		for (int i = 0; i < FILE_NUM; i++)
+//		{
+//			if (arr[i] <= s) {
+//				temp = arr[i];
+//				arr[i] = s;
+//				s = temp;
+//			}
+//			fprintf(fp2, "%f \n", arr[i]);
+//		}
+//		fclose(fp2);
+//	}
+//	return arr;
+//}
 
 
 
@@ -2340,6 +2357,7 @@ VOID MY_RNKING(VOID)
 VOID MY_RNKING_PROC(VOID)
 {
 
+
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 
 		SetMouseDispFlag(TRUE);
@@ -2352,7 +2370,25 @@ VOID MY_RNKING_PROC(VOID)
 
 VOID MY_RNKING_DRAW(VOID)
 {
+	static int fSize = 0;
 	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+	if (RANKINGflag)
+	{
+		R_WRITE rankingWatch;
+		float* ptrW = rankingWatch.Rread(fsArry);
+		for (int i = 0; i < FILE_NUM; i++)
+		{
+			fsArry[i] = ptrW[i];
+		}
+		RANKINGflag = FALSE;
+	}
+	fSize = 64;
+	for (int i = 0; i < FILE_NUM; i++)
+	{
+		SetFontSize(fSize);
+		DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("%d位: %.2f", i+1, fsArry[i], -1)) / 2, GAME_HEIGHT/9*2 + 64 * i, GetColor(0, 0, 0), "%d位: %.2f", i+1, fsArry[i]);
+		fSize -= 4;
+	}
 
 }
 
