@@ -51,7 +51,8 @@
 #define IMAGE_EX_NEWS2 TEXT(".\\IMAGE\\操説.png")
 
 #define IMAGE_RNK_BACK TEXT(".\\IMAGE\\RNK背景.png")
-
+#define IMAGE_RNK_BACK_NONE TEXT(".\\IMAGE\\RNK背景none.png")
+#define IMAGE_RNK_SHADOW TEXT(".\\IMAGE\\RNKkage.png")
 
 #define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
 
@@ -321,6 +322,9 @@ BOOL FALL_RESON = FALSE;
 BOOL CLICK_M = TRUE;
 BOOL RANKINGflag = TRUE;
 
+BOOL COINflag = FALSE;
+
+
 //FILE* fp = NULL, * fp2 = NULL;
 //errno_t error, error2;
 
@@ -331,6 +335,8 @@ IMAGE_BACK ImageShadow;
 
 IMAGE ImageTitleBK;
 IMAGE RNKBACK;
+IMAGE RNKBACKNone;
+IMAGE RNKShadow;
 
 IMAGE_ROTA ImageTitleROGO;
 
@@ -371,9 +377,9 @@ GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
 		k,l,t,t,t,k,t,k,t,c,l,t,l,t,l,t,l,t,	// 3
-		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		k,t,t,l,t,k,s,k,l,k,l,l,k,t,c,l,k,t,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
-		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
+		k,t,c,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
 		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
 
@@ -386,12 +392,11 @@ GAME_MAP_KIND mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
 		k,l,t,t,t,k,t,k,t,c,l,t,l,t,l,t,l,t,	// 3
-		k,t,t,l,t,k,s,k,l,k,l,l,k,t,l,l,k,t,	// 4
+		k,t,t,l,t,k,s,k,l,k,l,l,k,t,c,l,k,t,	// 4
 		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
-		k,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
+		k,t,c,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
 		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
-
 
 };
 
@@ -400,11 +405,11 @@ GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
 		t,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
 		t,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
-		t,l,t,t,t,k,t,k,t,t,l,t,l,t,l,t,l,t,	// 3
+		t,l,t,t,t,k,t,k,t,t,l,t,c,t,l,t,l,t,	// 3
 		t,t,k,t,t,t,l,t,t,t,l,t,t,t,t,t,k,t,	// 4
 		t,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
 		t,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
-		t,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
+		t,t,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
 };
 
@@ -1362,6 +1367,11 @@ VOID MY_PLAY_PROC(VOID)
 			mapData[y][x] = t;
 			map[y][x].kind = t;
 			COINCnt++;
+			if (!COINflag)
+			{
+				COINflag = TRUE;
+
+			}
 			break;
 		default:
 			break;
@@ -1400,6 +1410,7 @@ VOID MY_PLAY_PROC(VOID)
 VOID MY_PLAY_DRAW(VOID)
 {
 	static int StrWidth = 0;
+	static int CdrawCnt = 0;
 //背景スクロール
 	MAP_DRAW(ImageBack);
 	//DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
@@ -1437,37 +1448,49 @@ VOID MY_PLAY_DRAW(VOID)
 	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
 	//当たり判定の描画（デバッグ用）
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			//壁ならば
-			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-			}
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		//壁ならば
+	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+	//		}
 
-			//通路ならば
-			if (mapData[tate][yoko] == t)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-			}
-		}
-	}
+	//		//通路ならば
+	//		if (mapData[tate][yoko] == t)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+	//		}
+	//	}
+	//}
 
-	////ゴールの描画（デバッグ用）
-	//DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+	//////ゴールの描画（デバッグ用）
+	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
 
 
-	//当たり判定の描画（デバッグ用）
-	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	////当たり判定の描画（デバッグ用）
+	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
 	SetFontSize(30);
 	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
 	DrawString((GAME_WIDTH - StrWidth )/ 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
-	SetFontSize(20);
+	SetFontSize(40);
+	if (COINflag)
+	{
+		if (CdrawCnt < GAME_FPS / 2) {
+			DrawString(10, 80- CdrawCnt, "1C Get!!", GetColor(255, 255, 255));
+			CdrawCnt++;
+		}
+		else
+		{
+			CdrawCnt = 0;
+			COINflag = FALSE;
+		}
+	}
 	//DrawString((GAME_WIDTH - GetDrawStringWidth("※制作途中のため「画面端に出る」もしくは「停止画面」から脱出してください※", -1)) / 2, GAME_HEIGHT - 64, "※制作途中のため画面端に出るもしくは停止画面からゴールへ行ってください※", GetColor(255, 0, 0));
 	return;
 }
@@ -1720,6 +1743,31 @@ BOOL MY_LOAD_IMAGE(VOID)
 	RNKBACK.x = GAME_WIDTH / 2 - RNKBACK.width / 2;
 	RNKBACK.y = GAME_HEIGHT / 2 - RNKBACK.height / 2;
 
+//ランキング背景none
+	strcpy_s(RNKBACKNone.path, IMAGE_RNK_BACK_NONE);
+	RNKBACKNone.handle = LoadGraph(RNKBACKNone.path);
+	if (RNKBACKNone.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK_NONE, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(RNKBACKNone.handle, &RNKBACKNone.width, &RNKBACKNone.height);
+	RNKBACKNone.x = GAME_WIDTH / 2 - RNKBACKNone.width / 2;
+	RNKBACKNone.y = GAME_HEIGHT / 2 - RNKBACKNone.height / 2;
+
+	
+//ランキング背景追加影
+	strcpy_s(RNKShadow.path, IMAGE_RNK_SHADOW);
+	RNKShadow.handle = LoadGraph(RNKShadow.path);
+	if (RNKShadow.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_RNK_SHADOW, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(RNKShadow.handle, &RNKShadow.width, &RNKShadow.height);
+	RNKShadow.x = GAME_WIDTH / 2 - RNKShadow.width / 2;
+	RNKShadow.y = GAME_HEIGHT / 2 - RNKShadow.height / 2;
+
 //動く画像（タイトル）
 	strcpy_s(ImageChar[0].image.path, IMAGE_CHAR_PATH);			//パスの設定
 	strcpy_s(ImageChar[1].image.path, IMAGE_CHAR_1_PATH);		//パスの設定(背景画像反転)
@@ -1959,6 +2007,8 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(ImageTitleBK.handle);
 	DeleteGraph(ImageEXPOBK.handle);
 	DeleteGraph(RNKBACK.handle);
+	DeleteGraph(RNKBACKNone.handle);
+	DeleteGraph(RNKShadow.handle);
 	DeleteGraph(ImageTitleROGO.image.handle);
 	DeleteGraph(ImageTitleSTART.image.handle);
 	DeleteGraph(ImageTitleRNK.image.handle);
@@ -2396,6 +2446,9 @@ VOID MY_STOP_DRAW(VOID)
 		ImageSTbROGO.rate = 1.0;
 		ImageChoiser.x += 32;
 	}
+	SetFontSize(30);
+
+	DrawString((GAME_WIDTH - GetDrawStringWidth("_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", -1)) / 2, GAME_HEIGHT - 45, "_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", GetColor(255, 255, 255));
 
 }
 //ランキング
@@ -2422,8 +2475,32 @@ VOID MY_RNKING_PROC(VOID)
 
 VOID MY_RNKING_DRAW(VOID)
 {
+	static BOOL RNKBackDrawFlag = TRUE;
 	static int fSize = 0;
-	DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);
+	static float RBKdrawCnt = 0;
+	if (RNKBackDrawFlag) {
+		if (RBKdrawCnt < (GAME_FPS * 3)) {
+			DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);
+			RBKdrawCnt++;
+		}
+		else
+		{
+			RBKdrawCnt = 0;
+			RNKBackDrawFlag = FALSE;
+		}
+	}
+	else {
+		if (RBKdrawCnt < (GAME_FPS / 2) ) {
+			DrawGraph(RNKBACKNone.x, RNKBACKNone.y, RNKBACKNone.handle, TRUE);
+			RBKdrawCnt++;
+		}
+		else
+		{
+			RBKdrawCnt = 0;
+			RNKBackDrawFlag = TRUE;
+		}
+	}
+
 	if (RANKINGflag)
 	{
 		R_WRITE rankingWatch;
@@ -2441,6 +2518,11 @@ VOID MY_RNKING_DRAW(VOID)
 		DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("%d位: %.2f", i+1, fsArry[i], -1)) / 2, GAME_HEIGHT/9 * 4 + 64 * i, GetColor(0, 0, 0), "%d位: %.2f", i+1, fsArry[i]);
 		fSize -= 4;
 	}
+
+	if(!RNKBackDrawFlag)
+	DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
+
+	
 
 }
 
