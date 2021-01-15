@@ -50,6 +50,8 @@
 #define IMAGE_EX_NEWS1 TEXT(".\\IMAGE\\ルー説.png")
 #define IMAGE_EX_NEWS2 TEXT(".\\IMAGE\\操説.png")
 
+#define IMAGE_RNK_BACK TEXT(".\\IMAGE\\RNK背景.png")
+
 
 #define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
 
@@ -72,6 +74,8 @@
 
 #define IMAGE_END_ROGO_PATH	TEXT(".\\IMAGE\\ENRE.png")
 
+#define IMAGE_ST_E_ROGO_PATH	TEXT(".\\IMAGE\\End_Game.png")
+#define IMAGE_ST_B_ROGO_PATH	TEXT(".\\IMAGE\\Back_Game.png")
 
 #define MUSIC_LOAD_ERR_TITLE	TEXT("音楽読み込みエラー")
 
@@ -326,7 +330,13 @@ IMAGE_BACK ImageBackENDF;
 IMAGE_BACK ImageShadow;
 
 IMAGE ImageTitleBK;
+IMAGE RNKBACK;
+
 IMAGE_ROTA ImageTitleROGO;
+
+IMAGE_BLINK ImageSTeROGO;
+IMAGE_BLINK ImageSTbROGO;
+
 IMAGE_BLINK ImageTitleSTART;
 IMAGE_BLINK ImageTitleRNK;
 
@@ -1646,6 +1656,33 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleRNK.angle = 0;
 	ImageTitleRNK.rate = 1.0;
 
+//ゲームやめるロゴ
+	strcpy_s(ImageSTeROGO.image.path, IMAGE_ST_E_ROGO_PATH);
+	ImageSTeROGO.image.handle = LoadGraph(ImageSTeROGO.image.path);
+	if (ImageSTeROGO.image.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_ST_E_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageSTeROGO.image.handle, &ImageSTeROGO.image.width, &ImageSTeROGO.image.height);
+	ImageSTeROGO.image.x = GAME_WIDTH / 2;
+	ImageSTeROGO.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + 32;
+	ImageSTeROGO.angle = 0;
+	ImageSTeROGO.rate = 1.0;
+//ゲーム戻るロゴ
+	strcpy_s(ImageSTbROGO.image.path, IMAGE_ST_B_ROGO_PATH);
+	ImageSTbROGO.image.handle = LoadGraph(ImageSTbROGO.image.path);
+	if (ImageSTbROGO.image.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_ST_B_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(ImageSTbROGO.image.handle, &ImageSTbROGO.image.width, &ImageSTbROGO.image.height);
+	ImageSTbROGO.image.x = GAME_WIDTH / 2;
+	ImageSTbROGO.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + ImageTitleSTART.image.height + 40;
+	ImageSTbROGO.angle = 0;
+	ImageSTbROGO.rate = 1.0;
+
 //選択印
 	strcpy_s(ImageChoiser.path, IMAGE_TITLE_CHI);
 	ImageChoiser.handle = LoadGraph(ImageChoiser.path);
@@ -1670,6 +1707,18 @@ BOOL MY_LOAD_IMAGE(VOID)
 	GetGraphSize(ImageEXPOBK.handle, &ImageEXPOBK.width, &ImageEXPOBK.height);
 	ImageEXPOBK.x = GAME_WIDTH / 2 - ImageEXPOBK.width / 2;
 	ImageEXPOBK.y = GAME_HEIGHT / 2 - ImageEXPOBK.height / 2;
+
+//ランキング背景
+	strcpy_s(RNKBACK.path, IMAGE_RNK_BACK);
+	RNKBACK.handle = LoadGraph(RNKBACK.path);
+	if (RNKBACK.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+	GetGraphSize(RNKBACK.handle, &RNKBACK.width, &RNKBACK.height);
+	RNKBACK.x = GAME_WIDTH / 2 - RNKBACK.width / 2;
+	RNKBACK.y = GAME_HEIGHT / 2 - RNKBACK.height / 2;
 
 //動く画像（タイトル）
 	strcpy_s(ImageChar[0].image.path, IMAGE_CHAR_PATH);			//パスの設定
@@ -1906,12 +1955,15 @@ VOID MY_DELETE_IMAGE(VOID)
 	}
 
 	DeleteGraph(player.image.handle);
-
+	
 	DeleteGraph(ImageTitleBK.handle);
 	DeleteGraph(ImageEXPOBK.handle);
+	DeleteGraph(RNKBACK.handle);
 	DeleteGraph(ImageTitleROGO.image.handle);
 	DeleteGraph(ImageTitleSTART.image.handle);
 	DeleteGraph(ImageTitleRNK.image.handle);
+	DeleteGraph(ImageSTeROGO.image.handle);
+	DeleteGraph(ImageSTbROGO.image.handle);
 	DeleteGraph(ImageEndFAIL.image.handle);
 	DeleteGraph(ImageEndWD.image.handle);
 	DeleteGraph(ImageEndROGO.image.handle);
@@ -2305,43 +2357,43 @@ VOID MY_STOP_DRAW(VOID)
 	DrawGraph(ImageTitleROGO.image.x, ImageTitleROGO.image.y, ImageTitleROGO.image.handle, TRUE);
 
 	DrawRotaGraph(
-		ImageTitleSTART.image.x, ImageTitleSTART.image.y,
-		ImageTitleSTART.rate,
-		ImageTitleSTART.angle,
-		ImageTitleSTART.image.handle, TRUE);
+		ImageSTeROGO.image.x, ImageSTeROGO.image.y,
+		ImageSTeROGO.rate,
+		ImageSTeROGO.angle,
+		ImageSTeROGO.image.handle, TRUE);
 
 	DrawRotaGraph(
-		ImageTitleRNK.image.x, ImageTitleRNK.image.y,
-		ImageTitleRNK.rate,
-		ImageTitleRNK.angle,
-		ImageTitleRNK.image.handle, TRUE);
+		ImageSTbROGO.image.x, ImageSTbROGO.image.y,
+		ImageSTbROGO.rate,
+		ImageSTbROGO.angle,
+		ImageSTbROGO.image.handle, TRUE);
 
 	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
 
 
 	if (Kchoice == TRUE) {
-		ImageTitleSTART.rate = 1.2;
-		ImageTitleRNK.rate = 1.0;
-		ImageChoiser.x = ImageTitleSTART.image.x + ImageTitleSTART.image.width / 2 + 32;
-		ImageChoiser.y = ImageTitleSTART.image.y + ImageTitleSTART.image.height / 4 - ImageChoiser.height / 2;
+		ImageSTeROGO.rate = 1.2;
+		ImageSTbROGO.rate = 1.0;
+		ImageChoiser.x = ImageSTeROGO.image.x + ImageSTeROGO.image.width / 2 + 32;
+		ImageChoiser.y = ImageSTeROGO.image.y + ImageSTeROGO.image.height / 4 - ImageChoiser.height / 2;
 	}
 	else {
-		ImageTitleSTART.rate = 1.0;
-		ImageTitleRNK.rate = 1.2;
-		ImageChoiser.x = ImageTitleRNK.image.x + ImageTitleRNK.image.width / 2 + 32;
-		ImageChoiser.y = ImageTitleRNK.image.y + ImageTitleRNK.image.height / 4 - ImageChoiser.height / 2;
+		ImageSTeROGO.rate = 1.0;
+		ImageSTbROGO.rate = 1.2;
+		ImageChoiser.x = ImageSTbROGO.image.x + ImageSTbROGO.image.width / 2 + 32;
+		ImageChoiser.y = ImageSTbROGO.image.y + ImageSTbROGO.image.height / 4 - ImageChoiser.height / 2;
 	}
 
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
 		if (Kchoice == TRUE)
-			ImageTitleSTART.rate = 0.8;
+			ImageSTeROGO.rate = 0.8;
 		else
-			ImageTitleRNK.rate = 0.8;
+			ImageSTbROGO.rate = 0.8;
 		ImageChoiser.x -= 32;
 	}
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
-		ImageTitleSTART.rate = 1.0;
-		ImageTitleRNK.rate = 1.0;
+		ImageSTeROGO.rate = 1.0;
+		ImageSTbROGO.rate = 1.0;
 		ImageChoiser.x += 32;
 	}
 
@@ -2371,7 +2423,7 @@ VOID MY_RNKING_PROC(VOID)
 VOID MY_RNKING_DRAW(VOID)
 {
 	static int fSize = 0;
-	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
+	DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);
 	if (RANKINGflag)
 	{
 		R_WRITE rankingWatch;
@@ -2386,7 +2438,7 @@ VOID MY_RNKING_DRAW(VOID)
 	for (int i = 0; i < FILE_NUM; i++)
 	{
 		SetFontSize(fSize);
-		DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("%d位: %.2f", i+1, fsArry[i], -1)) / 2, GAME_HEIGHT/9*2 + 64 * i, GetColor(0, 0, 0), "%d位: %.2f", i+1, fsArry[i]);
+		DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("%d位: %.2f", i+1, fsArry[i], -1)) / 2, GAME_HEIGHT/9 * 4 + 64 * i, GetColor(0, 0, 0), "%d位: %.2f", i+1, fsArry[i]);
 		fSize -= 4;
 	}
 
