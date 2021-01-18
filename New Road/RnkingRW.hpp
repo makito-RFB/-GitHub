@@ -48,14 +48,14 @@ float* R_WRITE::Rwrite(float arr[], float s)
 	}
 	if (!error2 && fp2 != NULL)
 	{
-		for (int i = 0; i < FILE_NUM; i++)
+		for (int rw = 0; rw < FILE_NUM; rw++)
 		{
-			if (arr[i] <= s) {
-				temp = arr[i];
-				arr[i] = s;
+			if (arr[rw] <= s) {
+				temp = arr[rw];
+				arr[rw] = s;
 				s = temp;
 			}
-			fprintf(fp2, "%f \n", arr[i]);
+			fprintf(fp2, "%f \n", arr[rw]);
 		}
 		fclose(fp2);
 	}
