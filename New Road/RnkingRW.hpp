@@ -15,6 +15,7 @@ class R_WRITE
 public:
 	float* Rread(float arr[]);
 	float* Rwrite(float arr[], float s);
+	void ResetScore();
 private:
 	int fCnt = 0;
 	float temp = 0;
@@ -60,4 +61,21 @@ float* R_WRITE::Rwrite(float arr[], float s)
 		fclose(fp2);
 	}
 	return arr;
+}
+
+void R_WRITE::ResetScore()
+{
+	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
+		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
+		exit(EXIT_FAILURE);
+	}
+	if (!error2 && fp2 != NULL)
+	{
+		for (int rw = 0; rw < FILE_NUM; rw++)
+		{
+			fprintf(fp2, "%f \n", 0);
+		}
+		fclose(fp2);
+	}
+	return;
 }

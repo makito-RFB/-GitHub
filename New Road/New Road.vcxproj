@@ -154,8 +154,10 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="image.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RnkingRW.hpp" />
+    <ClInclude Include="score.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Recource.rc" />

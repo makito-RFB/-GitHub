@@ -1,6 +1,8 @@
 #include "DxLib.h"
 #include "resource.h"
 #include "RnkingRW.hpp"
+#include "image.hpp"
+#include "score.hpp"
 #include <random>
 #include <iostream>
 #include <stdlib.h>
@@ -23,64 +25,25 @@
 #define FONT_TANU_PATH    TEXT(".\\FONT\\TanukiMagic.ttf")
 #define FONT_TANU_NAME    TEXT("たぬき油性マジック")	
 
-//#define FONT_TANU_PATH    TEXT(".\\FONT\\SoukouMincho.ttf")
-//#define FONT_TANU_NAME    TEXT("装甲明朝")	
-
-
 #define FONT_INSTALL_ERR_TITLE	TEXT("フォントインストールエラー")
 #define FONT_CREATE_ERR_TITLE	TEXT("フォント作成エラー")
 
 #define IMAGE_LOAD_ERR_TITLE	TEXT("画像読み込みエラー")
-
-#define IMAGE_BACK_PATH       TEXT(".\\IMAGE\\背景1.png")
-#define IMAGE_SHADOW_PATH       TEXT(".\\IMAGE\\かげ.png")
-#define IMAGE_BACK_ENDC_PATH	  TEXT(".\\IMAGE\\背景CONP.png")
-#define IMAGE_BACK_ENDF_PATH	  TEXT(".\\IMAGE\\背景FALL.png")
-
-#define IMAGE_CHAR_PATH       TEXT(".\\IMAGE\\player.png")
-#define IMAGE_CHAR_1_PATH	  TEXT(".\\IMAGE\\char2.png")
-#define IMAGE_CHAR_2_PATH	  TEXT(".\\IMAGE\\char3.png")
 
 #define IMAGE_CHAR_NUM			12	
 #define WORK_CHAR_NUM			3	
 #define CHAR_DIV_TATE		3
 #define CHAR_DIV_YOKO		4
 
-#define IMAGE_EXPO_BACK TEXT(".\\IMAGE\\説明背景.png")
-#define IMAGE_EX_NEWS1 TEXT(".\\IMAGE\\ルー説.png")
-#define IMAGE_EX_NEWS2 TEXT(".\\IMAGE\\操説.png")
-
-#define IMAGE_RNK_BACK TEXT(".\\IMAGE\\RNK背景.png")
-#define IMAGE_RNK_BACK_NONE TEXT(".\\IMAGE\\RNK背景none.png")
-#define IMAGE_RNK_SHADOW TEXT(".\\IMAGE\\RNKkage.png")
-
-#define IMAGE_STOP_BACK TEXT(".\\IMAGE\\stop背景.png")
-
-#define IMAGE_PLAYER_PATH	TEXT(".\\IMAGE\\ply1.png")
 #define CHAR_DREC_NUM		4
  
 
 #define PLAYER_MOVE_COLLTIME 0.25 //秒
 
-#define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\strat背景.png")
-#define IMAGE_TITLE_ROGO_PATH	TEXT(".\\IMAGE\\rogo2.png")
-#define IMAGE_NEXT_ROGO_PATH		TEXT(".\\IMAGE\\NEXT.png")
-#define IMAGE_TITLE_START_PATH	TEXT(".\\IMAGE\\GAME_start.png")
-#define IMAGE_TITLE_RNK	TEXT(".\\IMAGE\\ranking.png")
-#define IMAGE_TITLE_CHI	TEXT(".\\IMAGE\\Choies.png")
-
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
 
 #define SCROLL_SPEED 1
-
-#define IMAGE_END_FAIL_PATH		TEXT(".\\IMAGE\\失敗.png")
-#define IMAGE_END_WITHDRAWAL_PATH		TEXT(".\\IMAGE\\成功.png")
-
-#define IMAGE_END_ROGO_PATH	TEXT(".\\IMAGE\\ENRE.png")
-
-#define IMAGE_ST_E_ROGO_PATH	TEXT(".\\IMAGE\\End_Game.png")
-#define IMAGE_ST_B_ROGO_PATH	TEXT(".\\IMAGE\\Back_Game.png")
 
 #define MUSIC_LOAD_ERR_TITLE	TEXT("音楽読み込みエラー")
 
@@ -97,8 +60,6 @@
 
 #define GAME_MAP_YOKO_NEW	15	//マップの更新横の数
 
-#define GAME_MAP_PATH			TEXT(".\\IMAGE\\MAP\\map.png")
-
 #define MAP_DIV_WIDTH		64
 #define MAP_DIV_HEIGHT		64
 #define MAP_DIV_TATE		10
@@ -112,15 +73,12 @@
 
 #define GOAL_ERR_TITLE		TEXT("ゴール位置エラー")
 #define GOAL_ERR_CAPTION	TEXT("ゴール位置が決まっていません")
-//
-//#define MOUSE_R_CLICK_TITLE		TEXT("ゲーム中断")
-//#define MOUSE_R_CLICK_CAPTION	TEXT("ゲームを中断し、脱出しますか？")
 
 #define FILE_OPEN_TITLE		TEXT("ファイルオープンエラー")
 #define FILE_OPEN_CAPTION	TEXT("ファイルオープンエラー")
 #define FILE_RNK_PATH		TEXT("rnkingFile.txt")
 
-#define FILE_NUM 5
+#define FILE_NUM	5
 
 enum GAME_MAP_KIND
 {
@@ -135,19 +93,6 @@ enum GAME_MAP_KIND
 	g = 3	//アイテム
 };	
 
-//enum GAME_MAP_KIND_PR
-//{
-//	np = -1,	//(NONE)未定
-//	kp = 0,	//壁
-//	mp = 1,  //壁２
-//	rp = 2,  //壁３
-//	lp = 4,  //動く壁
-//	tp = 9,	//通路
-//	sp = 5,	//スタート
-//	cp = 6,  //コイン
-//	gp = 3	//アイテム
-//};
-
 enum GAME_SCENE {
 	GAME_SCENE_START,
 	GAME_SCENE_EXPO,
@@ -158,21 +103,21 @@ enum GAME_SCENE {
 };
 
 enum GAME_END {
-	GAME_END_COMP,
+	GAME_END_EXIT,
 	GAME_END_FAIL
 };
 
-enum CHARA_SPEED {
-	CHARA_SPEED_LOW = 1,
-	CHARA_SPEED_MIDI = 2,
-	CHARA_SPEED_HIGH = 3
-};
+//enum CHARA_SPEED {
+//	CHARA_SPEED_LOW = 1,
+//	CHARA_SPEED_MIDI = 2,
+//	CHARA_SPEED_HIGH = 3
+//};
 
-enum CHARA_RELOAD {
-	CHARA_RELOAD_LOW = 60,
-	CHARA_RELOAD_MIDI = 30,
-	CHARA_RELOAD_HIGH = 15
-};
+//enum CHARA_RELOAD {
+//	CHARA_RELOAD_LOW = 60,
+//	CHARA_RELOAD_MIDI = 30,
+//	CHARA_RELOAD_HIGH = 15
+//};
 
 typedef struct STRUCT_I_POINT
 {
@@ -279,8 +224,6 @@ typedef struct STRUCT_MAP
 	BOOL IsDraw;
 }MAP;
 
-
-
 int StartTimeFps;
 int CountFps;
 float CalcFps;
@@ -292,21 +235,21 @@ int waitCnt = 0;
 
 int DrCharCnt = 0;
 
-
-
 int ExDrawCnt = 1;
 
-int ITEMCnt = 0, COINCnt = 0;
 
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
 
-
 char direc; //向きのやつ
 
+//タイマースコア関係
+int ITEMCnt = 0, COINCnt = 0;
 int timeCnt = 0;
 float time = 0;
 int mintime = 0;
+float Score = 0;
+
 float fsArry[]{ 0,0,0,0,0 };
 
 float MAPmoveCnt = 0;
@@ -316,8 +259,8 @@ MOUSE mouse;
 FONT FontTanu32;
 
 int GameScene;
-
 int GameEndKind;
+
 RECT itemRect = { -1,-1, -1, -1 };
 
 BOOL MY_KEY_TF = TRUE;
@@ -1193,32 +1136,6 @@ VOID MY_PLAY_PROC(VOID)
 		{
 			StopSoundMem(BGM.handle);
 		}
-		/*iPOINT R_ClickPt = mouse.Point;
-
-		SetMouseDispFlag(TRUE);
-
-		int Ret = MessageBox(GetMainWindowHandle(), MOUSE_R_CLICK_CAPTION, MOUSE_R_CLICK_TITLE, MB_YESNO);
-
-		if (Ret == IDYES)
-		{
-			
-
-			SetMouseDispFlag(TRUE);
-
-			GameEndKind = GAME_END_COMP;
-
-			GameScene = GAME_SCENE_END;
-			return;
-
-		}
-		else if (Ret == IDNO)
-		{
-			SetMousePoint(R_ClickPt.x, R_ClickPt.y);
-
-			SetMouseDispFlag(FALSE);
-		}*/
-
-
 		GameScene = GAME_SCENE_STOP;
 	}
 
@@ -1499,31 +1416,31 @@ VOID MY_PLAY_DRAW(VOID)
 
 	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
-	//当たり判定の描画（デバッグ用）
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			//壁ならば
-			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-			}
-
-			//通路ならば
-			if (mapData[tate][yoko] == t)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-			}
-		}
-	}
-
-	//////ゴールの描画（デバッグ用）
-	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
-
-
 	////当たり判定の描画（デバッグ用）
-	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		//壁ならば
+	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+	//		}
+
+	//		//通路ならば
+	//		if (mapData[tate][yoko] == t)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+	//		}
+	//	}
+	//}
+
+	////////ゴールの描画（デバッグ用）
+	//////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+
+
+	//////当たり判定の描画（デバッグ用）
+	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
@@ -1616,13 +1533,10 @@ VOID MY_END_PROC(VOID)
 
 VOID MY_END_DRAW(VOID)
 {
-	static float Score = 0;
-	static float TIMEScore = 0, COINScore = 0;
-	MY_PLAY_DRAW();
 
 	switch (GameEndKind)
 	{
-	case GAME_END_COMP:
+	case GAME_END_EXIT:
 		DrawGraph(ImageBackEND.image.x, ImageBackEND.image.y, ImageBackEND.image.handle, TRUE);
 
 		DrawGraph(ImageEndWD.image.x, ImageEndWD.image.y, ImageEndWD.image.handle, TRUE);
@@ -1637,13 +1551,10 @@ VOID MY_END_DRAW(VOID)
 		break;
 	}
 
-	SetFontSize(64);
-
-	TIMEScore = floor(100*(time * 10 + mintime * 600 + 20)) /100;
-	COINScore = COINCnt / 10 * 100;
-	Score = TIMEScore + COINScore;
-
-	DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("スコア: %.2f", Score, -1)) / 2, GAME_HEIGHT / 4 * 3, GetColor(255, 255, 255), "スコア: %.2f", Score);
+	DrawScore DScore;
+	//setScore.setS(time, mintime, COINCnt);
+	DScore.drawS(time, mintime, COINCnt);
+	Score = DScore.reS();
 
 	SetFontSize(16.5);
 
@@ -1832,12 +1743,6 @@ BOOL MY_LOAD_IMAGE(VOID)
 	stopBack.x = GAME_WIDTH / 2 - stopBack.width / 2;
 	stopBack.y = GAME_HEIGHT / 2 - stopBack.height / 2;
 
-//動く画像（タイトル）
-	strcpy_s(ImageChar[0].image.path, IMAGE_CHAR_PATH);			//パスの設定
-	strcpy_s(ImageChar[1].image.path, IMAGE_CHAR_1_PATH);		//パスの設定(背景画像反転)
-	strcpy_s(ImageChar[2].image.path, IMAGE_CHAR_2_PATH);			//パスの設定
-
-
 //キャラの設定
 	int charRes = LoadDivGraph(
 		IMAGE_CHAR_PATH,
@@ -1970,19 +1875,19 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 
 //プレイヤーの画像
-	strcpy_s(player.image.path, IMAGE_PLAYER_PATH);
-	player.image.handle = LoadGraph(player.image.path);
-	if (player.image.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_PLAYER_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(player.image.handle, &player.image.width, &player.image.height);
+	//strcpy_s(player.image.path, IMAGE_PLAYER_PATH);
+	//player.image.handle = LoadGraph(player.image.path);
+	//if (player.image.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_PLAYER_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(player.image.handle, &player.image.width, &player.image.height);
 	player.image.x = GAME_WIDTH / 2 - player.image.width / 2;
 	player.image.y = GAME_HEIGHT / 2 - player.image.height / 2;
 	player.CenterX = player.image.x + player.image.width / 2;
 	player.CenterY = player.image.y + player.image.height / 2;
-	player.speed = CHARA_SPEED_LOW;
+	//player.speed = CHARA_SPEED_LOW;
 
 //説明画像１
 	strcpy_s(ImageExNews1.image.path, IMAGE_EX_NEWS1);
@@ -2433,6 +2338,8 @@ VOID MY_STOP_PROC(VOID)
 		MusicPass = TRUE;
 		CLICK_M = TRUE;
 		GameScene = GAME_SCENE_END;
+		GameEndKind = GAME_END_EXIT;
+
 		return;
 	}
 //-------------------------
@@ -2473,7 +2380,6 @@ VOID MY_STOP_DRAW(VOID)
 	{
 		StopSoundMem(BGM_TITLE.handle);
 	}
-//DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 	DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
 
 	DrawGraph(ImageTitleROGO.image.x, ImageTitleROGO.image.y, ImageTitleROGO.image.handle, TRUE);
@@ -2533,7 +2439,11 @@ VOID MY_RNKING(VOID)
 
 VOID MY_RNKING_PROC(VOID)
 {
-
+	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
+		R_WRITE resetRnk;
+		resetRnk.ResetScore();
+		RANKINGflag = TRUE;
+	}
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 
