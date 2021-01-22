@@ -1,3 +1,6 @@
+#ifndef RNKINGRW_HPP_DEFINED_
+#define RNKINGRW_HPP_DEFINED_
+
 #include<iostream>
 #include <DxLib.h>
 
@@ -73,9 +76,11 @@ void R_WRITE::ResetScore()
 	{
 		for (int rw = 0; rw < FILE_NUM; rw++)
 		{
-			fprintf(fp2, "%f \n", 0);
+			fprintf(fp2, "%f \n", 0.0f);
 		}
 		fclose(fp2);
 	}
 	return;
 }
+
+#endif // !RNKINGRW_HPP_DEFINED_

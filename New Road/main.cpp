@@ -246,13 +246,15 @@ char direc; //向きのやつ
 //タイマースコア関係
 int ITEMCnt = 0, COINCnt = 0;
 int timeCnt = 0;
-float time = 0;
 int mintime = 0;
-float Score = 0;
+float time = 0.0f;
+float Score = 0.0f;
+int ScoreDrawCnt = 0;
+bool BackBtnIsDraw =false;
 
-float fsArry[]{ 0,0,0,0,0 };
+float fsArry[]{ 0.0f,0.0f,0.0f,0.0f,0.0f };
 
-float MAPmoveCnt = 0;
+float MAPmoveCnt = 0.0f;
 
 MOUSE mouse;
 
@@ -1493,17 +1495,21 @@ VOID MY_END_PROC(VOID)
 
 		MusicPass1 = FALSE;
 	}
-	
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
-		CLICK_M = TRUE;
+	if (BackBtnIsDraw)
+	{
+		if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+			CLICK_M = TRUE;
 
-		SetMouseDispFlag(TRUE);
+			SetMouseDispFlag(TRUE);
 
-		GameScene = GAME_SCENE_START;
+			GameScene = GAME_SCENE_START;
 
-		MusicPass1 = TRUE;
+			ScoreDrawCnt = 0;
 
-		return;
+			MusicPass1 = TRUE;
+
+			return;
+		}
 	}
 
 	//switch (GameEndKind)
@@ -1553,24 +1559,31 @@ VOID MY_END_DRAW(VOID)
 
 	DrawScore DScore;
 	//setScore.setS(time, mintime, COINCnt);
-	DScore.drawS(time, mintime, COINCnt);
+	BackBtnIsDraw = DScore.drawS(time, mintime, COINCnt, ScoreDrawCnt);
 	Score = DScore.reS();
+
+	if(ScoreDrawCnt <= (GAME_FPS * 3))
+	ScoreDrawCnt++;
 
 	SetFontSize(16.5);
 
-	DrawRotaGraph(
-		ImageEndROGO.image.x, ImageEndROGO.image.y,
-		ImageEndROGO.rate,
-		ImageEndROGO.angle,
-		ImageEndROGO.image.handle, TRUE);
-
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
-		ImageEndROGO.rate = 0.8;
-
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
-		FALL_RESON = FALSE;
-		ImageEndROGO.rate = 1.0;
+	if (BackBtnIsDraw)
+	{
+		DrawRotaGraph(
+			ImageEndROGO.image.x, ImageEndROGO.image.y,
+			ImageEndROGO.rate,
+			ImageEndROGO.angle,
+			ImageEndROGO.image.handle, TRUE);
 	}
+
+		if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+			ImageEndROGO.rate = 0.8;
+
+		if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+			FALL_RESON = FALSE;
+			ImageEndROGO.rate = 1.0;
+		}
+	
 //ランキング描きこみ処理
 	if (RANKINGflag)
 	{
@@ -2459,7 +2472,7 @@ VOID MY_RNKING_DRAW(VOID)
 {
 	static BOOL RNKBackDrawFlag = TRUE;
 	static int fSize = 0;
-	static float RBKdrawCnt = 0;
+	static float RBKdrawCnt = 0.0f;
 	if (RNKBackDrawFlag) {
 		if (RBKdrawCnt < (GAME_FPS * 3)) {
 			DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);

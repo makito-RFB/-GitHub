@@ -1,3 +1,6 @@
+#ifndef IMAGE_HPP_DEFINED_
+#define IMAGE_HPP_DEFINED_
+
 #include<iostream>
 
 #define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\STRAT_IMG\\strat背景.png")		//stratScene背景--------
@@ -33,3 +36,5 @@
 #define IMAGE_CHAR_PATH       TEXT(".\\IMAGE\\PLAYER_IMG\\player.png")	//プレイヤー（12分割）
 
 #define GAME_MAP_PATH			TEXT(".\\IMAGE\\MAP\\map.png")			//マップ
+
+#endif // !IMAGE_HPP_DEFINED_
