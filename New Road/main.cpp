@@ -6,7 +6,7 @@
 #include <random>
 #include <iostream>
 #include <stdlib.h>
-#include <stdio.h>
+#include <time.h>
 
 #define GAME_WIDTH     960
 #define GAME_HEIGHT    576
@@ -44,6 +44,7 @@
 #define IMAGE_TITLE_WORK_CNT_MAX   20
 
 #define SCROLL_SPEED 1
+#define SPEED_UP_CNT 5
 
 #define MUSIC_LOAD_ERR_TITLE	TEXT("音楽読み込みエラー")
 
@@ -56,6 +57,7 @@
 
 #define GAME_MAP_TATE_MAX	9	//マップの縦の数
 #define GAME_MAP_YOKO_MAX	18	//マップの横の数
+#define GAME_MAP_KAKU_YOKO_MAX	30	//拡張マップの横の数
 #define GAME_MAP_KIND_MAX	2	//マップの種類の数
 
 #define GAME_MAP_YOKO_NEW	15	//マップの更新横の数
@@ -232,6 +234,7 @@ int SampleNumFps = GAME_FPS;
 int newX = 0, newY = 0; //動かすブロックの座標
 
 int waitCnt = 0;
+float gameSpeed = 0.0f;
 
 int DrCharCnt = 0;
 
@@ -247,7 +250,7 @@ char direc; //向きのやつ
 int ITEMCnt = 0, COINCnt = 0;
 int timeCnt = 0;
 int mintime = 0;
-float time = 0.0f;
+float secondtime = 0.0f;
 float Score = 0.0f;
 int ScoreDrawCnt = 0;
 bool BackBtnIsDraw =false;
@@ -352,17 +355,17 @@ GAME_MAP_KIND mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 
 };
 
-GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
-	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
-		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		t,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
-		t,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
-		t,l,t,t,t,k,t,k,t,t,l,t,c,t,l,t,l,t,	// 3
-		t,t,k,t,t,t,l,t,t,t,l,t,t,t,t,t,k,t,	// 4
-		t,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
-		t,t,t,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
-		t,t,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,	// 7
-		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
+GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_KAKU_YOKO_MAX]{ //3ブロックづつ
+	//  0,1,2,3,4,5,6,7,8,9,1,1,2,3,4,5,6,7,8,9,2,1,2,3,4,5,6,7,8,9
+		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
+		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,l,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
+		k,l,t,t,l,k,g,k,l,t,l,t,c,l,l,t,l,t,l,k,l,t,k,t,k,g,t,k,t,t,	// 3
+		l,t,k,t,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
+		l,c,l,t,l,t,t,k,t,t,l,l,k,t,l,t,k,t,k,g,l,k,t,l,l,l,k,t,c,t,	// 5
+		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,g,t,l,k,l,g,k,t,l,t,t,k,t,	// 6
+		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,k,t,k,k,l,t,k,t,	// 7
+		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
 };
 
 GAME_MAP_KIND mapDataInit[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
@@ -842,7 +845,7 @@ VOID MY_START_PROC(VOID)
 
 		//タイマ初期化
 		timeCnt = 0;
-		time = 0;
+		secondtime = 0;
 		mintime = 0;
 
 		ImageChar[0].IsDraw = FALSE;
@@ -1066,6 +1069,11 @@ VOID MY_PLAY_PROC(VOID)
 	static int driecChar = 2;
 	static bool dirDrwFlag = false;
 
+	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0)
+	{
+		gameSpeed += 0.5;
+	}
+
 	player.collBeforePt.x -= SCROLL_SPEED; //スクロール時の過去位置の誤差修正
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
@@ -1078,16 +1086,16 @@ VOID MY_PLAY_PROC(VOID)
 	//タイマ処理
 	if (timeCnt >= 60)
 	{
-		time = time - 0.016 * timeCnt;
+		secondtime = secondtime - 0.016 * timeCnt;
 		timeCnt = 0;
-		time++;
+		secondtime++;
 	}
-	if (time >= 60)
+	if (secondtime >= 60)
 	{
-		time = 0;
+		secondtime = 0;
 		mintime++;
 	}
-	time += 0.016;
+	secondtime += 0.016;
 	timeCnt++;
 
 	//マップ移動
@@ -1407,12 +1415,12 @@ VOID MY_PLAY_DRAW(VOID)
 	//タイマーとアイテム描画
 	SetFontSize(25);
 
-	if (time >= 60 || mintime >= 1) {
-		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%d分%.2f秒", mintime, time);
+	if (secondtime >= 60 || mintime >= 1) {
+		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%d分%.2f秒", mintime, secondtime);
 	}
 	else
 	{
-		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%.2f秒", time);
+		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%.2f秒", secondtime);
 
 	}
 
@@ -1558,8 +1566,8 @@ VOID MY_END_DRAW(VOID)
 	}
 
 	DrawScore DScore;
-	//setScore.setS(time, mintime, COINCnt);
-	BackBtnIsDraw = DScore.drawS(time, mintime, COINCnt, ScoreDrawCnt);
+	//setScore.setS(secondtime, mintime, COINCnt);
+	BackBtnIsDraw = DScore.drawS(secondtime, mintime, COINCnt, ScoreDrawCnt);
 	Score = DScore.reS();
 
 	if(ScoreDrawCnt <= (GAME_FPS * 3))
@@ -2249,14 +2257,17 @@ VOID ROCKETMAP(VOID)
 	int plusYoko = 0;
 	int newMapYoko = 0;
 	int rndInt = 0;
-	rndInt = rand() % 5 + 1;
+
+	srand((unsigned int)time(NULL));
+	rndInt = rand() % 9 + 1;
+
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 	{
 		for (int yoko = 0; yoko < GAME_MAP_YOKO_NEW; yoko++)
 		{
 			plusYoko = yoko + 3;
 			//マップ移動更新
-			mapData[tate][yoko] = mapData[tate][plusYoko];	
+			mapData[tate][yoko] = mapData[tate][plusYoko];
 			map[tate][yoko].kind = map[tate][plusYoko].kind;
 		}
 		for (int yoko = GAME_MAP_YOKO_NEW; yoko < GAME_MAP_YOKO_MAX; yoko++)
