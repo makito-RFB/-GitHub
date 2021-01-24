@@ -48,12 +48,13 @@
 
 #define MUSIC_LOAD_ERR_TITLE	TEXT("音楽読み込みエラー")
 
-#define MUSIC_BGM_PATH			TEXT(".\\MUSIC\\PLAY.mp3")
+#define MUSIC_BGM_PATH			TEXT(".\\MUSIC\\Taste_Hell.mp3")
 #define MUSIC_PLAYER_SHOT_PATH	TEXT(".\\MUSIC\\ショット音.mp3")
 
-#define MUSIC_BGM_TITLE_PATH	TEXT(".\\MUSIC\\OP.mp3")	//タイトルのBGM
-#define MUSIC_BGM_COMP_PATH		TEXT(".\\MUSIC\\COMP.mp3")				//コンプリートBGM
-#define MUSIC_BGM_FAIL_PATH		TEXT(".\\MUSIC\\FALL.mp3")					//フォールトBGM
+#define MUSIC_BGM_TITLE_PATH	TEXT(".\\MUSIC\\荒涼の地.mp3")	//タイトルのBGM
+#define MUSIC_BGM_COMP_PATH		TEXT(".\\MUSIC\\Yours.mp3")				//コンプリートBGM
+#define MUSIC_BGM_FAIL_PATH		TEXT(".\\MUSIC\\Yours.mp3")					//フォールトBGM
+#define MUSIC_BGM_RANK_PATH		TEXT(".\\MUSIC\\深淵に眠るクトーニアン.mp3")//ランキングBGM
 
 #define GAME_MAP_TATE_MAX	9	//マップの縦の数
 #define GAME_MAP_YOKO_MAX	18	//マップの横の数
@@ -325,6 +326,7 @@ MUSIC BGM;
 MUSIC BGM_TITLE;
 MUSIC BGM_COMP;
 MUSIC BGM_FAIL;
+MUSIC BGM_RANKING;
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
@@ -426,7 +428,7 @@ BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT);
 BOOL MY_CHECK_RECT_COLL(RECT, RECT);
 
 VOID MAP_LOAD(VOID);
-VOID MAP_DRAW(IMAGE_BACK ImageBack);
+VOID MAP_DRAW();
 VOID ROCKETMAP(VOID);
 
 CHAR MY_DIRECTION(double, double, double, double);
@@ -1381,7 +1383,7 @@ VOID MY_PLAY_DRAW(VOID)
 	static int StrWidth = 0;
 	static int CdrawCnt = 0;
 //背景スクロール
-	MAP_DRAW(ImageBack);
+	MAP_DRAW();
 	//DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -2061,6 +2063,15 @@ BOOL MY_LOAD_MUSIC(VOID)
 		return FALSE;
 	}
 
+	strcpy_s(BGM_RANKING.path, MUSIC_BGM_RANK_PATH);
+	BGM_RANKING.handle = LoadSoundMem(BGM_RANKING.path);
+	if (BGM_RANKING.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
+
+
 	return TRUE;
 }
 
@@ -2236,18 +2247,18 @@ VOID GAME_STR(VOID)
 }
 
 //背景スクロール
-VOID MAP_DRAW(IMAGE_BACK ImageBack)
+VOID MAP_DRAW()
 {
 	DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	//二枚目描画
-	DrawGraph(ImageBack.image.x - GAME_WIDTH, ImageBack.image.y, ImageBack.image.handle, TRUE);
+	DrawGraph(ImageBack.image.x + GAME_WIDTH, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	//一番下までスクロールしたら初期値に戻す
-	if (ImageBack.image.x == GAME_WIDTH + 10)
-		ImageBack.image.x = 10;
+	if (ImageBack.image.x == -(GAME_WIDTH + 10))
+		ImageBack.image.x = -10;
 
-	ImageBack.image.x += SCROLL_SPEED;
+	ImageBack.image.x -= SCROLL_SPEED;
 
 	return;
 }
@@ -2280,46 +2291,6 @@ VOID ROCKETMAP(VOID)
 	return;
 }
 
-//スコア書き込み
-//float* RANKIG_WRITE(float arr[], float s)
-//{
-//	int fCnt = 0;
-//	float temp = 0;
-//	error = fopen_s(&fp, FILE_RNK_PATH, "r");
-//	if(!error && fp != NULL)
-//	{
-//		if (error == 0)
-//		{
-//			while (!feof(fp) && fCnt < FILE_NUM) {
-//				fscanf_s(fp, "%f", &(arr[fCnt]));
-//				fCnt++;
-//			}
-//		}
-//		
-//		fclose(fp);
-//	}
-//	fCnt = 0;
-//
-//	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
-//		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
-//		exit(EXIT_FAILURE);
-//	}
-//	if(!error2 && fp2!= NULL)
-//	{
-//		for (int i = 0; i < FILE_NUM; i++)
-//		{
-//			if (arr[i] <= s) {
-//				temp = arr[i];
-//				arr[i] = s;
-//				s = temp;
-//			}
-//			fprintf(fp2, "%f \n", arr[i]);
-//		}
-//		fclose(fp2);
-//	}
-//	return arr;
-//}
-
 
 
 //stop画面処理
@@ -2335,10 +2306,9 @@ VOID MY_STOP_PROC(VOID)
 	static BOOL MusicPass = TRUE;
 	static BOOL check = TRUE;
 
-	if (CheckSoundMem(BGM_TITLE.handle) == 0 && MusicPass == TRUE)
+	if (CheckSoundMem(BGM_TITLE.handle) != 0)
 	{
-		ChangeVolumeSoundMem(255 * 50 / 100, BGM_TITLE.handle);
-		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
+		StopSoundMem(BGM_TITLE.handle);
 	}
 //-----------------------
 	if (check == TRUE) {
@@ -2400,10 +2370,7 @@ VOID MY_STOP_PROC(VOID)
 VOID MY_STOP_DRAW(VOID)
 {
 	MY_PLAY_DRAW();
-	if (CheckSoundMem(BGM_TITLE.handle) != 0)
-	{
-		StopSoundMem(BGM_TITLE.handle);
-	}
+
 	DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
 
 	DrawGraph(ImageTitleROGO.image.x, ImageTitleROGO.image.y, ImageTitleROGO.image.handle, TRUE);
@@ -2463,6 +2430,12 @@ VOID MY_RNKING(VOID)
 
 VOID MY_RNKING_PROC(VOID)
 {
+	if (CheckSoundMem(BGM_RANKING.handle) == 0)
+	{
+		ChangeVolumeSoundMem(255 * 50 / 100, BGM_RANKING.handle);
+		PlaySoundMem(BGM_RANKING.handle, DX_PLAYTYPE_LOOP);
+	}
+
 	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
 		R_WRITE resetRnk;
 		resetRnk.ResetScore();
@@ -2527,8 +2500,6 @@ VOID MY_RNKING_DRAW(VOID)
 
 	if(!RNKBackDrawFlag)
 	DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
-
-	
 
 }
 
