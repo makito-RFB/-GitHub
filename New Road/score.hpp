@@ -17,7 +17,7 @@ private:
 	float TIMEScore = 0;
 	int COINScore = 0;
 public:
-	void setS(float, int, float);
+	void setS(float, int, int);
 	float reS();
 
 };
@@ -25,7 +25,7 @@ public:
 class DrawScore : public SetScore
 {
 public:
-	bool drawS(float, int, float, int);
+	bool drawS(float, int, int, int);
 private:
 	bool BTNIsDraw = false;
 };

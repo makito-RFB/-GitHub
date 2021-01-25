@@ -43,8 +43,10 @@
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
 
-#define SCROLL_SPEED 1
-#define SPEED_UP_CNT 5
+#define SCROLL_SPEED	1
+#define SPEED_UP_CNT	5
+#define SPEED_UP_TIME	3
+#define UP_SPEED		2
 
 #define MUSIC_LOAD_ERR_TITLE	TEXT("音楽読み込みエラー")
 
@@ -235,7 +237,9 @@ int SampleNumFps = GAME_FPS;
 int newX = 0, newY = 0; //動かすブロックの座標
 
 int waitCnt = 0;
-float gameSpeed = 0.0f;
+int gameSpeed = SCROLL_SPEED;
+int speedUpTime = 0;
+
 
 int DrCharCnt = 0;
 
@@ -248,7 +252,7 @@ char OldAllKeyState[256] = { '\0' };
 char direc; //向きのやつ
 
 //タイマースコア関係
-int ITEMCnt = 0, COINCnt = 0;
+int ITEMCnt = 0, COINCnt = 5;
 int timeCnt = 0;
 int mintime = 0;
 float secondtime = 0.0f;
@@ -1069,14 +1073,34 @@ VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
 	static int driecChar = 2;
-	static bool dirDrwFlag = false;
+	static bool dirDrwFlag = false, speedUPflg = false;;
 
-	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0)
+//難易度調整
+	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0 && speedUPflg == false) {
+		speedUPflg = true;
+	}
+	
+	if (speedUPflg)
 	{
-		gameSpeed += 0.5;
+		if (speedUpTime < (GAME_FPS * SPEED_UP_TIME)) {
+			gameSpeed = SCROLL_SPEED;
+			gameSpeed *= UP_SPEED;
+			speedUpTime++;
+		}
+		else if(speedUpTime >= (GAME_FPS * SPEED_UP_TIME))
+		{
+			gameSpeed = SCROLL_SPEED;
+			if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) != 0) {
+				speedUPflg = false;
+				speedUpTime = 0;
+			}
+		}
 	}
 
-	player.collBeforePt.x -= SCROLL_SPEED; //スクロール時の過去位置の誤差修正
+//スクロール時の過去位置の誤差修正
+	player.collBeforePt.x -= gameSpeed;
+
+
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
 		ChangeVolumeSoundMem(255 * 50 / 100, BGM.handle);
@@ -1085,7 +1109,7 @@ VOID MY_PLAY_PROC(VOID)
 
 	MAP_LOAD();
 
-	//タイマ処理
+//タイマ処理
 	if (timeCnt >= 60)
 	{
 		secondtime = secondtime - 0.016 * timeCnt;
@@ -1100,18 +1124,17 @@ VOID MY_PLAY_PROC(VOID)
 	secondtime += 0.016;
 	timeCnt++;
 
-	//マップ移動
-
-	player.CenterX -= SCROLL_SPEED;
+//マップ・キャラ移動
+	player.CenterX -= gameSpeed;
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 	{
 		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 		{
 			//マップを移動当たり判定も移動
-			map[tate][yoko].x -= SCROLL_SPEED;
-			mapColl[tate][yoko].left -= SCROLL_SPEED;
-			mapColl[tate][yoko].right -= SCROLL_SPEED;
+			map[tate][yoko].x -= gameSpeed;
+			mapColl[tate][yoko].left -= gameSpeed;
+			mapColl[tate][yoko].right -= gameSpeed;
 			//if (map[tate][yoko].x >= GAME_WIDTH)
 			//{
 			//	map[tate][yoko].IsDraw = FALSE;
@@ -1120,7 +1143,7 @@ VOID MY_PLAY_PROC(VOID)
 
 	}
 
-	MAPmoveCnt++;
+	MAPmoveCnt += gameSpeed;
 
 
 	if (MAPmoveCnt >= MAP_DIV_WIDTH * 3)
@@ -1428,31 +1451,31 @@ VOID MY_PLAY_DRAW(VOID)
 
 	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
+	//当たり判定の描画（デバッグ用）
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			//壁ならば
+			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+			{
+				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+			}
+
+			//通路ならば
+			if (mapData[tate][yoko] == t)
+			{
+				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+			}
+		}
+	}
+
+	//////ゴールの描画（デバッグ用）
+	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+
+
 	////当たり判定の描画（デバッグ用）
-	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	//{
-	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-	//	{
-	//		//壁ならば
-	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-	//		{
-	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-	//		}
-
-	//		//通路ならば
-	//		if (mapData[tate][yoko] == t)
-	//		{
-	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-	//		}
-	//	}
-	//}
-
-	////////ゴールの描画（デバッグ用）
-	//////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
-
-
-	//////当たり判定の描画（デバッグ用）
-	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
@@ -2255,7 +2278,7 @@ VOID MAP_DRAW()
 	DrawGraph(ImageBack.image.x + GAME_WIDTH, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	//一番下までスクロールしたら初期値に戻す
-	if (ImageBack.image.x == -(GAME_WIDTH + 10))
+	if (ImageBack.image.x <= -(GAME_WIDTH + 10))
 		ImageBack.image.x = -10;
 
 	ImageBack.image.x -= SCROLL_SPEED;
@@ -2393,13 +2416,13 @@ VOID MY_STOP_DRAW(VOID)
 	if (Kchoice == TRUE) {
 		ImageSTeROGO.rate = 1.2;
 		ImageSTbROGO.rate = 1.0;
-		ImageChoiser.x = ImageSTeROGO.image.x + ImageSTeROGO.image.width / 2 + 32;
+		ImageChoiser.x = ImageSTeROGO.image.x + ImageSTeROGO.image.width / 2 + MAP_DIV_WIDTH / 2;
 		ImageChoiser.y = ImageSTeROGO.image.y + ImageSTeROGO.image.height / 4 - ImageChoiser.height / 2;
 	}
 	else {
 		ImageSTeROGO.rate = 1.0;
 		ImageSTbROGO.rate = 1.2;
-		ImageChoiser.x = ImageSTbROGO.image.x + ImageSTbROGO.image.width / 2 + 32;
+		ImageChoiser.x = ImageSTbROGO.image.x + ImageSTbROGO.image.width / 2 + MAP_DIV_WIDTH / 2;
 		ImageChoiser.y = ImageSTbROGO.image.y + ImageSTbROGO.image.height / 4 - ImageChoiser.height / 2;
 	}
 
@@ -2408,12 +2431,12 @@ VOID MY_STOP_DRAW(VOID)
 			ImageSTeROGO.rate = 0.8;
 		else
 			ImageSTbROGO.rate = 0.8;
-		ImageChoiser.x -= 32;
+		ImageChoiser.x -= MAP_DIV_WIDTH / 2;
 	}
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 		ImageSTeROGO.rate = 1.0;
 		ImageSTbROGO.rate = 1.0;
-		ImageChoiser.x += 32;
+		ImageChoiser.x += MAP_DIV_WIDTH / 2;
 	}
 	SetFontSize(30);
 
@@ -2456,7 +2479,7 @@ VOID MY_RNKING_DRAW(VOID)
 {
 	static BOOL RNKBackDrawFlag = TRUE;
 	static int fSize = 0;
-	static float RBKdrawCnt = 0.0f;
+	static int RBKdrawCnt = 0;
 	if (RNKBackDrawFlag) {
 		if (RBKdrawCnt < (GAME_FPS * 3)) {
 			DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);

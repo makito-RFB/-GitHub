@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include"score.hpp"
 
-void SetScore::setS(float time_, int mintime_, float COINCnt_) {
+void SetScore::setS(float time_, int mintime_, int COINCnt_) {
 
 	TIMEScore = floor(100 * (time_ * 10 + mintime_ * 600 + 20)) / 100;
 	COINScore = COINCnt_ / 10 * 100;
@@ -15,7 +15,7 @@ float SetScore::reS() {
 	return Score;
 }
 
-bool DrawScore::drawS(float time, int mintime, float COINCnt, int SecondCnt) {
+bool DrawScore::drawS(float time, int mintime, int COINCnt, int SecondCnt) {
 	SetScore::setS(time, mintime, COINCnt);
 
 	SetFontSize(32);
