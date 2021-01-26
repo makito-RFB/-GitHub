@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <vector>
 
 #define GAME_WIDTH     960
 #define GAME_HEIGHT    576
@@ -1075,6 +1076,9 @@ VOID MY_PLAY_PROC(VOID)
 	static int driecChar = 2;
 	static bool dirDrwFlag = false, speedUPflg = false;;
 
+	//スクロール時の過去位置の誤差修正
+	player.collBeforePt.x -= gameSpeed;
+
 //難易度調整
 	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0 && speedUPflg == false) {
 		speedUPflg = true;
@@ -1096,10 +1100,6 @@ VOID MY_PLAY_PROC(VOID)
 			}
 		}
 	}
-
-//スクロール時の過去位置の誤差修正
-	player.collBeforePt.x -= gameSpeed;
-
 
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
