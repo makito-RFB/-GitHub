@@ -2,6 +2,8 @@
 #define RNKINGRW_HPP_DEFINED_
 
 #include<iostream>
+#include<vector>
+#include<algorithm>
 #include <DxLib.h>
 
 #define FILE_OPEN_TITLE		TEXT("ファイルオープンエラー")
@@ -16,15 +18,15 @@ errno_t error, error2;
 class R_WRITE
 {
 public:
-	float* Rread(float arr[]);
-	float* Rwrite(float arr[], float s);
+	void Rread(std::vector<float>& rarr);
+	void Rwrite(std::vector<float>& warr, float s);
 	void ResetScore();
 private:
 	int fCnt = 0;
 	float temp = 0;
 };
 
-float* R_WRITE::Rread(float arr[])
+void R_WRITE::Rread(std::vector<float>& arr)
 {
 	error = fopen_s(&fp, FILE_RNK_PATH, "r");
 	if (!error && fp != NULL)
@@ -32,7 +34,7 @@ float* R_WRITE::Rread(float arr[])
 		if (error == 0)
 		{
 			while (!feof(fp) && fCnt < FILE_NUM) {
-				fscanf_s(fp, "%f", &(arr[fCnt]));
+				fscanf_s(fp, "%f", &arr[fCnt]);
 				fCnt++;
 			}
 		}
@@ -41,29 +43,28 @@ float* R_WRITE::Rread(float arr[])
 	}
 	fCnt = 0;
 
-	return arr;
+	return;
 }
 
-float* R_WRITE::Rwrite(float arr[], float s)
+void R_WRITE::Rwrite(std::vector<float>& warr, float s)
 {
 	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
 		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
 		exit(EXIT_FAILURE);
 	}
+
 	if (!error2 && fp2 != NULL)
 	{
+		warr.push_back(s);
+		std::sort(warr.begin(), warr.end(), std::greater<float>());
+		warr.pop_back();
 		for (int rw = 0; rw < FILE_NUM; rw++)
 		{
-			if (arr[rw] <= s) {
-				temp = arr[rw];
-				arr[rw] = s;
-				s = temp;
-			}
-			fprintf(fp2, "%f \n", arr[rw]);
+			fprintf(fp2, "%f \n", warr[rw]);
 		}
 		fclose(fp2);
 	}
-	return arr;
+	return;
 }
 
 void R_WRITE::ResetScore()

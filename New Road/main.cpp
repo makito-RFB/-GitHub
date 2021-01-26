@@ -85,6 +85,7 @@
 #define FILE_RNK_PATH		TEXT("rnkingFile.txt")
 
 #define FILE_NUM	5
+#define CHECKEMPTY  1
 
 enum GAME_MAP_KIND
 {
@@ -241,11 +242,9 @@ int waitCnt = 0;
 int gameSpeed = SCROLL_SPEED;
 int speedUpTime = 0;
 
-
 int DrCharCnt = 0;
 
 int ExDrawCnt = 1;
-
 
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
@@ -253,7 +252,7 @@ char OldAllKeyState[256] = { '\0' };
 char direc; //向きのやつ
 
 //タイマースコア関係
-int ITEMCnt = 0, COINCnt = 5;
+int ITEMCnt = 0, COINCnt = 0;
 int timeCnt = 0;
 int mintime = 0;
 float secondtime = 0.0f;
@@ -261,7 +260,10 @@ float Score = 0.0f;
 int ScoreDrawCnt = 0;
 bool BackBtnIsDraw =false;
 
-float fsArry[]{ 0.0f,0.0f,0.0f,0.0f,0.0f };
+//float fsArry[]{ 0.0f,0.0f,0.0f,0.0f,0.0f };
+std::vector<float> fsArry(5);
+
+bool StopFlg = false;
 
 float MAPmoveCnt = 0.0f;
 
@@ -1074,7 +1076,7 @@ VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
 	static int driecChar = 2;
-	static bool dirDrwFlag = false, speedUPflg = false;;
+	static bool dirDrwFlag = false, speedUPflg = false;
 
 	//スクロール時の過去位置の誤差修正
 	player.collBeforePt.x -= gameSpeed;
@@ -1173,7 +1175,8 @@ VOID MY_PLAY_PROC(VOID)
 		}
 		GameScene = GAME_SCENE_STOP;
 	}
-
+	if (StopFlg)
+		StopFlg = false;
 
 
 	//一回の入力判定（押したととき）
@@ -1406,7 +1409,7 @@ VOID MY_PLAY_DRAW(VOID)
 	static int StrWidth = 0;
 	static int CdrawCnt = 0;
 //背景スクロール
-	MAP_DRAW();
+		MAP_DRAW();
 	//DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1509,27 +1512,28 @@ VOID MY_END(VOID)
 VOID MY_END_PROC(VOID)
 {
 	static BOOL MusicPass1 = TRUE;
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
-	{
-		if (CLICK_M == TRUE)
-		{
-			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
-			CLICK_M = FALSE;
-		}
-		if (CheckSoundMem(BGM_COMP.handle) != 0)
-		{
-			StopSoundMem(BGM_COMP.handle);
-		}
-
-		if (CheckSoundMem(BGM_FAIL.handle) != 0)
-		{
-			StopSoundMem(BGM_FAIL.handle);
-		}
-
-		MusicPass1 = FALSE;
-	}
 	if (BackBtnIsDraw)
 	{
+		if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+		{
+			if (CLICK_M == TRUE)
+			{
+				PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+				CLICK_M = FALSE;
+			}
+			if (CheckSoundMem(BGM_COMP.handle) != 0)
+			{
+				StopSoundMem(BGM_COMP.handle);
+			}
+
+			if (CheckSoundMem(BGM_FAIL.handle) != 0)
+			{
+				StopSoundMem(BGM_FAIL.handle);
+			}
+
+			MusicPass1 = FALSE;
+		}
+
 		if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
 			CLICK_M = TRUE;
 
@@ -1621,9 +1625,9 @@ VOID MY_END_DRAW(VOID)
 	if (RANKINGflag)
 	{
 		R_WRITE ranking;
-		float* ptr = ranking.Rread(fsArry);
-
-		float* ptr2 = ranking.Rwrite(ptr, Score);
+		ranking.Rread(fsArry);
+		COINCnt = COINCnt;
+		ranking.Rwrite(fsArry, Score);
 		/*for (int i = 0; i < FILE_NUM; i++)
 		{
 			fsArry[i] = ptr2[i];
@@ -2280,8 +2284,8 @@ VOID MAP_DRAW()
 	//一番下までスクロールしたら初期値に戻す
 	if (ImageBack.image.x <= -(GAME_WIDTH + 10))
 		ImageBack.image.x = -10;
-
-	ImageBack.image.x -= SCROLL_SPEED;
+	if(!StopFlg)
+		ImageBack.image.x -= gameSpeed;
 
 	return;
 }
@@ -2333,6 +2337,10 @@ VOID MY_STOP_PROC(VOID)
 	{
 		StopSoundMem(BGM_TITLE.handle);
 	}
+
+	if (!StopFlg)
+		StopFlg = true;
+
 //-----------------------
 	if (check == TRUE) {
 		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
@@ -2455,7 +2463,7 @@ VOID MY_RNKING_PROC(VOID)
 {
 	if (CheckSoundMem(BGM_RANKING.handle) == 0)
 	{
-		ChangeVolumeSoundMem(255 * 50 / 100, BGM_RANKING.handle);
+		ChangeVolumeSoundMem(255 * 25 / 100, BGM_RANKING.handle);
 		PlaySoundMem(BGM_RANKING.handle, DX_PLAYTYPE_LOOP);
 	}
 
@@ -2467,9 +2475,14 @@ VOID MY_RNKING_PROC(VOID)
 
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 
-		SetMouseDispFlag(TRUE);
+		/*SetMouseDispFlag(TRUE);*/
+		if (CheckSoundMem(BGM_RANKING.handle) != 0)
+		{
+			StopSoundMem(BGM_RANKING.handle);
+		}
 
 		GameScene = GAME_SCENE_START;
+		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP, FALSE);
 
 		return;
 	}
@@ -2505,11 +2518,9 @@ VOID MY_RNKING_DRAW(VOID)
 
 	if (RANKINGflag)
 	{
-		R_WRITE rankingWatch;
-		float* ptrW = rankingWatch.Rread(fsArry);
-		for (int i = 0; i < FILE_NUM; i++)
-		{
-			fsArry[i] = ptrW[i];
+		if (!fsArry[CHECKEMPTY]) {
+			R_WRITE rankingWatch;
+			rankingWatch.Rread(fsArry);
 		}
 		RANKINGflag = FALSE;
 	}
