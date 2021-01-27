@@ -492,6 +492,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(GetMainWindowHandle(), START_ERR_CAPTION, START_ERR_TITLE, MB_OK);	return -1;
 	}
 
+//ランキング読みこみランキング配列に格納
+	R_WRITE ranking;
+	ranking.Rread(fsArry);
+
 	while (TRUE)
 	{
 		if (ProcessMessage() != 0) { break; }
@@ -505,22 +509,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		switch (GameScene)
 		{
-		case GAME_SCENE_START:
+		case GAME_SCENE_START:	//スタート画面
 			MY_START();
 			break;
-		case GAME_SCENE_EXPO:
+		case GAME_SCENE_EXPO:	//説明画面
 			MY_EXPO();
 			break;
-		case GAME_SCENE_PLAY:
+		case GAME_SCENE_PLAY:	//プレイ画面
 			MY_PLAY();
 			break;
-		case GAME_SCENE_END:
+		case GAME_SCENE_END:	//エンド画面
 			MY_END();
 			break;
-		case GAME_SCENE_RNKING:
+		case GAME_SCENE_RNKING:	//ランキング表示画面
 			MY_RNKING();
 			break;
-		case GAME_SCENE_STOP:
+		case GAME_SCENE_STOP:	//プレイ中の停止画面
 			MY_STOP();
 			break;
 		}
@@ -758,7 +762,7 @@ VOID MY_START_PROC(VOID)
 		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
 	}
 
-	// 後ろ歩く処理
+// 後ろ歩く処理
 		if (ImageChar[1].IsDraw == FALSE && MY_CHAR_MOVE_ST == TRUE) {
 			ImageChar[1].IsDraw = TRUE;
 			MY_CHAR_MOVE_ST = FALSE;
@@ -804,7 +808,7 @@ VOID MY_START_PROC(VOID)
 		}
 
 
-		playerSt.image.x += 16;
+		playerSt.image.x += MOVE_ERIA / 4;
 
 		if (playerSt.image.x > GAME_WIDTH) {
 			playerSt.image.x -= GAME_WIDTH + player.image.width;
@@ -813,7 +817,7 @@ VOID MY_START_PROC(VOID)
 
 	}
 
-
+//ゲームスタートorランキング選択キー移動処理
 	if (check == TRUE) {
 		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
 			Kchoice = !Kchoice;
@@ -823,7 +827,7 @@ VOID MY_START_PROC(VOID)
 	if (MY_KEY_UP(KEY_INPUT_DOWN) == TRUE || MY_KEY_UP(KEY_INPUT_UP) == TRUE)
 		check = TRUE;
 
-
+//選択決定
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
 	{
 		if (CheckSoundMem(BGM_TITLE.handle) != 0)
@@ -847,6 +851,7 @@ VOID MY_START_PROC(VOID)
 		GameEndKind = GAME_END_FAIL;
 	}
 
+//ゲームスタートへ
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
 		//GameScene = GAME_SCENE_PLAY;
 		MusicPass = TRUE;
@@ -867,7 +872,8 @@ VOID MY_START_PROC(VOID)
 		MY_MAP_RELOAD = TRUE;
 		return;
 	}
-//
+
+//ランキングへ
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
 	{
 
@@ -897,7 +903,7 @@ VOID MY_START_PROC(VOID)
 	}
 
 	
-
+//ランキング書き込み呼び出しフラグ
 	if (!RANKINGflag)
 	{
 		RANKINGflag = TRUE;
@@ -910,6 +916,7 @@ VOID MY_START_DRAW(VOID)
 {
 	DrawGraph(ImageTitleBK.x, ImageTitleBK.y, ImageTitleBK.handle, TRUE);
 
+//後ろのキャラクター描画
 	for (int num = 0, Pnum = 0; num < WORK_CHAR_NUM; num++)
 	{
 		if (ImageChar[num].IsDraw == TRUE)
@@ -919,14 +926,16 @@ VOID MY_START_DRAW(VOID)
 		}
 	}
 
+//ロゴ
 	DrawGraph(ImageTitleROGO.image.x, ImageTitleROGO.image.y, ImageTitleROGO.image.handle, TRUE);
 	
+//スタートロゴ描画
 	DrawRotaGraph(
 		ImageTitleSTART.image.x, ImageTitleSTART.image.y,
 		ImageTitleSTART.rate,
 		ImageTitleSTART.angle,
 		ImageTitleSTART.image.handle, TRUE);
-
+//ランキングロゴ描画
 	DrawRotaGraph(
 		ImageTitleRNK.image.x, ImageTitleRNK.image.y,
 		ImageTitleRNK.rate,
@@ -935,8 +944,7 @@ VOID MY_START_DRAW(VOID)
 
 	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
 
-//上下選択の動き
-
+//上下選択の動き（サイズ変更）
 	if (Kchoice == TRUE) {
 		ImageTitleSTART.rate = 1.2; 
 		ImageTitleRNK.rate = 1.0;
@@ -952,15 +960,15 @@ VOID MY_START_DRAW(VOID)
 
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
 		if (Kchoice == TRUE) 
-			ImageTitleSTART.rate = 0.8;
+			ImageTitleSTART.rate = 0.8; //0.8%
 		else 
 			ImageTitleRNK.rate = 0.8;
-		ImageChoiser.x -= 32;
+		ImageChoiser.x -= MAP_DIV_WIDTH / 2;
 	}
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 		ImageTitleSTART.rate = 1.0;
 		ImageTitleRNK.rate = 1.0;
-		ImageChoiser.x += 32;
+		ImageChoiser.x += MAP_DIV_WIDTH / 2;
 	}
 	//DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
 	return;
@@ -981,6 +989,7 @@ VOID MY_EXPO_PROC(VOID) {
 		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
 	}*/
 
+//選択のページ判定
 	switch (ExDrawCnt)
 	{
 	case 1:
@@ -1009,6 +1018,7 @@ VOID MY_EXPO_PROC(VOID) {
 		break;
 	}
 
+//選択音
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN)) {
 
 		if (CLICK_M == TRUE)
@@ -1024,6 +1034,7 @@ VOID MY_EXPO_DRAW(VOID) {
 	static int StrDraw = 0;
 	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 
+//選択描画背景
 	switch (ExDrawCnt)
 	{
 	case 1:
@@ -1039,6 +1050,7 @@ VOID MY_EXPO_DRAW(VOID) {
 	//	break;　　//ここパス
 	}
 
+//文章の描画
 	char* str = NULL;
 	SetFontSize(44);
 	str = TEXT_DRAW(ExDrawCnt);
@@ -1051,6 +1063,7 @@ VOID MY_EXPO_DRAW(VOID) {
 		ImageNextROGO.angle,
 		ImageNextROGO.image.handle, TRUE);
 
+//選択（サイズ）
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
 		ImageNextROGO.rate = 0.8;
 
@@ -1078,7 +1091,7 @@ VOID MY_PLAY_PROC(VOID)
 	static int driecChar = 2;
 	static bool dirDrwFlag = false, speedUPflg = false;
 
-	//スクロール時の過去位置の誤差修正
+//スクロール時の過去位置の誤差修正
 	player.collBeforePt.x -= gameSpeed;
 
 //難易度調整
@@ -1086,6 +1099,7 @@ VOID MY_PLAY_PROC(VOID)
 		speedUPflg = true;
 	}
 	
+//スピードアップ処理
 	if (speedUPflg)
 	{
 		if (speedUpTime < (GAME_FPS * SPEED_UP_TIME)) {
@@ -1109,6 +1123,7 @@ VOID MY_PLAY_PROC(VOID)
 		PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP);
 	}
 
+//マップロード
 	MAP_LOAD();
 
 //タイマ処理
@@ -1166,7 +1181,7 @@ VOID MY_PLAY_PROC(VOID)
 		MAPmoveCnt = 0;
 	}
 
-
+//ストップ画面移行
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
 	{
 		if (CheckSoundMem(BGM.handle) != 0)
@@ -1179,7 +1194,7 @@ VOID MY_PLAY_PROC(VOID)
 		StopFlg = false;
 
 
-	//一回の入力判定（押したととき）
+//一回の入力判定（押したととき）
 	if (MY_KEY_TF == TRUE) {
 		if (MY_KEY_DOWN(KEY_INPUT_W)) {
 			player.CenterY -= MOVE_ERIA;
@@ -1214,7 +1229,7 @@ VOID MY_PLAY_PROC(VOID)
 		ImageChar[driecChar].IsDraw = TRUE;
 	}
 
-	//一回の入力判定（離したとき）
+//一回の入力判定（離したとき）
 	if (MY_KEY_TF == FALSE) {
 		if (colltime > PLAYER_MOVE_COLLTIME * GAME_FPS)
 		{
@@ -1249,7 +1264,7 @@ VOID MY_PLAY_PROC(VOID)
 	player.coll.right = player.CenterX + mapChip.width / 2 - 5;
 	player.coll.bottom = player.CenterY + mapChip.height / 2 - 5;
 
-	//向きを入れる
+//向きを入れる
 	direc = MY_DIRECTION(player.CenterX, player.CenterY, player.collBeforePt.x, player.collBeforePt.y);
 
 	BOOL IsMove = TRUE;
@@ -1454,31 +1469,31 @@ VOID MY_PLAY_DRAW(VOID)
 
 	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
-	//当たり判定の描画（デバッグ用）
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			//壁ならば
-			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-			}
-
-			//通路ならば
-			if (mapData[tate][yoko] == t)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-			}
-		}
-	}
-
-	//////ゴールの描画（デバッグ用）
-	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
-
-
 	////当たり判定の描画（デバッグ用）
-	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		//壁ならば
+	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+	//		}
+
+	//		//通路ならば
+	//		if (mapData[tate][yoko] == t)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+	//		}
+	//	}
+	//}
+
+	////////ゴールの描画（デバッグ用）
+	//////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+
+
+	//////当たり判定の描画（デバッグ用）
+	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
@@ -1613,19 +1628,18 @@ VOID MY_END_DRAW(VOID)
 			ImageEndROGO.image.handle, TRUE);
 	}
 
-		if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
-			ImageEndROGO.rate = 0.8;
+	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+		ImageEndROGO.rate = 0.8;
 
-		if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
-			FALL_RESON = FALSE;
-			ImageEndROGO.rate = 1.0;
-		}
+	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+		FALL_RESON = FALSE;
+		ImageEndROGO.rate = 1.0;
+	}
 	
 //ランキング描きこみ処理
 	if (RANKINGflag)
 	{
 		R_WRITE ranking;
-		ranking.Rread(fsArry);
 		COINCnt = COINCnt;
 		ranking.Rwrite(fsArry, Score);
 		/*for (int i = 0; i < FILE_NUM; i++)
@@ -2214,9 +2228,6 @@ char* TEXT_DRAW(int n)
 {
 	char* cp = NULL;
 
-	
-
-
 	cp = (char*)malloc(sizeof(char) * 30);
 
 	if (cp == NULL) {
@@ -2473,7 +2484,15 @@ VOID MY_RNKING_PROC(VOID)
 		RANKINGflag = TRUE;
 	}
 
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+//選択音
+	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE && CLICK_M == TRUE)
+	{
+		PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+		CLICK_M = FALSE;
+	}
+
+
+	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
 
 		/*SetMouseDispFlag(TRUE);*/
 		if (CheckSoundMem(BGM_RANKING.handle) != 0)
@@ -2482,6 +2501,7 @@ VOID MY_RNKING_PROC(VOID)
 		}
 
 		GameScene = GAME_SCENE_START;
+		CLICK_M = TRUE;
 		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP, FALSE);
 
 		return;
@@ -2534,6 +2554,22 @@ VOID MY_RNKING_DRAW(VOID)
 
 	if(!RNKBackDrawFlag)
 	DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
+
+	
+	DrawRotaGraph(
+		ImageEndROGO.image.x, ImageEndROGO.image.y,
+		ImageEndROGO.rate,
+		ImageEndROGO.angle,
+		ImageEndROGO.image.handle, TRUE);
+	
+
+	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+		ImageEndROGO.rate = 0.8;
+
+	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+		FALL_RESON = FALSE;
+		ImageEndROGO.rate = 1.0;
+	}
 
 }
 
