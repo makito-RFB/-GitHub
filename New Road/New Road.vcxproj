@@ -159,6 +159,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="RnkingRW.hpp" />
     <ClInclude Include="score.hpp" />
+    <ClInclude Include="textGoal.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Recource.rc" />

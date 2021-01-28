@@ -3,6 +3,7 @@
 #include "RnkingRW.hpp"
 #include "image.hpp"
 #include "score.hpp"
+#include "textGoal.hpp"
 #include <random>
 #include <iostream>
 #include <stdlib.h>
@@ -83,6 +84,11 @@
 #define FILE_OPEN_TITLE		TEXT("ファイルオープンエラー")
 #define FILE_OPEN_CAPTION	TEXT("ファイルオープンエラー")
 #define FILE_RNK_PATH		TEXT("rnkingFile.txt")
+
+
+#define GOAL1  TEXT("ゲーム目標とルール")
+#define GOAL2  TEXT("操作説明とアイテムについいて")
+#define GOAL3  TEXT("ストーリー")
 
 #define FILE_NUM	5
 #define CHECKEMPTY  1
@@ -260,8 +266,12 @@ float Score = 0.0f;
 int ScoreDrawCnt = 0;
 bool BackBtnIsDraw =false;
 
+//スコア配列
 //float fsArry[]{ 0.0f,0.0f,0.0f,0.0f,0.0f };
 std::vector<float> fsArry(5);
+
+//ゲーム説明の文字配列
+std::vector<std::string> textGaol;
 
 bool StopFlg = false;
 
@@ -440,7 +450,7 @@ VOID ROCKETMAP(VOID);
 
 CHAR MY_DIRECTION(double, double, double, double);
 
-char* TEXT_DRAW(int);
+void TEXT_DRAW();
 
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
@@ -1031,7 +1041,7 @@ VOID MY_EXPO_PROC(VOID) {
 }
 
 VOID MY_EXPO_DRAW(VOID) {
-	static int StrDraw = 0;
+
 	DrawGraph(ImageEXPOBK.x, ImageEXPOBK.y, ImageEXPOBK.handle, TRUE);
 
 //選択描画背景
@@ -1051,12 +1061,10 @@ VOID MY_EXPO_DRAW(VOID) {
 	}
 
 //文章の描画
-	char* str = NULL;
+	/*char* str = NULL;*/
 	SetFontSize(44);
-	str = TEXT_DRAW(ExDrawCnt);
-	StrDraw = GetDrawStringWidth(str, -1);
-	DrawString((GAME_WIDTH - StrDraw) / 2, 10, str, GetColor(255, 0, 0));
-
+	TEXT_DRAW();
+	
 	DrawRotaGraph(
 		ImageNextROGO.image.x, ImageNextROGO.image.y,
 		ImageNextROGO.rate,
@@ -1072,7 +1080,7 @@ VOID MY_EXPO_DRAW(VOID) {
 		ImageNextROGO.rate = 1.0;
 	}
 
-	free(str);
+	/*free(str);*/
 
 	return;
 }
@@ -2224,9 +2232,28 @@ VOID MAP_LOAD(VOID)
 	}
 }
 
-char* TEXT_DRAW(int n)
+VOID TEXT_DRAW()
 {
-	char* cp = NULL;
+	int Cnt = 0;
+	setGoals setText;
+	setText.appendText(textGaol, GOAL1);
+	setText.appendText(textGaol, GOAL2);
+	setText.appendText(textGaol, GOAL3);
+
+	switch (ExDrawCnt)
+	{
+	case 1:
+		Cnt = setText.findText(textGaol, GOAL1);		break;
+	case 2:
+		Cnt = setText.findText(textGaol, GOAL2);		break;
+	case 3:
+		Cnt = setText.findText(textGaol, GOAL3);		break;
+	}
+	
+	DrawString((GAME_WIDTH - GetDrawStringWidth(textGaol[Cnt].c_str(), -1)) / 2, 10, textGaol[Cnt].c_str(), GetColor(255, 0, 0));
+
+	
+	/*char* cp = NULL;
 
 	cp = (char*)malloc(sizeof(char) * 30);
 
@@ -2237,14 +2264,14 @@ char* TEXT_DRAW(int n)
 	switch (n)
 	{
 	case 1:
-		strcpy_s(cp, 22, "ゲームのルールと目標");		break;
+		strcpy_s(cp, 22, "ゲーム目標とルール");		break;
 	case 2:
 		strcpy_s(cp, 30, "操作説明とアイテムについいて");		break;
 	case 3:
 		strcpy_s(cp, 16, "ストーリー");		break;
 	}
-
-	return cp;
+	*/
+	return;
 
 }
 
@@ -2266,7 +2293,7 @@ VOID GAME_PILOT(VOID)
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(160, 0, 80));
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(160, 0, 80));
 	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」\nその他選択は「エンターキー」", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」", GetColor(0, 0, 0));
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
 
 	return;
