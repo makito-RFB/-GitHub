@@ -17,15 +17,16 @@ private:
 	float TIMEScore = 0;
 	int COINScore = 0;
 public:
-	void setS(float, int, int);
-	float reS();
+	void setS(float, int, int);		//スコアをセットする
+	float reS();					//スコアの返却
 
 };
 
 class DrawScore : public SetScore
 {
 public:
-	bool drawS(float, int, int, int);
+	bool drawS(float, int, int, int);	//スコアの描画と描画完了のフラグ返却
+	void drawStop(float, int, int);
 private:
 	bool BTNIsDraw = false;
 };

@@ -38,3 +38,17 @@ bool DrawScore::drawS(float time, int mintime, int COINCnt, int SecondCnt) {
 
 	return BTNIsDraw;
 }
+
+
+void DrawScore::drawStop(float time, int mintime, int COINCnt)
+{
+	SetScore::setS(time, mintime, COINCnt);
+
+	SetFontSize(32);
+	if (mintime > 0)
+		DrawFormatString(10, 10, GetColor(255, 255, 255), "現タイム : %d分%.2f", mintime, time);
+	else
+		DrawFormatString(10, 10, GetColor(255, 255, 255), "現タイム : %.2f", time);
+	DrawFormatString(10, 80, GetColor(255, 255, 255), "獲得コイン数 : %d", COINCnt);
+	return;
+}

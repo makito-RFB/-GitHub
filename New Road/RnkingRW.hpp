@@ -18,15 +18,16 @@ errno_t error, error2;
 class R_WRITE
 {
 public:
-	void Rread(std::vector<float>& rarr);
-	void Rwrite(std::vector<float>& warr, float s);
-	void ResetScore();
+	void Rread(std::vector<float>& rarr);			//スコア呼び込み
+	void Rwrite(std::vector<float>& warr, float s);	
+	void ResetScore(std::vector<float>& arr);								//スコアリセット
 private:
 	int fCnt = 0;
 	float temp = 0;
 };
 
-void R_WRITE::Rread(std::vector<float>& arr)
+//スコア呼び込み
+void R_WRITE::Rread(std::vector<float>& arr)		
 {
 	error = fopen_s(&fp, FILE_RNK_PATH, "r");
 	if (!error && fp != NULL)
@@ -46,7 +47,8 @@ void R_WRITE::Rread(std::vector<float>& arr)
 	return;
 }
 
-void R_WRITE::Rwrite(std::vector<float>& warr, float s)
+//スコア書き込み
+void R_WRITE::Rwrite(std::vector<float>& warr, float s)		
 {
 	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
 		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
@@ -67,7 +69,8 @@ void R_WRITE::Rwrite(std::vector<float>& warr, float s)
 	return;
 }
 
-void R_WRITE::ResetScore()
+//リセット
+void R_WRITE::ResetScore(std::vector<float>& arr)
 {
 	if ((error2 = fopen_s(&fp2, FILE_RNK_PATH, "w")) != 0) {
 		MessageBox(GetMainWindowHandle(), FILE_OPEN_CAPTION, FILE_OPEN_TITLE, MB_OK);
@@ -78,6 +81,7 @@ void R_WRITE::ResetScore()
 		for (int rw = 0; rw < FILE_NUM; rw++)
 		{
 			fprintf(fp2, "%f \n", 0.0f);
+			arr[rw] = 0.0f;
 		}
 		fclose(fp2);
 	}

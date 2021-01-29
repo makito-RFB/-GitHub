@@ -244,18 +244,21 @@ int SampleNumFps = GAME_FPS;
 
 int newX = 0, newY = 0; //動かすブロックの座標
 
+//プレイ画面関係
 int waitCnt = 0;
 int gameSpeed = SCROLL_SPEED;
+int MAPmoveCnt = 0;
 int speedUpTime = 0;
 
+//スタート画面関係
 int DrCharCnt = 0;
-
-int ExDrawCnt = 1;
 
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
 
+//キャラクター関係
 char direc; //向きのやつ
+int driecChar = 2;
 
 //タイマースコア関係
 int ITEMCnt = 0, COINCnt = 0;
@@ -267,15 +270,15 @@ int ScoreDrawCnt = 0;
 bool BackBtnIsDraw =false;
 
 //スコア配列
-//float fsArry[]{ 0.0f,0.0f,0.0f,0.0f,0.0f };
 std::vector<float> fsArry(5);
 
-//ゲーム説明の文字配列
+//ゲーム説明の文字配列とフラグなど
 std::vector<std::string> textGaol;
+int ExDrawCnt = 1;
+//bool textIsRoad = true;
 
+//ストップフラグ
 bool StopFlg = false;
-
-float MAPmoveCnt = 0.0f;
 
 MOUSE mouse;
 
@@ -295,7 +298,6 @@ BOOL CLICK_M = TRUE;
 BOOL RANKINGflag = TRUE;
 
 BOOL COINflag = FALSE;
-
 
 //FILE* fp = NULL, * fp2 = NULL;
 //errno_t error, error2;
@@ -455,7 +457,6 @@ void TEXT_DRAW();
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
 VOID GAME_STR(VOID);
-//float* RANKIG_WRITE(float[], float);
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -871,10 +872,6 @@ VOID MY_START_PROC(VOID)
 		timeCnt = 0;
 		secondtime = 0;
 		mintime = 0;
-
-		ImageChar[0].IsDraw = FALSE;
-		ImageChar[1].IsDraw = FALSE;
-		ImageChar[2].IsDraw = FALSE;
 		DrCharCnt = 0;
 
 		GameScene = GAME_SCENE_EXPO;
@@ -1021,7 +1018,14 @@ VOID MY_EXPO_PROC(VOID) {
 			{
 				StopSoundMem(BGM_TITLE.handle);
 			}
+			for (int charS = 0; charS < IMAGE_CHAR_NUM; charS++)
+			{
+				if (ImageChar[charS].IsDraw == TRUE)
+					ImageChar[charS].IsDraw = FALSE;
+			}
 			ITEMCnt = 0;
+			COINCnt = 0;
+			driecChar = 2;
 			CLICK_M = TRUE;
 			GameScene = GAME_SCENE_PLAY;
 		}
@@ -1096,11 +1100,8 @@ VOID MY_PLAY(VOID)
 VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
-	static int driecChar = 2;
-	static bool dirDrwFlag = false, speedUPflg = false;
 
-//スクロール時の過去位置の誤差修正
-	player.collBeforePt.x -= gameSpeed;
+	static bool dirDrwFlag = false, speedUPflg = false;
 
 //難易度調整
 	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0 && speedUPflg == false) {
@@ -1124,6 +1125,10 @@ VOID MY_PLAY_PROC(VOID)
 			}
 		}
 	}
+
+
+	//スクロール時の過去位置の誤差修正
+	player.collBeforePt.x -= gameSpeed;
 
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
@@ -1239,7 +1244,7 @@ VOID MY_PLAY_PROC(VOID)
 
 //一回の入力判定（離したとき）
 	if (MY_KEY_TF == FALSE) {
-		if (colltime > PLAYER_MOVE_COLLTIME * GAME_FPS)
+		if (colltime >= PLAYER_MOVE_COLLTIME * GAME_FPS)
 		{
 			if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
 			else {
@@ -1561,6 +1566,14 @@ VOID MY_END_PROC(VOID)
 			CLICK_M = TRUE;
 
 			SetMouseDispFlag(TRUE);
+
+			for (int charS = 0; charS < IMAGE_CHAR_NUM; charS++)
+			{
+				if (ImageChar[charS].IsDraw == TRUE)
+					ImageChar[charS].IsDraw = FALSE;
+			}
+
+			MY_CHAR_MOVE_ST = TRUE;
 
 			GameScene = GAME_SCENE_START;
 
@@ -2236,10 +2249,12 @@ VOID TEXT_DRAW()
 {
 	int Cnt = 0;
 	setGoals setText;
-	setText.appendText(textGaol, GOAL1);
-	setText.appendText(textGaol, GOAL2);
-	setText.appendText(textGaol, GOAL3);
-
+	if (auto findt = std::find(textGaol.begin(), textGaol.end(), GOAL1) == textGaol.end())
+	{
+		setText.appendText(textGaol, GOAL1);
+		setText.appendText(textGaol, GOAL2);
+		setText.appendText(textGaol, GOAL3);
+	}
 	switch (ExDrawCnt)
 	{
 	case 1:
@@ -2249,10 +2264,9 @@ VOID TEXT_DRAW()
 	case 3:
 		Cnt = setText.findText(textGaol, GOAL3);		break;
 	}
-	
+
 	DrawString((GAME_WIDTH - GetDrawStringWidth(textGaol[Cnt].c_str(), -1)) / 2, 10, textGaol[Cnt].c_str(), GetColor(255, 0, 0));
 
-	
 	/*char* cp = NULL;
 
 	cp = (char*)malloc(sizeof(char) * 30);
@@ -2472,6 +2486,9 @@ VOID MY_STOP_DRAW(VOID)
 		ImageChoiser.y = ImageSTbROGO.image.y + ImageSTbROGO.image.height / 4 - ImageChoiser.height / 2;
 	}
 
+	DrawScore intervalScore;
+	intervalScore.drawStop(secondtime, mintime, COINCnt);
+
 	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
 		if (Kchoice == TRUE)
 			ImageSTeROGO.rate = 0.8;
@@ -2486,7 +2503,7 @@ VOID MY_STOP_DRAW(VOID)
 	}
 	SetFontSize(30);
 
-	DrawString((GAME_WIDTH - GetDrawStringWidth("_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", -1)) / 2, GAME_HEIGHT - 45, "_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", GetColor(255, 255, 255));
+	//DrawString((GAME_WIDTH - GetDrawStringWidth("_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", -1)) / 2, GAME_HEIGHT - 45, "_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", GetColor(255, 255, 255));
 
 }
 //ランキング
@@ -2507,7 +2524,7 @@ VOID MY_RNKING_PROC(VOID)
 
 	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
 		R_WRITE resetRnk;
-		resetRnk.ResetScore();
+		resetRnk.ResetScore(fsArry);
 		RANKINGflag = TRUE;
 	}
 
@@ -2579,8 +2596,17 @@ VOID MY_RNKING_DRAW(VOID)
 		fSize -= 4;
 	}
 
-	if(!RNKBackDrawFlag)
-	DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
+	if (!RNKBackDrawFlag)
+	{
+		DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
+		SetFontSize(25);
+		DrawString((GAME_WIDTH - GetDrawFormatStringWidth("DELETE：スコア初期化", -1)), 0, "DELETE：スコア初期化", GetColor(255, 255, 255));
+	}
+	else
+	{
+		SetFontSize(25);
+		DrawString((GAME_WIDTH - GetDrawFormatStringWidth("DELETE：スコア初期化", -1)), 0, "DELETE：スコア初期化", GetColor(0, 0, 0));
+	}
 
 	
 	DrawRotaGraph(
@@ -2597,6 +2623,7 @@ VOID MY_RNKING_DRAW(VOID)
 		FALL_RESON = FALSE;
 		ImageEndROGO.rate = 1.0;
 	}
+
 
 }
 

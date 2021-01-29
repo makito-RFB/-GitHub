@@ -19,7 +19,7 @@
 #define IMAGE_BACK_ENDC_PATH	  TEXT(".\\IMAGE\\END_IMG\\îwåiCONP.png")	//endSceneîwåi--------
 #define IMAGE_BACK_ENDF_PATH	  TEXT(".\\IMAGE\\END_IMG\\îwåiFALL.png")	//è„Ç…ìØÇ∂
 #define IMAGE_END_FAIL_PATH			TEXT(".\\IMAGE\\END_IMG\\é∏îs.png")		//é∏îsÉçÉS
-#define IMAGE_END_WITHDRAWAL_PATH	TEXT(".\\IMAGE\\END_IMG\\ê¨å˜.png")		//ê¨å˜ÉçÉS
+#define IMAGE_END_WITHDRAWAL_PATH	TEXT(".\\IMAGE\\END_IMG\\íEèo.png")		//íEèoÉçÉS
 
 #define IMAGE_RNK_BACK TEXT(".\\IMAGE\\RANKING_IMG\\RNKîwåi.png")			//RankingSceneîwåi--------
 #define IMAGE_RNK_BACK_NONE TEXT(".\\IMAGE\\RANKING_IMG\\RNKîwåinone.png")	//Å™ÇÃè∆ñæÇ»Çµî≈îwåi
