@@ -88,7 +88,7 @@
 
 #define GOAL1  TEXT("ゲーム目標とルール")
 #define GOAL2  TEXT("操作説明とアイテムについいて")
-#define GOAL3  TEXT("ストーリー")
+#define GOAL3  TEXT("キャラ選択")
 
 #define FILE_NUM	5
 #define CHECKEMPTY  1
@@ -346,6 +346,7 @@ MUSIC BGM_TITLE;
 MUSIC BGM_COMP;
 MUSIC BGM_FAIL;
 MUSIC BGM_RANKING;
+MUSIC musicShot;
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
@@ -904,7 +905,7 @@ VOID MY_START_PROC(VOID)
 	{
 		if (CLICK_M == TRUE)
 		{
-			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
 			CLICK_M = FALSE;
 		}
 	}
@@ -999,21 +1000,22 @@ VOID MY_EXPO_PROC(VOID) {
 //選択のページ判定
 	switch (ExDrawCnt)
 	{
-	case 1:
+	case 1:		//ゲーム目標
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			CLICK_M = TRUE;
 			ExDrawCnt = 2;
 		}
 		break;
-	//case 3:
-	//	if (MY_KEY_UP(KEY_INPUT_RETURN)) {
-	//		ExDrawCnt = 3;
-	//		CLICK_M = TRUE;
-	//	}  //ここパス
+	case 2:		//操作説明
+		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
+			ExDrawCnt = 3;
+			CLICK_M = TRUE;
+		}
 		break;
-	case 2:
+	case 3:
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 1;
+			CLICK_M = TRUE;
 			if (CheckSoundMem(BGM_TITLE.handle) != 0)
 			{
 				StopSoundMem(BGM_TITLE.handle);
@@ -1024,9 +1026,8 @@ VOID MY_EXPO_PROC(VOID) {
 					ImageChar[charS].IsDraw = FALSE;
 			}
 			ITEMCnt = 0;
-			COINCnt = 0;
+			COINCnt = 4;
 			driecChar = 2;
-			CLICK_M = TRUE;
 			GameScene = GAME_SCENE_PLAY;
 		}
 		break;
@@ -1037,7 +1038,7 @@ VOID MY_EXPO_PROC(VOID) {
 
 		if (CLICK_M == TRUE)
 		{
-			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
 			CLICK_M = FALSE;
 		}
 	}
@@ -1059,9 +1060,11 @@ VOID MY_EXPO_DRAW(VOID) {
 		GAME_PILOT();
 		DrawGraph(ImageExNews2.image.x, ImageExNews2.image.y, ImageExNews2.image.handle, TRUE);
 		break;
-	//case 3:
-	//	GAME_STR();
-	//	break;　　//ここパス
+	case 3:
+		GAME_STR();
+		DrawGraph(ImageExNews2.image.x, ImageExNews2.image.y, ImageExNews2.image.handle, TRUE);
+		DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
+		break;		//ここパス
 	}
 
 //文章の描画
@@ -1482,31 +1485,31 @@ VOID MY_PLAY_DRAW(VOID)
 
 	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
 
+	//当たり判定の描画（デバッグ用）
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			//壁ならば
+			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+			{
+				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+			}
+
+			//通路ならば
+			if (mapData[tate][yoko] == t)
+			{
+				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+			}
+		}
+	}
+
+	//////ゴールの描画（デバッグ用）
+	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+
+
 	////当たり判定の描画（デバッグ用）
-	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	//{
-	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-	//	{
-	//		//壁ならば
-	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-	//		{
-	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-	//		}
-
-	//		//通路ならば
-	//		if (mapData[tate][yoko] == t)
-	//		{
-	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-	//		}
-	//	}
-	//}
-
-	////////ゴールの描画（デバッグ用）
-	//////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
-
-
-	//////当たり判定の描画（デバッグ用）
-	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
@@ -1546,7 +1549,7 @@ VOID MY_END_PROC(VOID)
 		{
 			if (CLICK_M == TRUE)
 			{
-				PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+				PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
 				CLICK_M = FALSE;
 			}
 			if (CheckSoundMem(BGM_COMP.handle) != 0)
@@ -1673,9 +1676,10 @@ VOID MY_END_DRAW(VOID)
 	return;
 }
 
+
 BOOL MY_LOAD_IMAGE(VOID)
 {
-//タイトル背景
+	//タイトル背景
 	strcpy_s(ImageTitleBK.path, IMAGE_TITLE_BK_PATH);
 	ImageTitleBK.handle = LoadGraph(ImageTitleBK.path);
 	if (ImageTitleBK.handle == -1)
@@ -1687,7 +1691,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleBK.x = GAME_WIDTH / 2 - ImageTitleBK.width / 2;
 	ImageTitleBK.y = GAME_HEIGHT / 2 - ImageTitleBK.height / 2;
 
-//タイトルロゴ
+	//タイトルロゴ
 	strcpy_s(ImageTitleROGO.image.path, IMAGE_TITLE_ROGO_PATH);
 	ImageTitleROGO.image.handle = LoadGraph(ImageTitleROGO.image.path);
 	if (ImageTitleROGO.image.handle == -1)
@@ -1699,7 +1703,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleROGO.image.x = GAME_WIDTH / 2 - ImageTitleROGO.image.width / 2;
 	ImageTitleROGO.image.y = GAME_HEIGHT / 2 - ImageTitleROGO.image.height / 2;
 
-//タイトルスタート
+	//タイトルスタート
 	strcpy_s(ImageTitleSTART.image.path, IMAGE_TITLE_START_PATH);
 	ImageTitleSTART.image.handle = LoadGraph(ImageTitleSTART.image.path);
 	if (ImageTitleSTART.image.handle == -1)
@@ -1713,7 +1717,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleSTART.angle = 0;
 	ImageTitleSTART.rate = 1.0;
 
-//ランキング選択
+	//ランキング選択
 	strcpy_s(ImageTitleRNK.image.path, IMAGE_TITLE_RNK);
 	ImageTitleRNK.image.handle = LoadGraph(ImageTitleRNK.image.path);
 	if (ImageTitleRNK.image.handle == -1)
@@ -1727,7 +1731,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageTitleRNK.angle = 0;
 	ImageTitleRNK.rate = 1.0;
 
-//ゲームやめるロゴ
+	//ゲームやめるロゴ
 	strcpy_s(ImageSTeROGO.image.path, IMAGE_ST_E_ROGO_PATH);
 	ImageSTeROGO.image.handle = LoadGraph(ImageSTeROGO.image.path);
 	if (ImageSTeROGO.image.handle == -1)
@@ -1740,7 +1744,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageSTeROGO.image.y = ImageTitleROGO.image.y + ImageTitleROGO.image.height + 32;
 	ImageSTeROGO.angle = 0;
 	ImageSTeROGO.rate = 1.0;
-//ゲーム戻るロゴ
+	//ゲーム戻るロゴ
 	strcpy_s(ImageSTbROGO.image.path, IMAGE_ST_B_ROGO_PATH);
 	ImageSTbROGO.image.handle = LoadGraph(ImageSTbROGO.image.path);
 	if (ImageSTbROGO.image.handle == -1)
@@ -1754,7 +1758,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageSTbROGO.angle = 0;
 	ImageSTbROGO.rate = 1.0;
 
-//選択印
+	//選択印
 	strcpy_s(ImageChoiser.path, IMAGE_TITLE_CHI);
 	ImageChoiser.handle = LoadGraph(ImageChoiser.path);
 	if (ImageChoiser.handle == -1)
@@ -1767,7 +1771,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageChoiser.y = ImageTitleSTART.image.y + ImageTitleSTART.image.height / 4 - ImageChoiser.height / 2;
 
 
-//ゲーム説明
+	//ゲーム説明
 	strcpy_s(ImageEXPOBK.path, IMAGE_EXPO_BACK);
 	ImageEXPOBK.handle = LoadGraph(ImageEXPOBK.path);
 	if (ImageEXPOBK.handle == -1)
@@ -1779,7 +1783,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageEXPOBK.x = GAME_WIDTH / 2 - ImageEXPOBK.width / 2;
 	ImageEXPOBK.y = GAME_HEIGHT / 2 - ImageEXPOBK.height / 2;
 
-//ランキング背景
+	//ランキング背景
 	strcpy_s(RNKBACK.path, IMAGE_RNK_BACK);
 	RNKBACK.handle = LoadGraph(RNKBACK.path);
 	if (RNKBACK.handle == -1)
@@ -1791,7 +1795,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	RNKBACK.x = GAME_WIDTH / 2 - RNKBACK.width / 2;
 	RNKBACK.y = GAME_HEIGHT / 2 - RNKBACK.height / 2;
 
-//ランキング背景none
+	//ランキング背景none
 	strcpy_s(RNKBACKNone.path, IMAGE_RNK_BACK_NONE);
 	RNKBACKNone.handle = LoadGraph(RNKBACKNone.path);
 	if (RNKBACKNone.handle == -1)
@@ -1803,8 +1807,8 @@ BOOL MY_LOAD_IMAGE(VOID)
 	RNKBACKNone.x = GAME_WIDTH / 2 - RNKBACKNone.width / 2;
 	RNKBACKNone.y = GAME_HEIGHT / 2 - RNKBACKNone.height / 2;
 
-	
-//ランキング背景追加影
+
+	//ランキング背景追加影
 	strcpy_s(RNKShadow.path, IMAGE_RNK_SHADOW);
 	RNKShadow.handle = LoadGraph(RNKShadow.path);
 	if (RNKShadow.handle == -1)
@@ -1816,7 +1820,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	RNKShadow.x = GAME_WIDTH / 2 - RNKShadow.width / 2;
 	RNKShadow.y = GAME_HEIGHT / 2 - RNKShadow.height / 2;
 
-//ストップ画面背景
+	//ストップ画面背景
 	strcpy_s(stopBack.path, IMAGE_STOP_BACK);
 	stopBack.handle = LoadGraph(stopBack.path);
 	if (stopBack.handle == -1)
@@ -1828,7 +1832,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	stopBack.x = GAME_WIDTH / 2 - stopBack.width / 2;
 	stopBack.y = GAME_HEIGHT / 2 - stopBack.height / 2;
 
-//キャラの設定
+	//キャラの設定
 	int charRes = LoadDivGraph(
 		IMAGE_CHAR_PATH,
 		IMAGE_CHAR_NUM, CHAR_DIV_TATE, CHAR_DIV_YOKO,
@@ -1847,7 +1851,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	for (int imageCharNUM = 0; imageCharNUM < WORK_CHAR_NUM; imageCharNUM++)
 	{
 		ImageChar[imageCharNUM].IsDraw = FALSE;
-	
+
 	}
 	playerSt.image.x = GAME_WIDTH / 2 - player.image.width / 2;	//左右中央揃え
 	playerSt.image.y = GAME_HEIGHT - player.image.height;			//yは原点から
@@ -1864,7 +1868,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageEndFAIL.image.x = GAME_WIDTH / 2 - ImageEndFAIL.image.width / 2;
 	ImageEndFAIL.image.y = GAME_HEIGHT / 2 - ImageEndFAIL.image.height / 2 - 32;
 
-//エンド撤退
+	//エンド撤退
 	strcpy_s(ImageEndWD.image.path, IMAGE_END_WITHDRAWAL_PATH);
 	ImageEndWD.image.handle = LoadGraph(ImageEndWD.image.path);
 	if (ImageEndWD.image.handle == -1)
@@ -1876,7 +1880,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageEndWD.image.x = GAME_WIDTH / 2 - ImageEndWD.image.width / 2;
 	ImageEndWD.image.y = GAME_HEIGHT / 2 - ImageEndWD.image.height / 2 - 32;
 
-//エスケーププッシュ
+	//エスケーププッシュ
 	strcpy_s(ImageEndROGO.image.path, IMAGE_END_ROGO_PATH);
 	ImageEndROGO.image.handle = LoadGraph(ImageEndROGO.image.path);
 	if (ImageEndROGO.image.handle == -1)
@@ -1887,10 +1891,10 @@ BOOL MY_LOAD_IMAGE(VOID)
 	GetGraphSize(ImageEndROGO.image.handle, &ImageEndROGO.image.width, &ImageEndROGO.image.height);
 	ImageEndROGO.image.x = GAME_WIDTH - 70;
 	ImageEndROGO.image.y = GAME_HEIGHT - 50;
-	ImageEndROGO.angle = 0; 
+	ImageEndROGO.angle = 0;
 	ImageEndROGO.rate = 1.0;
 
-//NEXT PUSH
+	//NEXT PUSH
 	strcpy_s(ImageNextROGO.image.path, IMAGE_NEXT_ROGO_PATH);
 	ImageNextROGO.image.handle = LoadGraph(ImageNextROGO.image.path);
 	if (ImageNextROGO.image.handle == -1)
@@ -1905,7 +1909,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageNextROGO.rate = 1.0;
 
 
-//背景画像
+	//背景画像
 	strcpy_s(ImageBack.image.path, IMAGE_BACK_PATH);
 	ImageBack.image.handle = LoadGraph(ImageBack.image.path);
 	if (ImageBack.image.handle == -1)
@@ -1918,7 +1922,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageBack.image.y = 0 - ImageBack.image.height * 0;
 	ImageBack.IsDraw = FALSE;
 
-//shadow
+	//shadow
 	strcpy_s(ImageShadow.image.path, IMAGE_SHADOW_PATH);
 	ImageShadow.image.handle = LoadGraph(ImageShadow.image.path);
 	if (ImageShadow.image.handle == -1)
@@ -1932,7 +1936,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageShadow.IsDraw = FALSE;
 
 
-//背景画像END
+	//背景画像END
 	strcpy_s(ImageBackEND.image.path, IMAGE_BACK_ENDC_PATH);
 	ImageBackEND.image.handle = LoadGraph(ImageBackEND.image.path);
 	if (ImageBackEND.image.handle == -1)
@@ -1945,7 +1949,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageBackEND.image.y = 0 - ImageBackEND.image.height * 0;
 	ImageBackEND.IsDraw = FALSE;
 
-//背景画像ENDF
+	//背景画像ENDF
 	strcpy_s(ImageBackENDF.image.path, IMAGE_BACK_ENDF_PATH);
 	ImageBackENDF.image.handle = LoadGraph(ImageBackENDF.image.path);
 	if (ImageBackENDF.image.handle == -1)
@@ -1959,15 +1963,15 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageBackENDF.IsDraw = FALSE;
 
 
-//プレイヤーの画像
-	//strcpy_s(player.image.path, IMAGE_PLAYER_PATH);
-	//player.image.handle = LoadGraph(player.image.path);
-	//if (player.image.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_PLAYER_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(player.image.handle, &player.image.width, &player.image.height);
+	//プレイヤーの画像
+		//strcpy_s(player.image.path, IMAGE_PLAYER_PATH);
+		//player.image.handle = LoadGraph(player.image.path);
+		//if (player.image.handle == -1)
+		//{
+		//	MessageBox(GetMainWindowHandle(), IMAGE_PLAYER_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+		//	return FALSE;
+		//}
+		//GetGraphSize(player.image.handle, &player.image.width, &player.image.height);
 	player.image.x = GAME_WIDTH / 2 - player.image.width / 2;
 	player.image.y = GAME_HEIGHT / 2 - player.image.height / 2;
 	player.CenterX = player.image.x + player.image.width / 2;
@@ -1987,7 +1991,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageExNews1.image.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
 	ImageExNews1.IsDraw = FALSE;
 
-//説明画像2
+	//説明画像2
 	strcpy_s(ImageExNews2.image.path, IMAGE_EX_NEWS2);
 	ImageExNews2.image.handle = LoadGraph(ImageExNews2.image.path);
 	if (ImageExNews2.image.handle == -1)
@@ -1996,11 +2000,11 @@ BOOL MY_LOAD_IMAGE(VOID)
 		return FALSE;
 	}
 	GetGraphSize(ImageExNews2.image.handle, &ImageExNews2.image.width, &ImageExNews2.image.height);
-	ImageExNews2.image.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH /4 - 2);
+	ImageExNews2.image.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
 	ImageExNews2.image.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
 	ImageExNews2.IsDraw = FALSE;
 
-//マップの画像を分割する
+	//マップの画像を分割する
 	int mapRes = LoadDivGraph(
 		GAME_MAP_PATH,
 		MAP_DIV_NUM, MAP_DIV_TATE, MAP_DIV_YOKO,
@@ -2057,7 +2061,7 @@ VOID MY_DELETE_IMAGE(VOID)
 	}
 
 	DeleteGraph(player.image.handle);
-	
+
 	DeleteGraph(ImageTitleBK.handle);
 	DeleteGraph(ImageEXPOBK.handle);
 	DeleteGraph(RNKBACK.handle);
@@ -2093,9 +2097,9 @@ BOOL MY_LOAD_MUSIC(VOID)
 		return FALSE;
 	}
 
-	strcpy_s(player.musicShot.path, MUSIC_PLAYER_SHOT_PATH);
-	player.musicShot.handle = LoadSoundMem(player.musicShot.path);
-	if (player.musicShot.handle == -1)
+	strcpy_s(musicShot.path, MUSIC_PLAYER_SHOT_PATH);
+	musicShot.handle = LoadSoundMem(musicShot.path);
+	if (musicShot.handle == -1)
 	{
 		MessageBox(GetMainWindowHandle(), MUSIC_PLAYER_SHOT_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
 		return FALSE;
@@ -2140,7 +2144,7 @@ BOOL MY_LOAD_MUSIC(VOID)
 VOID MY_DELETE_MUSIC(VOID)
 {
 	DeleteSoundMem(BGM.handle);
-	DeleteSoundMem(player.musicShot.handle);
+	DeleteSoundMem(musicShot.handle);
 	DeleteSoundMem(BGM_TITLE.handle);
 	DeleteSoundMem(BGM_COMP.handle);
 	DeleteSoundMem(BGM_FAIL.handle);
@@ -2443,7 +2447,7 @@ VOID MY_STOP_PROC(VOID)
 	{
 		if (CLICK_M == TRUE)
 		{
-			PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+			PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
 			CLICK_M = FALSE;
 		}
 	}
@@ -2531,7 +2535,7 @@ VOID MY_RNKING_PROC(VOID)
 //選択音
 	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE && CLICK_M == TRUE)
 	{
-		PlaySoundMem(player.musicShot.handle, DX_PLAYTYPE_BACK);
+		PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
 		CLICK_M = FALSE;
 	}
 
