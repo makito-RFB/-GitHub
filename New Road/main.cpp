@@ -40,7 +40,7 @@
 #define CHAR_DREC_NUM		4
  
 
-#define PLAYER_MOVE_COLLTIME 0.25 //秒
+#define PLAYER_MOVE_COOLTIME 0.25f //秒
 
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
@@ -1129,10 +1129,6 @@ VOID MY_PLAY_PROC(VOID)
 		}
 	}
 
-
-	//スクロール時の過去位置の誤差修正
-	player.collBeforePt.x -= gameSpeed;
-
 	if (CheckSoundMem(BGM.handle) == 0)
 	{
 		ChangeVolumeSoundMem(255 * 50 / 100, BGM.handle);
@@ -1157,8 +1153,9 @@ VOID MY_PLAY_PROC(VOID)
 	secondtime += 0.016;
 	timeCnt++;
 
-//マップ・キャラ移動
+	//キャラのスクロール
 	player.CenterX -= gameSpeed;
+	player.collBeforePt.x -= gameSpeed;	//スクロールするまえの当たっていない位置と今の前の位置は違う
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 	{
@@ -1175,27 +1172,11 @@ VOID MY_PLAY_PROC(VOID)
 		}
 
 	}
-
+	//マップもここでスクロール
 	MAPmoveCnt += gameSpeed;
 
-
-	if (MAPmoveCnt >= MAP_DIV_WIDTH * 3)
-	{
-		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-		{
-			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-			{
-				//マップを移動当たり判定も移動
-				map[tate][yoko].x += MAPmoveCnt;
-				mapColl[tate][yoko].left += MAPmoveCnt;
-				mapColl[tate][yoko].right += MAPmoveCnt;
-
-			}
-		
-		}
-		ROCKETMAP();
-		MAPmoveCnt = 0;
-	}
+	ROCKETMAP();
+	MAPmoveCnt = 0;
 
 //ストップ画面移行
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
@@ -1247,7 +1228,7 @@ VOID MY_PLAY_PROC(VOID)
 
 //一回の入力判定（離したとき）
 	if (MY_KEY_TF == FALSE) {
-		if (colltime >= PLAYER_MOVE_COLLTIME * GAME_FPS)
+		if (colltime >= PLAYER_MOVE_COOLTIME * GAME_FPS)
 		{
 			if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
 			else {
@@ -1457,7 +1438,6 @@ VOID MY_PLAY_DRAW(VOID)
 
 	//プレイヤーを描画する
 	//DrawGraph(player.image.x, player.image.y, player.image.handle, TRUE);
-
 	for (int num = 0, Pnum = 0; num < CHAR_DREC_NUM; num++)
 	{
 		if (ImageChar[num].IsDraw == TRUE)
