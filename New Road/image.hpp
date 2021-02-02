@@ -66,6 +66,7 @@
 
 
 #define IMAGE_CHAR_PATH       TEXT(".\\IMAGE\\PLAYER_IMG\\player.png")	//プレイヤー（12分割）
+#define IMAGE_CHAR2_PATH       TEXT(".\\IMAGE\\PLAYER_IMG\\player2.png")	//プレイヤー（12分割）
 
 #define GAME_MAP_PATH			TEXT(".\\IMAGE\\MAP\\map.png")			//マップ
 

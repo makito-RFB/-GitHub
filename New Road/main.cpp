@@ -40,7 +40,7 @@
 #define CHAR_DREC_NUM		4
  
 
-#define PLAYER_MOVE_COOLTIME 0.25f //秒
+#define MOVE_COOLTIME  GAME_FPS * 0.25 //秒
 
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
@@ -260,6 +260,10 @@ char OldAllKeyState[256] = { '\0' };
 char direc; //向きのやつ
 int driecChar = 2;
 
+//マップのスピードアップと誤差フラグ
+bool speedUPflg = false;
+bool diffMarginFlg = false;
+
 //タイマースコア関係
 int ITEMCnt = 0, COINCnt = 0;
 int timeCnt = 0;
@@ -298,6 +302,8 @@ BOOL CLICK_M = TRUE;
 BOOL RANKINGflag = TRUE;
 
 BOOL COINflag = FALSE;
+
+BOOL IsReMove = FALSE;
 
 //FILE* fp = NULL, * fp2 = NULL;
 //errno_t error, error2;
@@ -1028,6 +1034,9 @@ VOID MY_EXPO_PROC(VOID) {
 			ITEMCnt = 0;
 			COINCnt = 4;
 			driecChar = 2;
+			speedUPflg = false;
+			speedUpTime = 0;
+			gameSpeed = SCROLL_SPEED;
 			GameScene = GAME_SCENE_PLAY;
 		}
 		break;
@@ -1104,11 +1113,12 @@ VOID MY_PLAY_PROC(VOID)
 {
 	static int colltime = 0;
 
-	static bool dirDrwFlag = false, speedUPflg = false;
+	static bool dirDrwFlag = false;
 
 //難易度調整
 	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0 && speedUPflg == false) {
 		speedUPflg = true;
+		speedUpTime = 0;
 	}
 	
 //スピードアップ処理
@@ -1124,7 +1134,6 @@ VOID MY_PLAY_PROC(VOID)
 			gameSpeed = SCROLL_SPEED;
 			if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) != 0) {
 				speedUPflg = false;
-				speedUpTime = 0;
 			}
 		}
 	}
@@ -1175,8 +1184,29 @@ VOID MY_PLAY_PROC(VOID)
 	//マップもここでスクロール
 	MAPmoveCnt += gameSpeed;
 
-	ROCKETMAP();
-	MAPmoveCnt = 0;
+	if (MAPmoveCnt >= MAP_DIV_WIDTH * 3)
+	{
+		if (MAPmoveCnt != MAP_DIV_WIDTH * 3) {
+			MAPmoveCnt--;
+			diffMarginFlg = true;
+		}
+		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+		{
+			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+			{
+				//マップを移動当たり判定も移動
+				map[tate][yoko].x += MAPmoveCnt;
+				mapColl[tate][yoko].left += MAPmoveCnt;
+				mapColl[tate][yoko].right += MAPmoveCnt;
+			}
+
+		}
+		ROCKETMAP();
+		MAPmoveCnt = diffMarginFlg ? 1 : 0; 
+		//マップ配列の描画誤差フラグを下す
+		if (diffMarginFlg)
+			diffMarginFlg = !diffMarginFlg;
+	}
 
 //ストップ画面移行
 	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
@@ -1191,6 +1221,7 @@ VOID MY_PLAY_PROC(VOID)
 		StopFlg = false;
 
 
+
 //一回の入力判定（押したととき）
 	if (MY_KEY_TF == TRUE) {
 		if (MY_KEY_DOWN(KEY_INPUT_W)) {
@@ -1199,36 +1230,33 @@ VOID MY_PLAY_PROC(VOID)
 			driecChar = 0;
 			MY_KEY_TF = FALSE;
 		}
-
-		if (MY_KEY_DOWN(KEY_INPUT_A)) {
+		else if (MY_KEY_DOWN(KEY_INPUT_A)) {
 			player.CenterX -= MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
 			driecChar = 3;
 			MY_KEY_TF = FALSE;
 		}
-
-		if (MY_KEY_DOWN(KEY_INPUT_S)) {
+		else if (MY_KEY_DOWN(KEY_INPUT_S)) {
 			player.CenterY += MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
 			driecChar = 2;
 			MY_KEY_TF = FALSE;
 		}
-
-		if (MY_KEY_DOWN(KEY_INPUT_D)) {
+		else if (MY_KEY_DOWN(KEY_INPUT_D)) {
 			player.CenterX += MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
 			driecChar = 1;
 			MY_KEY_TF = FALSE;
 		}
-	}
-	if (!ImageChar[driecChar].IsDraw)
-	{
-		ImageChar[driecChar].IsDraw = TRUE;
+		if (!ImageChar[driecChar].IsDraw)
+		{
+			ImageChar[driecChar].IsDraw = TRUE;
+		}
 	}
 
-//一回の入力判定（離したとき）
+	//一回の入力判定（離したとき）
 	if (MY_KEY_TF == FALSE) {
-		if (colltime >= PLAYER_MOVE_COOLTIME * GAME_FPS)
+		if (colltime >= MOVE_COOLTIME)
 		{
 			if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
 			else {
@@ -1238,23 +1266,27 @@ VOID MY_PLAY_PROC(VOID)
 		}
 		else
 			colltime++;
-		if (MY_KEY_UP(KEY_INPUT_W) || MY_KEY_UP(KEY_INPUT_A) || MY_KEY_UP(KEY_INPUT_S) || MY_KEY_UP(KEY_INPUT_D)) {
+
+	}
+
+	if (MY_KEY_UP(KEY_INPUT_W) || MY_KEY_UP(KEY_INPUT_A) || MY_KEY_UP(KEY_INPUT_S) || MY_KEY_UP(KEY_INPUT_D)) {
 		//プレイヤーの向き取り
-			if (DrCharCnt < 3 && DrCharCnt > -1) {
-				if(!dirDrwFlag)
-					DrCharCnt++;
-				else
-					DrCharCnt--;
-			}
-			if (DrCharCnt >= 3 || DrCharCnt <= -1) {
-				if (!dirDrwFlag)
-					DrCharCnt-=2;
-				else
-					DrCharCnt+=2;
-				dirDrwFlag = !dirDrwFlag;
-			}
+		if (DrCharCnt < 3 && DrCharCnt > -1) {
+			if (!dirDrwFlag)
+				DrCharCnt++;
+			else
+				DrCharCnt--;
+		}
+		if (DrCharCnt >= 3 || DrCharCnt <= -1) {
+			if (!dirDrwFlag)
+				DrCharCnt -= 2;
+			else
+				DrCharCnt += 2;
+			dirDrwFlag = !dirDrwFlag;
 		}
 	}
+
+
 
 	player.coll.left = player.CenterX - mapChip.width / 2 + 5;
 	player.coll.top = player.CenterY - mapChip.height / 2 + 5;
@@ -1278,13 +1310,13 @@ VOID MY_PLAY_PROC(VOID)
 	{
 		IsMove = FALSE;
 
-		newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH; //移動のプラス
+		newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
 		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 
 		if (map[newY][newX].kind == l)
 		{
 			//マップの更新
-			BOOL IsReMove = FALSE;
+
 
 			if (IsReMove == FALSE)
 			{
@@ -1352,7 +1384,7 @@ VOID MY_PLAY_PROC(VOID)
 		}
 
 		////元の位置に戻る
-		player.CenterX = player.collBeforePt.x;
+		player.CenterX = player.collBeforePt.x;	//スクロールするまえの当たっていない位置と今の前の位置は違う
 		player.CenterY = player.collBeforePt.y;
 	}
 
@@ -1361,6 +1393,7 @@ VOID MY_PLAY_PROC(VOID)
 
 	if (IsMove == TRUE)
 	{
+
 		int x = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
 		int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
 		switch (map[y][x].kind)
@@ -1394,6 +1427,8 @@ VOID MY_PLAY_PROC(VOID)
 		player.collBeforePt.x = player.CenterX;
 		player.collBeforePt.y = player.CenterY;
 	}
+
+
 
 	if (player.image.x > GAME_WIDTH || player.image.y > GAME_HEIGHT
 		|| player.image.x + player.image.width < 0 || player.image.y + player.image.height < 0)
