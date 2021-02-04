@@ -1,11 +1,11 @@
-#ifndef TEXTGOAL_HPP_DEFINED_
-#define TEXTGOAL_HPP_DEFINED_
+#ifndef SETTEXT_HPP_DEFINED_
+#define SETTEXT_HPP_DEFINED_
 
 #include<iostream>
 #include<vector>
 #include <DxLib.h>
 
-class setGoals
+class setText
 {
 public:
 	void appendText(std::vector<std::string>& textGaol, std::string appText);
@@ -17,4 +17,4 @@ private:
 
 
 
-#endif // !TEXTGOAL_HPP_DEFINED_
+#endif // !TEXT_HPP_DEFINED_

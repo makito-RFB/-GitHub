@@ -2,14 +2,14 @@
 #include<iostream>
 #include<vector>
 #include <DxLib.h>
-#include "textGoal.hpp"
+#include "setText.hpp"
 
-void setGoals::appendText(std::vector<std::string>& textGaol, std::string appText)
+void setText::appendText(std::vector<std::string>& textGaol, std::string appText)
 {
 	textGaol.emplace_back(appText);
 }
 
-int setGoals::findText(std::vector<std::string>& textGaol, std::string lookText)
+int setText::findText(std::vector<std::string>& textGaol, std::string lookText)
 {
 	auto reCnt = std::find(textGaol.begin(), textGaol.end(), lookText);
 	if (reCnt != textGaol.end())

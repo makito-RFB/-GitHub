@@ -153,14 +153,14 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="score.cpp" />
-    <ClCompile Include="textGoal.cpp" />
+    <ClCompile Include="setText.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="image.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RnkingRW.hpp" />
     <ClInclude Include="score.hpp" />
-    <ClInclude Include="textGoal.hpp" />
+    <ClInclude Include="setText.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Recource.rc" />
