@@ -26,8 +26,8 @@
 
 #define FONT_TANU_PATH    TEXT(".\\FONT\\TanukiMagic.ttf")
 #define FONT_TANU_NAME    TEXT("たぬき油性マジック")	
-#define FONT_GEN_PATH    TEXT(".\\FONT\\genkai-mincho.ttf")
-#define FONT_GEN_NAME    TEXT("源界明朝")	
+#define FONT_GEN_PATH    TEXT(".\\FONT\\doheta_j.ttf")
+#define FONT_GEN_NAME    TEXT("ドヘタ字 J")	
 
 
 #define FONT_INSTALL_ERR_TITLE	TEXT("フォントインストールエラー")
@@ -96,6 +96,8 @@
 #define STATUSTEMP		TEXT("名前　　：\nタイプ　：\nスピード：\nパワー　：")
 #define STATUS1		TEXT("アリス\nバランス\n★★★\n★")
 #define STATUS2		TEXT("リッキー\nタンク\n★\n★★★")
+#define CHARBIGSIZE	1.5
+#define CHARRESIZE	1
 
 #define FILE_NUM	5
 #define CHECKEMPTY  1
@@ -524,7 +526,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (MY_FONT_INSTALL_ONCE() == FALSE) { return -1; }
 	if (MY_FONT_CREATE() == FALSE) { return -1; }
 
-	ChangeFont("源界明朝", DX_CHARSET_DEFAULT);
+	ChangeFont("ドヘタ字 J", DX_CHARSET_DEFAULT);
 	ChangeFontType(DX_FONTTYPE_ANTIALIASING_8X8);
 
 	SetMouseDispFlag(TRUE);
@@ -1123,9 +1125,10 @@ VOID MY_EXPO_DRAW(VOID) {
 	case 2:
 		GAME_PILOT();
 		DrawGraph(ImageExNews2.x, ImageExNews2.y, ImageExNews2.handle, TRUE);
+		PlayChar = CHARA_BALANCE;
 		break;
 	case 3:
-		GAME_STR();
+		GAME_PILOT();
 		DrawGraph(ImageExNews2.x, ImageExNews2.y, ImageExNews2.handle, TRUE);
 		DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
 		CHAR_TYPE_SET();
@@ -1535,7 +1538,17 @@ VOID MY_PLAY_DRAW(VOID)
 		{
 			Pnum = num + (2 * num);
 			Pnum += DrCharCnt;
-			DrawGraph(player.x, player.y, player2.handle2[Pnum], TRUE);
+			switch (PlayChar)
+			{
+			case CHARA_BALANCE:
+				DrawGraph(player.x, player.y, player.handle2[Pnum], TRUE);
+				break;
+			case CHARA_TANK:
+				DrawGraph(player.x, player.y, player2.handle2[Pnum], TRUE);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -2040,7 +2053,7 @@ BOOL MY_LOAD_IMAGE(VOID)
 	GetGraphSize(player2.handle2[0], &player2.width, &player2.height);
 	//位置・サイズの設定
 	player.x = GAME_WIDTH / 4;
-	player.y = GAME_HEIGHT / 2;
+	player.y = GAME_HEIGHT / 4;
 	player.angle = 0;
 	player.rate = 1.0;
 
@@ -2337,7 +2350,8 @@ VOID MAP_LOAD(VOID)
 
 void CHAR_TYPE_SET()
 {
-	int Template = 0 , Cnt = 0, Cnt2 = 0;
+	static int Template = 0, Cnt = 0, play1y = GAME_HEIGHT / 2, play2y = GAME_HEIGHT / 2;
+	static float lx = 0.0f, ly = 0.0f, rx = 0.0f, ry = 0.0f;
 	//文字の書き込み
 	setText setText;
 	if (auto findt = std::find(charstatus.begin(), charstatus.end(), STATUSTEMP) == charstatus.end())
@@ -2347,41 +2361,81 @@ void CHAR_TYPE_SET()
 		setText.appendText(charstatus, STATUS2);
 	}
 
+	//キャラクタの後ろの図形
+	DrawBoxAA(lx, ly, rx, ry, GetColor(220, 220, 220), TRUE);
+
 	//描画＆サイズ指定
 	DrawRotaGraph(
-		player.x = GAME_WIDTH / 4, player.y = GAME_HEIGHT / 2,
-		player.rate *2,
+		player.x = GAME_WIDTH / 4, player.y = play1y,
+		player.rate * 2,
 		player.angle,
 		player.handle2[1], TRUE);
-	//キャラの説明呼び出し
-	Cnt = setText.findText(charstatus, STATUS1);
 
 	DrawRotaGraph(
-		player2.x = GAME_WIDTH / 4 * 3, player2.y = GAME_HEIGHT / 2,
-		player2.rate *2,
+		player2.x = GAME_WIDTH / 4 * 3, player2.y = play2y,
+		player2.rate * 2,
 		player2.angle,
 		player2.handle2[1], TRUE);
-	//キャラの説明呼び出し
-	Cnt2 = setText.findText(charstatus, STATUS2);
 
-	switch (PlayChar)
-	{
-	case CHARA_BALANCE:
-		player.rate * 1.2;
-		DrawString((player.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), player.y + player.height / 2 + MAP_DIV_TATE / 2, charstatus[Template].c_str(), GetColor(255, 0, 0));
-		DrawString(player.x + 10, player.y + player.height / 2 + MAP_DIV_TATE / 2, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
-		break;
-	case CHARA_TANK:
-		player2.rate * 1.2;
-		DrawString((player2.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), player2.y + player2.height / 2 + MAP_DIV_TATE / 2, charstatus[Template].c_str(), GetColor(255, 0, 0));
-		DrawString(player2.x + 10, player2.y + player2.height / 2 + MAP_DIV_TATE / 2, charstatus[Cnt2].c_str(), GetColor(255, 0, 0));
-		break;
-	default:
-		break;
+	if (charstatus[Template] == STATUSTEMP) {
+		switch (PlayChar)
+		{
+		case CHARA_BALANCE:
+			lx = (player.x - player.width / 2) - player.width * 2;			//背景図形の位置設定
+			ly = (player.y - player.height / 2) - player.width;
+			rx = (player.x + player.width / 2) + player.width * 2;
+			ry = (player.y + player.height / 2) + player.height * 3.5;
+			if (charstatus[Cnt] == STATUS1) {
+				play1y = GAME_HEIGHT / 5 * 2;
+				play2y = GAME_HEIGHT / 2;
+				player.rate = CHARBIGSIZE;
+				player2.rate = CHARRESIZE;
+
+				//文字の場所指定
+				DrawString((player.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
+				DrawString(player.x + 10, (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
+			}
+			else
+			{
+				Cnt = setText.findText(charstatus, STATUS1); 	//キャラの説明呼び出し
+
+			}
+			if(MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) { //キャラの変更
+				PlayChar = CHARA_TANK; 
+			}
+			break;
+		case CHARA_TANK:
+			if (charstatus[Cnt] == STATUS2) {
+				lx = (player2.x - player2.width / 2) - player2.width * 2;			//背景図形の位置設定
+				ly = (player2.y - player2.height / 2) - player2.width;
+				rx = (player2.x + player2.width / 2) + player2.width * 2;
+				ry = (player2.y + player2.height / 2) + player2.height * 3.5;
+				play2y = GAME_HEIGHT / 5 * 2;
+				play1y = GAME_HEIGHT / 2;
+				player2.rate = CHARBIGSIZE;
+				player.rate = CHARRESIZE;
+
+				//文字の場所指定
+				DrawString((player2.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
+				DrawString(player2.x + 10, (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
+			}
+			else
+			{
+				Cnt = setText.findText(charstatus, STATUS2); 	//キャラの説明呼び出し
+			}
+			if (MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) {	//キャラの変更
+				PlayChar = CHARA_BALANCE;
+			}
+
+			break;
+		default:
+			break;
+		}
 	}
-
-	//文字の場所指定
-
+	else
+	{
+		Template = setText.findText(charstatus, STATUSTEMP); 	//キャラの説明テンプレート呼び出し
+	}
 
 	return;
 }
