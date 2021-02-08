@@ -43,7 +43,8 @@
 #define CHAR_DREC_NUM		4
  
 
-#define MOVE_COOLTIME  GAME_FPS * 0.25 //秒
+#define VARNCE_CHAR  GAME_FPS * 0.25 //秒
+#define TANKA_CHAR	GAME_FPS * 0.5 //秒
 
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
@@ -96,6 +97,7 @@
 #define STATUSTEMP		TEXT("名前　　：\nタイプ　：\nスピード：\nパワー　：")
 #define STATUS1		TEXT("アリス\nバランス\n★★★\n★")
 #define STATUS2		TEXT("リッキー\nタンク\n★\n★★★")
+#define CHARA_ARROW TEXT("十字キー\n←　　→")
 #define CHARBIGSIZE	1.5
 #define CHARRESIZE	1
 
@@ -296,6 +298,7 @@ char OldAllKeyState[256] = { '\0' };
 char direc; //向きのやつ
 int driecChar = 2;
 int PlayChar = 0;
+int cooltimeType = 0; 
 
 //マップのスピードアップと誤差フラグ
 bool speedUPflg = false;
@@ -1078,6 +1081,17 @@ VOID MY_EXPO_PROC(VOID) {
 				if (ImageChar[charS].IsDraw == TRUE)
 					ImageChar[charS].IsDraw = FALSE;
 			}
+			switch (PlayChar)
+			{
+				case CHARA_BALANCE:
+					cooltimeType = VARNCE_CHAR;
+				break;
+				case CHARA_TANK:
+					cooltimeType = TANKA_CHAR;
+					break;
+			default:
+				break;
+			}
 
 			player.CenterX = startPt.x;
 			player.CenterY = startPt.y;
@@ -1314,8 +1328,8 @@ VOID MY_PLAY_PROC(VOID)
 	}
 
 	//一回の入力判定（離したとき）
-	if (MY_KEY_TF == FALSE) {
-		if (colltime >= MOVE_COOLTIME)
+	if (MY_KEY_TF == FALSE) {		//プレイヤーの移動入力のクールタイム設定
+		if (colltime >= cooltimeType)
 		{
 			if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
 			else {
@@ -2436,6 +2450,7 @@ void CHAR_TYPE_SET()
 	{
 		Template = setText.findText(charstatus, STATUSTEMP); 	//キャラの説明テンプレート呼び出し
 	}
+	DrawString(GAME_WIDTH / 2 - GetDrawStringWidth(CHARA_ARROW,-1) / 2, GAME_HEIGHT / 2 - 44, CHARA_ARROW, GetColor(255, 255, 255));
 
 	return;
 }
