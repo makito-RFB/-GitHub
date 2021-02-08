@@ -70,183 +70,48 @@
 
 #define GAME_MAP_PATH			TEXT(".\\IMAGE\\MAP\\map.png")			//マップ
 
-//
-//enum GAME_MAP_KIND
-//{
-//	n = -1,	//(NONE)未定
-//	k = 0,	//壁
-//	m = 1,  //壁２
-//	r = 2,  //壁３
-//	l = 4,  //動く壁
-//	t = 9,	//通路
-//	s = 5,	//スタート
-//	c = 6,  //コイン
-//	g = 3	//アイテム
-//};
-//
-//typedef struct STRUCT_IMAGE
-//{
-//	char path[PATH_MAX];
-//	int handle;
-//	int handle2[IMAGE_CHAR_NUM];
-//	int x;
-//	int y;
-//	int width;
-//	int height;
-//}IMAGE;
-//
-//
-//typedef struct STRUCT_CHARA
-//{
-//	IMAGE image;
-//	int speed;
-//	int CenterX;
-//	int CenterY;
-//
-//
-//
-//	RECT coll;
-//	iPOINT collBeforePt;
-//
-//}CHARA;
-//
-//
-//typedef struct STRUCT_IMAGE_BACK
-//{
-//	IMAGE image;
-//	BOOL IsDraw;
-//}IMAGE_BACK;
-//
-//typedef struct STRUCT_IMAGE_ROTA
-//{
-//	IMAGE image;
-//
-//}IMAGE_ROTA;
-//
-//typedef struct STRUCT_IMAGE_WORK
-//{
-//	IMAGE image;
-//	int Cnt;
-//	int CntMAX;
-//	BOOL IsDraw;
-//
-//}IMAGE_WORK;
-//
-//typedef struct STRUCT_IMAGE_BLINK
-//{
-//	IMAGE image;
-//	BOOL IsDraw;
-//	double rate;
-//	double angle;
-//}IMAGE_BLINK;
-//
-//typedef struct STRUCT_MAP_IMAGE
-//{
-//	char path[PATH_MAX];
-//	int handle[MAP_DIV_NUM];
-//	int kind[MAP_DIV_NUM];
-//	int width;
-//	int height;
-//}MAPCHIP;
-//
-//typedef struct STRUCT_MAP
-//{
-//	GAME_MAP_KIND kind;
-//	int x;
-//	int y;
-//	int width;
-//	int height;
-//	BOOL IsDraw;
-//}MAP;
-//
-//IMAGE_BACK ImageBack;
-//IMAGE_BACK ImageBackEND;
-//IMAGE_BACK ImageBackENDF;
-//IMAGE_BACK ImageShadow;
-//
-//IMAGE ImageTitleBK;
-//IMAGE RNKBACK;
-//IMAGE RNKBACKNone;
-//IMAGE RNKShadow;
-//IMAGE stopBack;
-//
-//IMAGE_ROTA ImageTitleROGO;
-//
-//IMAGE_BLINK ImageSTeROGO;
-//IMAGE_BLINK ImageSTbROGO;
-//
-//IMAGE_BLINK ImageTitleSTART;
-//IMAGE_BLINK ImageTitleRNK;
-//
-//IMAGE ImageEXPOBK;
-//
-//IMAGE_BACK ImageExNews1;
-//IMAGE_BACK ImageExNews2;
-//
-//IMAGE_BACK ImageEndFAIL;
-//IMAGE_BACK ImageEndWD;
-//
-//IMAGE_BLINK ImageNextROGO;
-//IMAGE_BLINK ImageEndROGO;
-//IMAGE ImageChoiser;
-//
-//IMAGE_WORK ImageWork;
-//
-//IMAGE_WORK ImageChar[IMAGE_CHAR_NUM];
-//
-//CHARA playerSt;
-//CHARA player;
-//
-//GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
-//	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
-//		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-//		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
-//		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
-//		k,l,t,t,t,k,t,k,t,c,l,t,l,t,l,t,l,t,	// 3
-//		k,t,t,l,t,k,s,k,l,k,l,l,k,t,c,l,k,t,	// 4
-//		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
-//		k,t,c,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
-//		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
-//		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
-//
-//};
-//
-////マップ初期化用のバックアップ
-//GAME_MAP_KIND mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
-//	//  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7
-//		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-//		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,	// 1
-//		k,t,t,l,t,l,t,l,t,k,t,t,l,t,t,t,l,t,	// 2
-//		k,l,t,t,t,k,t,k,t,c,l,t,l,t,l,t,l,t,	// 3
-//		k,t,t,l,t,k,s,k,l,k,l,l,k,t,c,l,k,t,	// 4
-//		k,l,l,t,l,t,t,k,t,t,l,t,k,t,l,t,k,t,	// 5
-//		k,t,c,k,t,l,t,k,l,t,g,t,k,g,g,t,k,g,	// 6
-//		k,t,t,k,t,k,t,l,t,t,l,t,t,t,l,t,t,t,	// 7
-//		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,	// 8
-//
-//};
-//
-//GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_KAKU_YOKO_MAX]{ //3ブロックづつ
-//	//  0,1,2,3,4,5,6,7,8,9,1,1,2,3,4,5,6,7,8,9,2,1,2,3,4,5,6,7,8,9
-//		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-//		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
-//		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,l,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
-//		k,l,t,t,l,k,g,k,l,t,l,t,c,l,l,t,l,t,l,k,l,t,k,t,k,g,t,k,t,t,	// 3
-//		l,t,k,t,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
-//		l,c,l,t,l,t,t,k,t,t,l,l,k,t,l,t,k,t,k,g,l,k,t,l,l,l,k,t,c,t,	// 5
-//		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,g,t,l,k,l,g,k,t,l,t,t,k,t,	// 6
-//		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,k,t,k,k,l,t,k,t,	// 7
-//		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
-//};
-//
-//GAME_MAP_KIND mapDataInit[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
-//MAPCHIP mapChip;
-//MAP map[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
-//iPOINT startPt{ -1,-1 };
-//RECT mapColl[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX];
+typedef struct STRUCT_I_POINT
+{
+	int x = -1;
+	int y = -1;
+}iPOINT;
+
+class IMG
+{
+public:
+	int x;
+	int y;
+	int width;
+	int height;
+	int handle;
+	BOOL IsDraw;
+	char path[PATH_MAX];
+
+	BOOL RoadImage(IMG &,const char*);
+};
+
+class IMG_BLINK :public IMG
+{
+public:
+	double rate;
+	double angle;
+
+};
+
+class IMG_CHAR :public IMG_BLINK
+{
+public:
+	int handle2[IMAGE_CHAR_NUM];
+	int Cnt;
+	int CntMAX;
+
+	int CenterX;
+	int CenterY;
+	RECT coll;
+	iPOINT collBeforePt;
+};
 
 
-//
 //BOOL MY_LOAD_IMAGE(VOID)
 //{
 //	//タイトル背景

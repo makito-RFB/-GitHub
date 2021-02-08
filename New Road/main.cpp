@@ -44,7 +44,7 @@
  
 
 #define VARNCE_CHAR  GAME_FPS * 0.25 //秒
-#define TANKA_CHAR	GAME_FPS * 0.5 //秒
+#define TANKA_CHAR	GAME_FPS * 0.3 //秒
 
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
@@ -63,6 +63,13 @@
 #define MUSIC_BGM_COMP_PATH		TEXT(".\\MUSIC\\Yours.mp3")				//コンプリートBGM
 #define MUSIC_BGM_FAIL_PATH		TEXT(".\\MUSIC\\Yours.mp3")					//フォールトBGM
 #define MUSIC_BGM_RANK_PATH		TEXT(".\\MUSIC\\深淵に眠るクトーニアン.mp3")//ランキングBGM
+
+#define MUSIC_CLOCK_BGM_PATH			TEXT(".\\MUSIC\\se_clock.mp3")			//時計
+#define MUSIC_COIN_BGM_PATH				TEXT(".\\MUSIC\\se_coin_get1.mp3")		//コインゲットしたとき
+#define MUSIC_BRAKE_BGM_PATH			TEXT(".\\MUSIC\\se_gareki01.mp3")		//障害物破壊
+#define MUSIC_STRAT_ROGO_BGM_PATH		TEXT(".\\MUSIC\\se_nanika01.mp3")		//何かが出る感じの音
+#define MUSIC_RANI_BGM_PATH				TEXT(".\\MUSIC\\se_rain2_loop.mp3")		//雨
+#define MUSIC_SCEN_SEN_BGM_PATH			TEXT(".\\MUSIC\\se_scene_seni02.mp3")	//シーン遷移
 
 #define GAME_MAP_TATE_MAX	9	//マップの縦の数
 #define GAME_MAP_YOKO_MAX	18	//マップの横の数
@@ -142,20 +149,16 @@ enum CHARA_TYPE_SET {
 //	CHARA_RELOAD_HIGH = 15
 //};
 
-typedef struct STRUCT_I_POINT
-{
-	int x = -1;
-	int y = -1;
-}iPOINT;
 
-typedef struct STRUCT_MOUSE
-{
-	int InputValue = 0;	
-	iPOINT Point;		//マウスの座標が入る
-	iPOINT OldPoint;	//マウスの座標(直前)が入る
-	int OldButton[MOUSE_BUTTON_CODE] = { 0 };
-	int Button[MOUSE_BUTTON_CODE] = { 0 };
-}MOUSE;
+
+//typedef struct STRUCT_MOUSE
+//{
+//	int InputValue = 0;	
+//	iPOINT Point;		//マウスの座標が入る
+//	iPOINT OldPoint;	//マウスの座標(直前)が入る
+//	int OldButton[MOUSE_BUTTON_CODE] = { 0 };
+//	int Button[MOUSE_BUTTON_CODE] = { 0 };
+//}MOUSE;
 
 typedef struct STRUCT_FONT
 {
@@ -175,54 +178,6 @@ typedef struct STRUCT_MUSIC
 	int handle;
 }MUSIC;
 
-//typedef struct STRUCT_IMAGE
-//{
-//	char path[PATH_MAX];
-//	int handle;
-//	int handle2[IMAGE_CHAR_NUM];
-//	int x;
-//	int y;
-//	int width;
-//	int height;
-//}IMAGE;
-//typedef struct STRUCT_CHARA
-//{
-//	IMAGE image;
-//	int speed;
-//	int CenterX;
-//	int CenterY;
-//
-//	RECT coll;
-//	iPOINT collBeforePt;
-//
-//}CHARA;
-//typedef struct STRUCT_IMAGE_BACK
-//{
-//	IMAGE image;
-//	BOOL IsDraw;
-//}IMAGE_BACK;
-//
-//typedef struct STRUCT_IMAGE_ROTA
-//{
-//	IMAGE image;
-//
-//}IMAGE_ROTA;
-//
-//typedef struct STRUCT_IMAGE_WORK
-//{
-//	IMAGE image;
-//	int Cnt;
-//	int CntMAX;
-//	BOOL IsDraw;
-//
-//}IMAGE_WORK;
-//typedef struct STRUCT_IMAGE_BLINK
-//{
-//	IMAGE image;
-//	BOOL IsDraw;
-//	double rate;
-//	double angle;
-//}IMAGE_BLINK;
 
 typedef struct STRUCT_MAP_IMAGE
 {
@@ -243,37 +198,6 @@ typedef struct STRUCT_MAP
 	BOOL IsDraw;
 }MAP;
 
-class IMG
-{
-public:
-	int x;
-	int y;
-	int width;
-	int height;
-	int handle;
-	BOOL IsDraw;
-	char path[PATH_MAX];
-};
-
-class IMG_BLINK :public IMG
-{
-public:
-	double rate;
-	double angle;
-};
-
-class IMG_CHAR :public IMG_BLINK
-{
-public:
-	int handle2[IMAGE_CHAR_NUM];
-	int Cnt;
-	int CntMAX;
-
-	int CenterX;
-	int CenterY;
-	RECT coll;
-	iPOINT collBeforePt;
-};
 
 int StartTimeFps;
 int CountFps;
@@ -324,7 +248,7 @@ int ExDrawCnt = 1;
 //ストップフラグ
 bool StopFlg = false;
 
-MOUSE mouse;
+//MOUSE mouse;
 
 FONT FontTanu32;
 FONT FontGen32;
@@ -396,6 +320,13 @@ MUSIC BGM_COMP;
 MUSIC BGM_FAIL;
 MUSIC BGM_RANKING;
 MUSIC musicShot;
+
+MUSIC se_clock;
+MUSIC se_coin_g;
+MUSIC se_breke;
+MUSIC se_rogo_draw;
+MUSIC se_rain;
+MUSIC se_scene_sen;
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
@@ -821,6 +752,8 @@ VOID MY_FONT_DELETE(VOID)
 	return;
 }
 
+/*----------------------------------スタートシーン------------------------------------------------------*/
+
 VOID MY_START(VOID)
 {
 	MY_START_PROC();
@@ -1038,6 +971,8 @@ VOID MY_START_DRAW(VOID)
 	return;
 }
 
+/*----------------------------------ゲーム説明シーン------------------------------------------------------*/
+
 VOID MY_EXPO(VOID)
 {
 	MY_EXPO_PROC();
@@ -1173,6 +1108,8 @@ VOID MY_EXPO_DRAW(VOID) {
 
 	return;
 }
+
+/*----------------------------------プレイシーン------------------------------------------------------*/
 
 VOID MY_PLAY(VOID)
 {
@@ -1631,6 +1568,8 @@ VOID MY_PLAY_DRAW(VOID)
 	return;
 }
 
+/*----------------------------------エンドシーン------------------------------------------------------*/
+
 VOID MY_END(VOID)
 {
 	MY_END_PROC();
@@ -1774,267 +1713,891 @@ VOID MY_END_DRAW(VOID)
 	return;
 }
 
+/*----------------------------------stopシーン------------------------------------------------------*/
 
+VOID MY_STOP(VOID)
+{
+	MY_STOP_PROC();
+	MY_STOP_DRAW();
+	return;
+}
+
+VOID MY_STOP_PROC(VOID)
+{
+	static BOOL MusicPass = TRUE;
+	static BOOL check = TRUE;
+
+	if (CheckSoundMem(BGM_TITLE.handle) != 0)
+	{
+		StopSoundMem(BGM_TITLE.handle);
+	}
+
+	if (!StopFlg)
+		StopFlg = true;
+
+	//-----------------------
+	if (check == TRUE) {
+		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
+			Kchoice = !Kchoice;
+			check = FALSE;
+		}
+	}
+	if (MY_KEY_UP(KEY_INPUT_DOWN) == TRUE || MY_KEY_UP(KEY_INPUT_UP) == TRUE)
+		check = TRUE;
+	//------------------------
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
+	{
+		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		{
+			StopSoundMem(BGM_TITLE.handle);
+			MusicPass = FALSE;
+		}
+	}
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
+		MusicPass = TRUE;
+		CLICK_M = TRUE;
+		GameScene = GAME_SCENE_END;
+		GameEndKind = GAME_END_EXIT;
+
+		return;
+	}
+	//-------------------------
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
+	{
+
+		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		{
+			StopSoundMem(BGM_TITLE.handle);
+			MusicPass = FALSE;
+		}
+	}
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
+		MusicPass = TRUE;
+		Kchoice = TRUE;
+		CLICK_M = TRUE;
+		PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP, FALSE);
+		GameScene = GAME_SCENE_PLAY;
+		return;
+	}
+
+	//選択音
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
+	{
+		if (CLICK_M == TRUE)
+		{
+			PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
+			CLICK_M = FALSE;
+		}
+	}
+	return;
+}
+
+VOID MY_STOP_DRAW(VOID)
+{
+	MY_PLAY_DRAW();
+
+	DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
+
+	DrawGraph(ImageTitleROGO.x, ImageTitleROGO.y, ImageTitleROGO.handle, TRUE);
+
+	DrawRotaGraph(
+		ImageSTeROGO.x, ImageSTeROGO.y,
+		ImageSTeROGO.rate,
+		ImageSTeROGO.angle,
+		ImageSTeROGO.handle, TRUE);
+
+	DrawRotaGraph(
+		ImageSTbROGO.x, ImageSTbROGO.y,
+		ImageSTbROGO.rate,
+		ImageSTbROGO.angle,
+		ImageSTbROGO.handle, TRUE);
+
+	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
+
+
+	if (Kchoice == TRUE) {
+		ImageSTeROGO.rate = 1.2;
+		ImageSTbROGO.rate = 1.0;
+		ImageChoiser.x = ImageSTeROGO.x + ImageSTeROGO.width / 2 + MAP_DIV_WIDTH / 2;
+		ImageChoiser.y = ImageSTeROGO.y + ImageSTeROGO.height / 4 - ImageChoiser.height / 2;
+	}
+	else {
+		ImageSTeROGO.rate = 1.0;
+		ImageSTbROGO.rate = 1.2;
+		ImageChoiser.x = ImageSTbROGO.x + ImageSTbROGO.width / 2 + MAP_DIV_WIDTH / 2;
+		ImageChoiser.y = ImageSTbROGO.y + ImageSTbROGO.height / 4 - ImageChoiser.height / 2;
+	}
+
+	DrawScore intervalScore;
+	intervalScore.drawStop(secondtime, mintime, COINCnt);
+
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
+		if (Kchoice == TRUE)
+			ImageSTeROGO.rate = 0.8;
+		else
+			ImageSTbROGO.rate = 0.8;
+		ImageChoiser.x -= MAP_DIV_WIDTH / 2;
+	}
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+		ImageSTeROGO.rate = 1.0;
+		ImageSTbROGO.rate = 1.0;
+		ImageChoiser.x += MAP_DIV_WIDTH / 2;
+	}
+	SetFontSize(30);
+
+	//DrawString((GAME_WIDTH - GetDrawStringWidth("_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", -1)) / 2, GAME_HEIGHT - 45, "_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", GetColor(255, 255, 255));
+
+}
+
+/*----------------------------------ランキングシーン------------------------------------------------------*/
+
+VOID MY_RNKING(VOID)
+{
+	MY_RNKING_PROC();
+	MY_RNKING_DRAW();
+	return;
+}
+
+VOID MY_RNKING_PROC(VOID)
+{
+	if (CheckSoundMem(BGM_RANKING.handle) == 0)
+	{
+		ChangeVolumeSoundMem(255 * 25 / 100, BGM_RANKING.handle);
+		PlaySoundMem(BGM_RANKING.handle, DX_PLAYTYPE_LOOP);
+	}
+
+	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
+		R_WRITE resetRnk;
+		resetRnk.ResetScore(fsArry);
+		RANKINGflag = TRUE;
+	}
+
+	//選択音
+	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE && CLICK_M == TRUE)
+	{
+		PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
+		CLICK_M = FALSE;
+	}
+
+
+	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+
+		/*SetMouseDispFlag(TRUE);*/
+		if (CheckSoundMem(BGM_RANKING.handle) != 0)
+		{
+			StopSoundMem(BGM_RANKING.handle);
+		}
+
+		GameScene = GAME_SCENE_START;
+		CLICK_M = TRUE;
+		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP, FALSE);
+
+		return;
+	}
+}
+
+VOID MY_RNKING_DRAW(VOID)
+{
+	static BOOL RNKBackDrawFlag = TRUE;
+	static int fSize = 0;
+	static int RBKdrawCnt = 0;
+	if (RNKBackDrawFlag) {
+		if (RBKdrawCnt < (GAME_FPS * 3)) {
+			DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);
+			RBKdrawCnt++;
+		}
+		else
+		{
+			RBKdrawCnt = 0;
+			RNKBackDrawFlag = FALSE;
+		}
+	}
+	else {
+		if (RBKdrawCnt < (GAME_FPS / 2)) {
+			DrawGraph(RNKBACKNone.x, RNKBACKNone.y, RNKBACKNone.handle, TRUE);
+			RBKdrawCnt++;
+		}
+		else
+		{
+			RBKdrawCnt = 0;
+			RNKBackDrawFlag = TRUE;
+		}
+	}
+
+	if (RANKINGflag)
+	{
+		if (!fsArry[CHECKEMPTY]) {
+			R_WRITE rankingWatch;
+			rankingWatch.Rread(fsArry);
+		}
+		RANKINGflag = FALSE;
+	}
+	fSize = 64;
+	for (int i = 0; i < FILE_NUM; i++)
+	{
+		SetFontSize(fSize);
+		DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("%d位: %.2f", i + 1, fsArry[i], -1)) / 2, GAME_HEIGHT / 9 * 4 + 64 * i, GetColor(0, 0, 0), "%d位: %.2f", i + 1, fsArry[i]);
+		fSize -= 4;
+	}
+
+	if (!RNKBackDrawFlag)
+	{
+		DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
+		SetFontSize(25);
+		DrawString((GAME_WIDTH - GetDrawFormatStringWidth("DELETE：スコア初期化", -1)), 0, "DELETE：スコア初期化", GetColor(255, 255, 255));
+	}
+	else
+	{
+		SetFontSize(25);
+		DrawString((GAME_WIDTH - GetDrawFormatStringWidth("DELETE：スコア初期化", -1)), 0, "DELETE：スコア初期化", GetColor(0, 0, 0));
+	}
+
+
+	DrawRotaGraph(
+		ImageEndROGO.x, ImageEndROGO.y,
+		ImageEndROGO.rate,
+		ImageEndROGO.angle,
+		ImageEndROGO.handle, TRUE);
+
+
+	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+		ImageEndROGO.rate = 0.8;
+
+	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+		FALL_RESON = FALSE;
+		ImageEndROGO.rate = 1.0;
+	}
+
+
+}
+
+/*----------------------------------シーン以外の関数------------------------------------------------------*/
+
+BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT player)
+{
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			if (MY_CHECK_RECT_COLL(player, mapColl[tate][yoko]) == TRUE)
+			{
+				if (map[tate][yoko].kind == k) { return TRUE; }
+				if (map[tate][yoko].kind == l) { return TRUE; }
+				if (map[tate][yoko].kind == m) { return TRUE; }
+				if (map[tate][yoko].kind == r) { return TRUE; }
+				//if (map[tate][yoko].kind == g) { return TRUE; }
+
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL MY_CHECK_RECT_COLL(RECT a, RECT b)
+{
+	if (a.left < b.right &&
+		a.top < b.bottom &&
+		a.right > b.left &&
+		a.bottom > b.top
+		)
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+//動いた向きをとる
+CHAR MY_DIRECTION(double x, double y, double oldx, double oldy)
+{
+	if (x != oldx) {
+		if (x < oldx)
+			return 'A';
+		else
+			return 'D';
+	}
+	if (y != oldy) {
+		if (y < oldy)
+			return 'W';
+		else
+			return 'S';
+	}
+}
+
+//向き処理２
+
+VOID MAP_LOAD(VOID)
+{
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		if (mapData[tate][yoko] == g)
+	//		{
+	//			itemRect.left = mapChip.width * yoko;
+	//			itemRect.top = mapChip.height * tate;
+	//			itemRect.right = mapChip.width * (yoko + 1);
+	//			itemRect.bottom = mapChip.height * (tate + 1);
+	//		}
+	//	}
+	//}
+
+	if (MY_MAP_RELOAD == TRUE) {
+		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+		{
+			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+			{
+				mapData[tate][yoko] = mapDataPR[tate][yoko];
+				map[tate][yoko].kind = mapDataPR[tate][yoko];
+			}
+		}
+		//位置初期化
+		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+		{
+			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+			{
+				//マップを移動当たり判定も移動
+				map[tate][yoko].x += MAPmoveCnt;
+				mapColl[tate][yoko].left += MAPmoveCnt;
+				mapColl[tate][yoko].right += MAPmoveCnt;
+
+			}
+
+		}
+		MAPmoveCnt = 0;
+		MY_MAP_RELOAD = FALSE;
+	}
+}
+
+void CHAR_TYPE_SET()
+{
+	static int Template = 0, Cnt = 0, play1y = GAME_HEIGHT / 2, play2y = GAME_HEIGHT / 2;
+	static float lx = 0.0f, ly = 0.0f, rx = 0.0f, ry = 0.0f;
+	//文字の書き込み
+	setText setText;
+	if (auto findt = std::find(charstatus.begin(), charstatus.end(), STATUSTEMP) == charstatus.end())
+	{
+		setText.appendText(charstatus, STATUSTEMP);
+		setText.appendText(charstatus, STATUS1);
+		setText.appendText(charstatus, STATUS2);
+	}
+
+	//キャラクタの後ろの図形
+	DrawBoxAA(lx, ly, rx, ry, GetColor(220, 220, 220), TRUE);
+
+	//描画＆サイズ指定
+	DrawRotaGraph(
+		player.x = GAME_WIDTH / 4, player.y = play1y,
+		player.rate * 2,
+		player.angle,
+		player.handle2[1], TRUE);
+
+	DrawRotaGraph(
+		player2.x = GAME_WIDTH / 4 * 3, player2.y = play2y,
+		player2.rate * 2,
+		player2.angle,
+		player2.handle2[1], TRUE);
+
+	if (charstatus[Template] == STATUSTEMP) {
+		switch (PlayChar)
+		{
+		case CHARA_BALANCE:
+			lx = (player.x - player.width / 2) - player.width * 2;			//背景図形の位置設定
+			ly = (player.y - player.height / 2) - player.width;
+			rx = (player.x + player.width / 2) + player.width * 2;
+			ry = (player.y + player.height / 2) + player.height * 3.5;
+			if (charstatus[Cnt] == STATUS1) {
+				play1y = GAME_HEIGHT / 5 * 2;
+				play2y = GAME_HEIGHT / 2;
+				player.rate = CHARBIGSIZE;
+				player2.rate = CHARRESIZE;
+
+				//文字の場所指定
+				DrawString((player.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
+				DrawString(player.x + 10, (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
+			}
+			else
+			{
+				Cnt = setText.findText(charstatus, STATUS1); 	//キャラの説明呼び出し
+
+			}
+			if (MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) { //キャラの変更
+				PlayChar = CHARA_TANK;
+			}
+			break;
+		case CHARA_TANK:
+			if (charstatus[Cnt] == STATUS2) {
+				lx = (player2.x - player2.width / 2) - player2.width * 2;			//背景図形の位置設定
+				ly = (player2.y - player2.height / 2) - player2.width;
+				rx = (player2.x + player2.width / 2) + player2.width * 2;
+				ry = (player2.y + player2.height / 2) + player2.height * 3.5;
+				play2y = GAME_HEIGHT / 5 * 2;
+				play1y = GAME_HEIGHT / 2;
+				player2.rate = CHARBIGSIZE;
+				player.rate = CHARRESIZE;
+
+				//文字の場所指定
+				DrawString((player2.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
+				DrawString(player2.x + 10, (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
+			}
+			else
+			{
+				Cnt = setText.findText(charstatus, STATUS2); 	//キャラの説明呼び出し
+			}
+			if (MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) {	//キャラの変更
+				PlayChar = CHARA_BALANCE;
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		Template = setText.findText(charstatus, STATUSTEMP); 	//キャラの説明テンプレート呼び出し
+	}
+	DrawString(GAME_WIDTH / 2 - GetDrawStringWidth(CHARA_ARROW, -1) / 2, GAME_HEIGHT / 2 - 44, CHARA_ARROW, GetColor(255, 255, 255));
+
+	return;
+}
+
+VOID TEXT_DRAW()
+{
+	int Cnt = 0;
+	setText setText;
+	if (auto findt = std::find(textGaol.begin(), textGaol.end(), GOAL1) == textGaol.end())
+	{
+		setText.appendText(textGaol, GOAL1);
+		setText.appendText(textGaol, GOAL2);
+		setText.appendText(textGaol, GOAL3);
+	}
+	switch (ExDrawCnt)
+	{
+	case 1:
+		Cnt = setText.findText(textGaol, GOAL1);		break;
+	case 2:
+		Cnt = setText.findText(textGaol, GOAL2);		break;
+	case 3:
+		Cnt = setText.findText(textGaol, GOAL3);		break;
+	}
+
+	DrawString((GAME_WIDTH - GetDrawStringWidth(textGaol[Cnt].c_str(), -1)) / 2, 10, textGaol[Cnt].c_str(), GetColor(255, 0, 0));
+
+	/*char* cp = NULL;
+
+	cp = (char*)malloc(sizeof(char) * 30);
+
+	if (cp == NULL) {
+		printf("配列作成失敗\n");
+	}
+
+	switch (n)
+	{
+	case 1:
+		strcpy_s(cp, 22, "ゲーム目標とルール");		break;
+	case 2:
+		strcpy_s(cp, 30, "操作説明とアイテムについいて");		break;
+	case 3:
+		strcpy_s(cp, 16, "ストーリー");		break;
+	}
+	*/
+	return;
+
+}
+
+VOID GAME_RULE(VOID)
+{
+	SetFontSize(32);
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "ゲーム目標", GetColor(160, 0, 80));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(160, 0, 80));
+	SetFontSize(25);
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "長く生き残り、\n高スコアを叩きだせ！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "流れるマップの障害物を\n避けて・動かして・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ！！", GetColor(0, 0, 0));
+
+	return;
+}
+
+VOID GAME_PILOT(VOID)
+{
+	SetFontSize(32);
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(160, 0, 80));
+	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(160, 0, 80));
+	SetFontSize(25);
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているピッケル\nを使い可動障害物を破壊する\nことが可能。\nピッケルのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
+
+	return;
+}
+
+//VOID GAME_STR(VOID)
+//{
+//	SetFontSize(32);
+//	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "はじまりの物語", GetColor(0, 0, 0));
+//	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "　", GetColor(0, 0, 0));
+//	SetFontSize(25);
+//	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "あなたは謎の空間に飛ばされ\n", GetColor(0, 0, 0));
+//	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "　", GetColor(0, 0, 0));
+//
+//	return;
+//}
+
+//背景スクロール
+VOID MAP_DRAW()
+{
+	DrawGraph(ImageBack.x, ImageBack.y, ImageBack.handle, TRUE);
+
+	//二枚目描画
+	DrawGraph(ImageBack.x + GAME_WIDTH, ImageBack.y, ImageBack.handle, TRUE);
+
+	//一番下までスクロールしたら初期値に戻す
+	if (ImageBack.x <= -(GAME_WIDTH + 10))
+		ImageBack.x = -10;
+	if (!StopFlg)
+		ImageBack.x -= gameSpeed;
+
+	return;
+}
+
+VOID ROCKETMAP(VOID)
+{
+	int plusYoko = 0;
+	int newMapYoko = 0;
+	int rndInt = 0;
+
+	srand((unsigned int)time(NULL));
+	rndInt = rand() % 9 + 1;
+
+	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	{
+		for (int yoko = 0; yoko < GAME_MAP_YOKO_NEW; yoko++)
+		{
+			plusYoko = yoko + 3;
+			//マップ移動更新
+			mapData[tate][yoko] = mapData[tate][plusYoko];
+			map[tate][yoko].kind = map[tate][plusYoko].kind;
+		}
+		for (int yoko = GAME_MAP_YOKO_NEW; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		{
+			newMapYoko = (yoko - GAME_MAP_YOKO_NEW) + rndInt * 3;
+			mapData[tate][yoko] = mapDataNEW[tate][newMapYoko];
+			map[tate][yoko].kind = mapDataNEW[tate][newMapYoko];
+		}
+	}
+	return;
+}
+
+
+/*----------------------------------画像等読み込み系------------------------------------------------------*/
 BOOL MY_LOAD_IMAGE(VOID)
 {
 	//タイトル背景
-	strcpy_s(ImageTitleBK.path, IMAGE_TITLE_BK_PATH);
-	ImageTitleBK.handle = LoadGraph(ImageTitleBK.path);
-	if (ImageTitleBK.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_BK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageTitleBK.handle, &ImageTitleBK.width, &ImageTitleBK.height);
+	IMG roadImage;
+	if (!roadImage.RoadImage(ImageTitleBK, IMAGE_TITLE_BK_PATH)) { return FALSE; }
+	//strcpy_s(ImageTitleBK.path, IMAGE_TITLE_BK_PATH);
+	//ImageTitleBK.handle = LoadGraph(ImageTitleBK.path);
+	//if (ImageTitleBK.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_BK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageTitleBK.handle, &ImageTitleBK.width, &ImageTitleBK.height);
 	ImageTitleBK.x = GAME_WIDTH / 2 - ImageTitleBK.width / 2;
 	ImageTitleBK.y = GAME_HEIGHT / 2 - ImageTitleBK.height / 2;
 
 	//タイトルロゴ
-	strcpy_s(ImageTitleROGO.path, IMAGE_TITLE_ROGO_PATH);
-	ImageTitleROGO.handle = LoadGraph(ImageTitleROGO.path);
-	if (ImageTitleROGO.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageTitleROGO.handle, &ImageTitleROGO.width, &ImageTitleROGO.height);
+	if (!roadImage.RoadImage(ImageTitleROGO, IMAGE_TITLE_ROGO_PATH)) { return FALSE; }
+	//strcpy_s(ImageTitleROGO.path, IMAGE_TITLE_ROGO_PATH);
+	//ImageTitleROGO.handle = LoadGraph(ImageTitleROGO.path);
+	//if (ImageTitleROGO.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageTitleROGO.handle, &ImageTitleROGO.width, &ImageTitleROGO.height);
 	ImageTitleROGO.x = GAME_WIDTH / 2 - ImageTitleROGO.width / 2;
 	ImageTitleROGO.y = GAME_HEIGHT / 2 - ImageTitleROGO.height / 2;
 
 	//タイトルスタート
-	strcpy_s(ImageTitleSTART.path, IMAGE_TITLE_START_PATH);
-	ImageTitleSTART.handle = LoadGraph(ImageTitleSTART.path);
-	if (ImageTitleSTART.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_START_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageTitleSTART.handle, &ImageTitleSTART.width, &ImageTitleSTART.height);
+	if (!roadImage.RoadImage(ImageTitleSTART, IMAGE_TITLE_START_PATH)) { return FALSE; }
+	//strcpy_s(ImageTitleSTART.path, IMAGE_TITLE_START_PATH);
+	//ImageTitleSTART.handle = LoadGraph(ImageTitleSTART.path);
+	//if (ImageTitleSTART.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_START_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageTitleSTART.handle, &ImageTitleSTART.width, &ImageTitleSTART.height);
 	ImageTitleSTART.x = GAME_WIDTH / 2;
 	ImageTitleSTART.y = ImageTitleROGO.y + ImageTitleROGO.height + 32;
 	ImageTitleSTART.angle = 0;
 	ImageTitleSTART.rate = 1.0;
 
 	//ランキング選択
-	strcpy_s(ImageTitleRNK.path, IMAGE_TITLE_RNK);
-	ImageTitleRNK.handle = LoadGraph(ImageTitleRNK.path);
-	if (ImageTitleRNK.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_RNK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageTitleRNK.handle, &ImageTitleRNK.width, &ImageTitleRNK.height);
+	if (!roadImage.RoadImage(ImageTitleRNK, IMAGE_TITLE_RNK)) { return FALSE; }
+	//strcpy_s(ImageTitleRNK.path, IMAGE_TITLE_RNK);
+	//ImageTitleRNK.handle = LoadGraph(ImageTitleRNK.path);
+	//if (ImageTitleRNK.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_RNK, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageTitleRNK.handle, &ImageTitleRNK.width, &ImageTitleRNK.height);
 	ImageTitleRNK.x = GAME_WIDTH / 2;
 	ImageTitleRNK.y = ImageTitleROGO.y + ImageTitleROGO.height + ImageTitleSTART.height + 40;
 	ImageTitleRNK.angle = 0;
 	ImageTitleRNK.rate = 1.0;
 
 	//ゲームやめるロゴ
-	strcpy_s(ImageSTeROGO.path, IMAGE_ST_E_ROGO_PATH);
-	ImageSTeROGO.handle = LoadGraph(ImageSTeROGO.path);
-	if (ImageSTeROGO.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_ST_E_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageSTeROGO.handle, &ImageSTeROGO.width, &ImageSTeROGO.height);
+	if (!roadImage.RoadImage(ImageSTeROGO, IMAGE_ST_E_ROGO_PATH)) { return FALSE; }
+	//strcpy_s(ImageSTeROGO.path, IMAGE_ST_E_ROGO_PATH);
+	//ImageSTeROGO.handle = LoadGraph(ImageSTeROGO.path);
+	//if (ImageSTeROGO.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_ST_E_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageSTeROGO.handle, &ImageSTeROGO.width, &ImageSTeROGO.height);
 	ImageSTeROGO.x = GAME_WIDTH / 2;
 	ImageSTeROGO.y = ImageTitleROGO.y + ImageTitleROGO.height + 32;
 	ImageSTeROGO.angle = 0;
 	ImageSTeROGO.rate = 1.0;
+
 	//ゲーム戻るロゴ
-	strcpy_s(ImageSTbROGO.path, IMAGE_ST_B_ROGO_PATH);
-	ImageSTbROGO.handle = LoadGraph(ImageSTbROGO.path);
-	if (ImageSTbROGO.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_ST_B_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageSTbROGO.handle, &ImageSTbROGO.width, &ImageSTbROGO.height);
+	if (!roadImage.RoadImage(ImageSTbROGO, IMAGE_ST_B_ROGO_PATH)) { return FALSE; }
+	//strcpy_s(ImageSTbROGO.path, IMAGE_ST_B_ROGO_PATH);
+	//ImageSTbROGO.handle = LoadGraph(ImageSTbROGO.path);
+	//if (ImageSTbROGO.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_ST_B_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageSTbROGO.handle, &ImageSTbROGO.width, &ImageSTbROGO.height);
 	ImageSTbROGO.x = GAME_WIDTH / 2;
 	ImageSTbROGO.y = ImageTitleROGO.y + ImageTitleROGO.height + ImageTitleSTART.height + 40;
 	ImageSTbROGO.angle = 0;
 	ImageSTbROGO.rate = 1.0;
 
 	//選択印
-	strcpy_s(ImageChoiser.path, IMAGE_TITLE_CHI);
-	ImageChoiser.handle = LoadGraph(ImageChoiser.path);
-	if (ImageChoiser.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_TITLE_CHI, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageChoiser.handle, &ImageChoiser.width, &ImageChoiser.height);
+	if (!roadImage.RoadImage(ImageChoiser, IMAGE_TITLE_CHI)) { return FALSE; }
+	//strcpy_s(ImageChoiser.path, IMAGE_TITLE_CHI);
+	//ImageChoiser.handle = LoadGraph(ImageChoiser.path);
+	//if (ImageChoiser.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_CHI, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageChoiser.handle, &ImageChoiser.width, &ImageChoiser.height);
 	ImageChoiser.x = ImageTitleSTART.x + ImageTitleSTART.width / 2 + 32;
 	ImageChoiser.y = ImageTitleSTART.y + ImageTitleSTART.height / 4 - ImageChoiser.height / 2;
 
-
 	//ゲーム説明
-	strcpy_s(ImageEXPOBK.path, IMAGE_EXPO_BACK);
-	ImageEXPOBK.handle = LoadGraph(ImageEXPOBK.path);
-	if (ImageEXPOBK.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_EXPO_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageEXPOBK.handle, &ImageEXPOBK.width, &ImageEXPOBK.height);
+	if (!roadImage.RoadImage(ImageEXPOBK, IMAGE_EXPO_BACK)) { return FALSE; }
+	//strcpy_s(ImageEXPOBK.path, IMAGE_EXPO_BACK);
+	//ImageEXPOBK.handle = LoadGraph(ImageEXPOBK.path);
+	//if (ImageEXPOBK.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_EXPO_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageEXPOBK.handle, &ImageEXPOBK.width, &ImageEXPOBK.height);
 	ImageEXPOBK.x = GAME_WIDTH / 2 - ImageEXPOBK.width / 2;
 	ImageEXPOBK.y = GAME_HEIGHT / 2 - ImageEXPOBK.height / 2;
 
 	//ランキング背景
-	strcpy_s(RNKBACK.path, IMAGE_RNK_BACK);
-	RNKBACK.handle = LoadGraph(RNKBACK.path);
-	if (RNKBACK.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(RNKBACK.handle, &RNKBACK.width, &RNKBACK.height);
+	if (!roadImage.RoadImage(RNKBACK, IMAGE_RNK_BACK)) { return FALSE; }
+	//strcpy_s(RNKBACK.path, IMAGE_RNK_BACK);
+	//RNKBACK.handle = LoadGraph(RNKBACK.path);
+	//if (RNKBACK.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(RNKBACK.handle, &RNKBACK.width, &RNKBACK.height);
 	RNKBACK.x = GAME_WIDTH / 2 - RNKBACK.width / 2;
 	RNKBACK.y = GAME_HEIGHT / 2 - RNKBACK.height / 2;
 
 	//ランキング背景none
-	strcpy_s(RNKBACKNone.path, IMAGE_RNK_BACK_NONE);
-	RNKBACKNone.handle = LoadGraph(RNKBACKNone.path);
-	if (RNKBACKNone.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK_NONE, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(RNKBACKNone.handle, &RNKBACKNone.width, &RNKBACKNone.height);
+	if (!roadImage.RoadImage(RNKBACKNone, IMAGE_RNK_BACK_NONE)) { return FALSE; }
+	//strcpy_s(RNKBACKNone.path, IMAGE_RNK_BACK_NONE);
+	//RNKBACKNone.handle = LoadGraph(RNKBACKNone.path);
+	//if (RNKBACKNone.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK_NONE, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(RNKBACKNone.handle, &RNKBACKNone.width, &RNKBACKNone.height);
 	RNKBACKNone.x = GAME_WIDTH / 2 - RNKBACKNone.width / 2;
 	RNKBACKNone.y = GAME_HEIGHT / 2 - RNKBACKNone.height / 2;
 
-
 	//ランキング背景追加影
-	strcpy_s(RNKShadow.path, IMAGE_RNK_SHADOW);
-	RNKShadow.handle = LoadGraph(RNKShadow.path);
-	if (RNKShadow.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_RNK_SHADOW, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(RNKShadow.handle, &RNKShadow.width, &RNKShadow.height);
+	if (!roadImage.RoadImage(RNKShadow, IMAGE_RNK_SHADOW)) { return FALSE; }
+	//strcpy_s(RNKShadow.path, IMAGE_RNK_SHADOW);
+	//RNKShadow.handle = LoadGraph(RNKShadow.path);
+	//if (RNKShadow.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_RNK_SHADOW, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(RNKShadow.handle, &RNKShadow.width, &RNKShadow.height);
 	RNKShadow.x = GAME_WIDTH / 2 - RNKShadow.width / 2;
 	RNKShadow.y = GAME_HEIGHT / 2 - RNKShadow.height / 2;
 
 	//ストップ画面背景
-	strcpy_s(stopBack.path, IMAGE_STOP_BACK);
-	stopBack.handle = LoadGraph(stopBack.path);
-	if (stopBack.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_STOP_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(stopBack.handle, &stopBack.width, &stopBack.height);
+	if (!roadImage.RoadImage(stopBack, IMAGE_STOP_BACK)) { return FALSE; }
+	//strcpy_s(stopBack.path, IMAGE_STOP_BACK);
+	//stopBack.handle = LoadGraph(stopBack.path);
+	//if (stopBack.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_STOP_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(stopBack.handle, &stopBack.width, &stopBack.height);
 	stopBack.x = GAME_WIDTH / 2 - stopBack.width / 2;
 	stopBack.y = GAME_HEIGHT / 2 - stopBack.height / 2;
 
 //エンドフォール
-	strcpy_s(ImageEndFAIL.path, IMAGE_END_FAIL_PATH);
-	ImageEndFAIL.handle = LoadGraph(ImageEndFAIL.path);
-	if (ImageEndFAIL.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_END_FAIL_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageEndFAIL.handle, &ImageEndFAIL.width, &ImageEndFAIL.height);
+	if (!roadImage.RoadImage(ImageEndFAIL, IMAGE_END_FAIL_PATH)) { return FALSE; }
+	//strcpy_s(ImageEndFAIL.path, IMAGE_END_FAIL_PATH);
+	//ImageEndFAIL.handle = LoadGraph(ImageEndFAIL.path);
+	//if (ImageEndFAIL.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_END_FAIL_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageEndFAIL.handle, &ImageEndFAIL.width, &ImageEndFAIL.height);
 	ImageEndFAIL.x = GAME_WIDTH / 2 - ImageEndFAIL.width / 2;
 	ImageEndFAIL.y = GAME_HEIGHT / 2 - ImageEndFAIL.height / 2 - 32;
 
 	//エンド撤退
-	strcpy_s(ImageEndWD.path, IMAGE_END_WITHDRAWAL_PATH);
-	ImageEndWD.handle = LoadGraph(ImageEndWD.path);
-	if (ImageEndWD.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_END_WITHDRAWAL_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageEndWD.handle, &ImageEndWD.width, &ImageEndWD.height);
+	if (!roadImage.RoadImage(ImageEndWD, IMAGE_END_WITHDRAWAL_PATH)) { return FALSE; }
+	//strcpy_s(ImageEndWD.path, IMAGE_END_WITHDRAWAL_PATH);
+	//ImageEndWD.handle = LoadGraph(ImageEndWD.path);
+	//if (ImageEndWD.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_END_WITHDRAWAL_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageEndWD.handle, &ImageEndWD.width, &ImageEndWD.height);
 	ImageEndWD.x = GAME_WIDTH / 2 - ImageEndWD.width / 2;
 	ImageEndWD.y = GAME_HEIGHT / 2 - ImageEndWD.height / 2 - 32;
 
 	//エスケーププッシュ
-	strcpy_s(ImageEndROGO.path, IMAGE_END_ROGO_PATH);
-	ImageEndROGO.handle = LoadGraph(ImageEndROGO.path);
-	if (ImageEndROGO.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_END_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageEndROGO.handle, &ImageEndROGO.width, &ImageEndROGO.height);
+	if (!roadImage.RoadImage(ImageEndROGO, IMAGE_END_ROGO_PATH)) { return FALSE; }
+	//strcpy_s(ImageEndROGO.path, IMAGE_END_ROGO_PATH);
+	//ImageEndROGO.handle = LoadGraph(ImageEndROGO.path);
+	//if (ImageEndROGO.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_END_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageEndROGO.handle, &ImageEndROGO.width, &ImageEndROGO.height);
 	ImageEndROGO.x = GAME_WIDTH - 70;
 	ImageEndROGO.y = GAME_HEIGHT - 50;
 	ImageEndROGO.angle = 0;
 	ImageEndROGO.rate = 1.0;
 
 	//NEXT PUSH
-	strcpy_s(ImageNextROGO.path, IMAGE_NEXT_ROGO_PATH);
-	ImageNextROGO.handle = LoadGraph(ImageNextROGO.path);
-	if (ImageNextROGO.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_NEXT_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageNextROGO.handle, &ImageNextROGO.width, &ImageNextROGO.height);
+	if (!roadImage.RoadImage(ImageNextROGO, IMAGE_NEXT_ROGO_PATH)) { return FALSE; }
+	//strcpy_s(ImageNextROGO.path, IMAGE_NEXT_ROGO_PATH);
+	//ImageNextROGO.handle = LoadGraph(ImageNextROGO.path);
+	//if (ImageNextROGO.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_NEXT_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageNextROGO.handle, &ImageNextROGO.width, &ImageNextROGO.height);
 	ImageNextROGO.x = GAME_WIDTH - 70;
 	ImageNextROGO.y = GAME_HEIGHT - 50;
 	ImageNextROGO.angle = 0;
 	ImageNextROGO.rate = 1.0;
 
-
 	//背景画像
-	strcpy_s(ImageBack.path, IMAGE_BACK_PATH);
-	ImageBack.handle = LoadGraph(ImageBack.path);
-	if (ImageBack.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_BACK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageBack.handle, &ImageBack.width, &ImageBack.height);
+	if (!roadImage.RoadImage(ImageBack, IMAGE_BACK_PATH)) { return FALSE; }
+	//strcpy_s(ImageBack.path, IMAGE_BACK_PATH);
+	//ImageBack.handle = LoadGraph(ImageBack.path);
+	//if (ImageBack.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_BACK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageBack.handle, &ImageBack.width, &ImageBack.height);
 	ImageBack.x = GAME_WIDTH / 2 - ImageBack.width / 2;
 	ImageBack.y = 0 - ImageBack.height * 0;
 	ImageBack.IsDraw = FALSE;
 
 	//shadow
-	strcpy_s(ImageShadow.path, IMAGE_SHADOW_PATH);
-	ImageShadow.handle = LoadGraph(ImageShadow.path);
-	if (ImageShadow.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_SHADOW_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageShadow.handle, &ImageShadow.width, &ImageShadow.height);
+	if (!roadImage.RoadImage(ImageShadow, IMAGE_SHADOW_PATH)) { return FALSE; }
+	//strcpy_s(ImageShadow.path, IMAGE_SHADOW_PATH);
+	//ImageShadow.handle = LoadGraph(ImageShadow.path);
+	//if (ImageShadow.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_SHADOW_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageShadow.handle, &ImageShadow.width, &ImageShadow.height);
 	ImageShadow.x = GAME_WIDTH / 2 - ImageShadow.width / 2;
 	ImageShadow.y = 0 - ImageShadow.height * 0;
 	ImageShadow.IsDraw = FALSE;
 
 
 	//背景画像END
-	strcpy_s(ImageBackEND.path, IMAGE_BACK_ENDC_PATH);
-	ImageBackEND.handle = LoadGraph(ImageBackEND.path);
-	if (ImageBackEND.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_BACK_ENDC_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageBackEND.handle, &ImageBackEND.width, &ImageBackEND.height);
+	if (!roadImage.RoadImage(ImageBackEND, IMAGE_BACK_ENDC_PATH)) { return FALSE; }
+	//strcpy_s(ImageBackEND.path, IMAGE_BACK_ENDC_PATH);
+	//ImageBackEND.handle = LoadGraph(ImageBackEND.path);
+	//if (ImageBackEND.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_BACK_ENDC_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageBackEND.handle, &ImageBackEND.width, &ImageBackEND.height);
 	ImageBackEND.x = GAME_WIDTH / 2 - ImageBackEND.width / 2;
 	ImageBackEND.y = 0 - ImageBackEND.height * 0;
 	ImageBackEND.IsDraw = FALSE;
 
 	//背景画像ENDF
-	strcpy_s(ImageBackENDF.path, IMAGE_BACK_ENDF_PATH);
-	ImageBackENDF.handle = LoadGraph(ImageBackENDF.path);
-	if (ImageBackENDF.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_BACK_ENDF_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageBackENDF.handle, &ImageBackENDF.width, &ImageBackENDF.height);
+	if (!roadImage.RoadImage(ImageBackENDF, IMAGE_BACK_ENDF_PATH)) { return FALSE; }
+	//strcpy_s(ImageBackENDF.path, IMAGE_BACK_ENDF_PATH);
+	//ImageBackENDF.handle = LoadGraph(ImageBackENDF.path);
+	//if (ImageBackENDF.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_BACK_ENDF_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageBackENDF.handle, &ImageBackENDF.width, &ImageBackENDF.height);
 	ImageBackENDF.x = GAME_WIDTH / 2 - ImageBackENDF.width / 2;
 	ImageBackENDF.y = 0 - ImageBackENDF.height * 0;
 	ImageBackENDF.IsDraw = FALSE;
+
+	//説明画像１
+	if (!roadImage.RoadImage(ImageExNews1, IMAGE_EX_NEWS1)) { return FALSE; }
+	//strcpy_s(ImageExNews1.path, IMAGE_EX_NEWS1);
+	//ImageExNews1.handle = LoadGraph(ImageExNews1.path);
+	//if (ImageExNews1.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS1, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageExNews1.handle, &ImageExNews1.width, &ImageExNews1.height);
+	ImageExNews1.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
+	ImageExNews1.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
+	ImageExNews1.IsDraw = FALSE;
+
+	//説明画像2
+	if (!roadImage.RoadImage(ImageExNews2, IMAGE_EX_NEWS2)) { return FALSE; }
+	//strcpy_s(ImageExNews2.path, IMAGE_EX_NEWS2);
+	//ImageExNews2.handle = LoadGraph(ImageExNews2.path);
+	//if (ImageExNews2.handle == -1)
+	//{
+	//	MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS2, IMAGE_LOAD_ERR_TITLE, MB_OK);
+	//	return FALSE;
+	//}
+	//GetGraphSize(ImageExNews2.handle, &ImageExNews2.width, &ImageExNews2.height);
+	ImageExNews2.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
+	ImageExNews2.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
+	ImageExNews2.IsDraw = FALSE;
+
 
 
 	//プレイヤーの画像（分割）1キャラ目
@@ -2088,33 +2651,6 @@ BOOL MY_LOAD_IMAGE(VOID)
 	//スタート画面のキャラクタースタート位置
 	playerSt.x = 0 + player.width;	//左右中央揃え
 	playerSt.y = GAME_HEIGHT - player.height;			//yは原点から
-
-
-//説明画像１
-	strcpy_s(ImageExNews1.path, IMAGE_EX_NEWS1);
-	ImageExNews1.handle = LoadGraph(ImageExNews1.path);
-	if (ImageExNews1.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS1, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageExNews1.handle, &ImageExNews1.width, &ImageExNews1.height);
-	ImageExNews1.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
-	ImageExNews1.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
-	ImageExNews1.IsDraw = FALSE;
-
-	//説明画像2
-	strcpy_s(ImageExNews2.path, IMAGE_EX_NEWS2);
-	ImageExNews2.handle = LoadGraph(ImageExNews2.path);
-	if (ImageExNews2.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS2, IMAGE_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-	GetGraphSize(ImageExNews2.handle, &ImageExNews2.width, &ImageExNews2.height);
-	ImageExNews2.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
-	ImageExNews2.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
-	ImageExNews2.IsDraw = FALSE;
 
 	//マップの画像を分割する
 	int mapRes = LoadDivGraph(
@@ -2250,6 +2786,53 @@ BOOL MY_LOAD_MUSIC(VOID)
 		return FALSE;
 	}
 
+	strcpy_s(se_clock.path, MUSIC_BGM_RANK_PATH);
+	se_clock.handle = LoadSoundMem(se_clock.path);
+	if (se_clock.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}	
+	
+	strcpy_s(se_coin_g.path, MUSIC_BGM_RANK_PATH);
+	se_coin_g.handle = LoadSoundMem(se_coin_g.path);
+	if (se_coin_g.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}	
+	
+	strcpy_s(se_breke.path, MUSIC_BGM_RANK_PATH);
+	se_breke.handle = LoadSoundMem(se_breke.path);
+	if (se_breke.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}	
+	
+	strcpy_s(se_rogo_draw.path, MUSIC_BGM_RANK_PATH);
+	se_rogo_draw.handle = LoadSoundMem(se_rogo_draw.path);
+	if (se_rogo_draw.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}	
+	
+	strcpy_s(se_rain.path, MUSIC_BGM_RANK_PATH);
+	se_rain.handle = LoadSoundMem(se_rain.path);
+	if (se_rain.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}	
+	
+	strcpy_s(se_scene_sen.path, MUSIC_BGM_RANK_PATH);
+	se_scene_sen.handle = LoadSoundMem(se_scene_sen.path);
+	if (se_scene_sen.handle == -1)
+	{
+		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -2261,580 +2844,16 @@ VOID MY_DELETE_MUSIC(VOID)
 	DeleteSoundMem(BGM_TITLE.handle);
 	DeleteSoundMem(BGM_COMP.handle);
 	DeleteSoundMem(BGM_FAIL.handle);
+	DeleteSoundMem(BGM_RANKING.handle);
+	DeleteSoundMem(se_clock.handle);
+	DeleteSoundMem(se_coin_g.handle);
+	DeleteSoundMem(se_breke.handle);
+	DeleteSoundMem(se_rogo_draw.handle);
+	DeleteSoundMem(se_rain.handle);
+	DeleteSoundMem(se_scene_sen.handle);
+
 
 	return;
-}
-
-BOOL MY_CHECK_MAP1_PLAYER_COLL(RECT player)
-{
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			if (MY_CHECK_RECT_COLL(player, mapColl[tate][yoko]) == TRUE)
-			{
-				if (map[tate][yoko].kind == k) { return TRUE; }
-				if (map[tate][yoko].kind == l) { return TRUE; }
-				if (map[tate][yoko].kind == m) { return TRUE; }
-				if (map[tate][yoko].kind == r) { return TRUE; }
-				//if (map[tate][yoko].kind == g) { return TRUE; }
-
-			}
-		}
-	}
-
-	return FALSE;
-}
-
-BOOL MY_CHECK_RECT_COLL(RECT a, RECT b)
-{
-	if (a.left < b.right &&
-		a.top < b.bottom &&
-		a.right > b.left &&
-		a.bottom > b.top
-		)
-	{
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-//動いた向きをとる
-CHAR MY_DIRECTION(double x, double y, double oldx, double oldy)
-{
-	if (x != oldx) {
-		if (x < oldx)
-			return 'A';
-		else
-			return 'D';
-	}
-	if (y != oldy) {
-		if (y < oldy)
-			return 'W';
-		else
-			return 'S';
-	}
-}
-
-//向き処理２
-
-VOID MAP_LOAD(VOID)
-{
-	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	//{
-	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-	//	{
-	//		if (mapData[tate][yoko] == g)
-	//		{
-	//			itemRect.left = mapChip.width * yoko;
-	//			itemRect.top = mapChip.height * tate;
-	//			itemRect.right = mapChip.width * (yoko + 1);
-	//			itemRect.bottom = mapChip.height * (tate + 1);
-	//		}
-	//	}
-	//}
-
-	if (MY_MAP_RELOAD == TRUE) {
-		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-		{
-			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-			{
-					mapData[tate][yoko] = mapDataPR[tate][yoko];
-					map[tate][yoko].kind = mapDataPR[tate][yoko];
-			}		
-		}
-	//位置初期化
-		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-		{
-			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-			{
-				//マップを移動当たり判定も移動
-				map[tate][yoko].x += MAPmoveCnt;
-				mapColl[tate][yoko].left += MAPmoveCnt;
-				mapColl[tate][yoko].right += MAPmoveCnt;
-
-			}
-
-		}
-		MAPmoveCnt = 0;
-		MY_MAP_RELOAD = FALSE;
-	}
-}
-
-void CHAR_TYPE_SET()
-{
-	static int Template = 0, Cnt = 0, play1y = GAME_HEIGHT / 2, play2y = GAME_HEIGHT / 2;
-	static float lx = 0.0f, ly = 0.0f, rx = 0.0f, ry = 0.0f;
-	//文字の書き込み
-	setText setText;
-	if (auto findt = std::find(charstatus.begin(), charstatus.end(), STATUSTEMP) == charstatus.end())
-	{
-		setText.appendText(charstatus, STATUSTEMP);
-		setText.appendText(charstatus, STATUS1);
-		setText.appendText(charstatus, STATUS2);
-	}
-
-	//キャラクタの後ろの図形
-	DrawBoxAA(lx, ly, rx, ry, GetColor(220, 220, 220), TRUE);
-
-	//描画＆サイズ指定
-	DrawRotaGraph(
-		player.x = GAME_WIDTH / 4, player.y = play1y,
-		player.rate * 2,
-		player.angle,
-		player.handle2[1], TRUE);
-
-	DrawRotaGraph(
-		player2.x = GAME_WIDTH / 4 * 3, player2.y = play2y,
-		player2.rate * 2,
-		player2.angle,
-		player2.handle2[1], TRUE);
-
-	if (charstatus[Template] == STATUSTEMP) {
-		switch (PlayChar)
-		{
-		case CHARA_BALANCE:
-			lx = (player.x - player.width / 2) - player.width * 2;			//背景図形の位置設定
-			ly = (player.y - player.height / 2) - player.width;
-			rx = (player.x + player.width / 2) + player.width * 2;
-			ry = (player.y + player.height / 2) + player.height * 3.5;
-			if (charstatus[Cnt] == STATUS1) {
-				play1y = GAME_HEIGHT / 5 * 2;
-				play2y = GAME_HEIGHT / 2;
-				player.rate = CHARBIGSIZE;
-				player2.rate = CHARRESIZE;
-
-				//文字の場所指定
-				DrawString((player.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
-				DrawString(player.x + 10, (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
-			}
-			else
-			{
-				Cnt = setText.findText(charstatus, STATUS1); 	//キャラの説明呼び出し
-
-			}
-			if(MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) { //キャラの変更
-				PlayChar = CHARA_TANK; 
-			}
-			break;
-		case CHARA_TANK:
-			if (charstatus[Cnt] == STATUS2) {
-				lx = (player2.x - player2.width / 2) - player2.width * 2;			//背景図形の位置設定
-				ly = (player2.y - player2.height / 2) - player2.width;
-				rx = (player2.x + player2.width / 2) + player2.width * 2;
-				ry = (player2.y + player2.height / 2) + player2.height * 3.5;
-				play2y = GAME_HEIGHT / 5 * 2;
-				play1y = GAME_HEIGHT / 2;
-				player2.rate = CHARBIGSIZE;
-				player.rate = CHARRESIZE;
-
-				//文字の場所指定
-				DrawString((player2.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
-				DrawString(player2.x + 10, (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
-			}
-			else
-			{
-				Cnt = setText.findText(charstatus, STATUS2); 	//キャラの説明呼び出し
-			}
-			if (MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) {	//キャラの変更
-				PlayChar = CHARA_BALANCE;
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-	else
-	{
-		Template = setText.findText(charstatus, STATUSTEMP); 	//キャラの説明テンプレート呼び出し
-	}
-	DrawString(GAME_WIDTH / 2 - GetDrawStringWidth(CHARA_ARROW,-1) / 2, GAME_HEIGHT / 2 - 44, CHARA_ARROW, GetColor(255, 255, 255));
-
-	return;
-}
-
-VOID TEXT_DRAW()
-{
-	int Cnt = 0;
-	setText setText;
-	if (auto findt = std::find(textGaol.begin(), textGaol.end(), GOAL1) == textGaol.end())
-	{
-		setText.appendText(textGaol, GOAL1);
-		setText.appendText(textGaol, GOAL2);
-		setText.appendText(textGaol, GOAL3);
-	}
-	switch (ExDrawCnt)
-	{
-	case 1:
-		Cnt = setText.findText(textGaol, GOAL1);		break;
-	case 2:
-		Cnt = setText.findText(textGaol, GOAL2);		break;
-	case 3:
-		Cnt = setText.findText(textGaol, GOAL3);		break;
-	}
-
-	DrawString((GAME_WIDTH - GetDrawStringWidth(textGaol[Cnt].c_str(), -1)) / 2, 10, textGaol[Cnt].c_str(), GetColor(255, 0, 0));
-
-	/*char* cp = NULL;
-
-	cp = (char*)malloc(sizeof(char) * 30);
-
-	if (cp == NULL) {
-		printf("配列作成失敗\n");
-	}
-
-	switch (n)
-	{
-	case 1:
-		strcpy_s(cp, 22, "ゲーム目標とルール");		break;
-	case 2:
-		strcpy_s(cp, 30, "操作説明とアイテムについいて");		break;
-	case 3:
-		strcpy_s(cp, 16, "ストーリー");		break;
-	}
-	*/
-	return;
-
-}
-
-VOID GAME_RULE(VOID)
-{
-	SetFontSize(32);
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "ゲーム目標", GetColor(160, 0, 80));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(160, 0, 80));
-	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "長く生き残り、\n高スコアを叩きだせ！", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "流れるマップの障害物を\n避けて・動かして・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ", GetColor(0, 0, 0));
-
-	return;
-}
-
-VOID GAME_PILOT(VOID)
-{
-	SetFontSize(32);
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "操作方法", GetColor(160, 0, 80));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(160, 0, 80));
-	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているアイテム\nを使い可動障害物を破壊する\nことが可能。\nアイテムのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
-
-	return;
-}
-
-VOID GAME_STR(VOID)
-{
-	SetFontSize(32);
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 3, "はじまりの物語", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "　", GetColor(0, 0, 0));
-	SetFontSize(25);
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "あなたは謎の空間に飛ばされ\n", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "　", GetColor(0, 0, 0));
-
-	return;
-}
-
-//背景スクロール
-VOID MAP_DRAW()
-{
-	DrawGraph(ImageBack.x, ImageBack.y, ImageBack.handle, TRUE);
-
-	//二枚目描画
-	DrawGraph(ImageBack.x + GAME_WIDTH, ImageBack.y, ImageBack.handle, TRUE);
-
-	//一番下までスクロールしたら初期値に戻す
-	if (ImageBack.x <= -(GAME_WIDTH + 10))
-		ImageBack.x = -10;
-	if(!StopFlg)
-		ImageBack.x -= gameSpeed;
-
-	return;
-}
-
-VOID ROCKETMAP(VOID)
-{
-	int plusYoko = 0;
-	int newMapYoko = 0;
-	int rndInt = 0;
-
-	srand((unsigned int)time(NULL));
-	rndInt = rand() % 9 + 1;
-
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_NEW; yoko++)
-		{
-			plusYoko = yoko + 3;
-			//マップ移動更新
-			mapData[tate][yoko] = mapData[tate][plusYoko];
-			map[tate][yoko].kind = map[tate][plusYoko].kind;
-		}
-		for (int yoko = GAME_MAP_YOKO_NEW; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			newMapYoko = (yoko - GAME_MAP_YOKO_NEW) + rndInt * 3;
-			mapData[tate][yoko] = mapDataNEW[tate][newMapYoko];
-			map[tate][yoko].kind = mapDataNEW[tate][newMapYoko];
-		}
-	}
-	return;
-}
-
-
-
-//stop画面処理
-VOID MY_STOP(VOID)
-{
-	MY_STOP_PROC();
-	MY_STOP_DRAW();
-	return;
-}
-
-VOID MY_STOP_PROC(VOID)
-{
-	static BOOL MusicPass = TRUE;
-	static BOOL check = TRUE;
-
-	if (CheckSoundMem(BGM_TITLE.handle) != 0)
-	{
-		StopSoundMem(BGM_TITLE.handle);
-	}
-
-	if (!StopFlg)
-		StopFlg = true;
-
-//-----------------------
-	if (check == TRUE) {
-		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
-			Kchoice = !Kchoice;
-			check = FALSE;
-		}
-	}
-	if (MY_KEY_UP(KEY_INPUT_DOWN) == TRUE || MY_KEY_UP(KEY_INPUT_UP) == TRUE)
-		check = TRUE;
-//------------------------
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
-	{
-		if (CheckSoundMem(BGM_TITLE.handle) != 0)
-		{
-			StopSoundMem(BGM_TITLE.handle);
-			MusicPass = FALSE;
-		}
-	}
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
-		MusicPass = TRUE;
-		CLICK_M = TRUE;
-		GameScene = GAME_SCENE_END;
-		GameEndKind = GAME_END_EXIT;
-
-		return;
-	}
-//-------------------------
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
-	{
-
-		if (CheckSoundMem(BGM_TITLE.handle) != 0)
-		{
-			StopSoundMem(BGM_TITLE.handle);
-			MusicPass = FALSE;
-		}
-	}
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
-		MusicPass = TRUE;
-		Kchoice = TRUE;
-		CLICK_M = TRUE;
-		PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP, FALSE);
-		GameScene = GAME_SCENE_PLAY;
-		return;
-	}
-
-//選択音
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
-	{
-		if (CLICK_M == TRUE)
-		{
-			PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
-			CLICK_M = FALSE;
-		}
-	}
-	return;
-}
-
-VOID MY_STOP_DRAW(VOID)
-{
-	MY_PLAY_DRAW();
-
-	DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
-
-	DrawGraph(ImageTitleROGO.x, ImageTitleROGO.y, ImageTitleROGO.handle, TRUE);
-
-	DrawRotaGraph(
-		ImageSTeROGO.x, ImageSTeROGO.y,
-		ImageSTeROGO.rate,
-		ImageSTeROGO.angle,
-		ImageSTeROGO.handle, TRUE);
-
-	DrawRotaGraph(
-		ImageSTbROGO.x, ImageSTbROGO.y,
-		ImageSTbROGO.rate,
-		ImageSTbROGO.angle,
-		ImageSTbROGO.handle, TRUE);
-
-	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
-
-
-	if (Kchoice == TRUE) {
-		ImageSTeROGO.rate = 1.2;
-		ImageSTbROGO.rate = 1.0;
-		ImageChoiser.x = ImageSTeROGO.x + ImageSTeROGO.width / 2 + MAP_DIV_WIDTH / 2;
-		ImageChoiser.y = ImageSTeROGO.y + ImageSTeROGO.height / 4 - ImageChoiser.height / 2;
-	}
-	else {
-		ImageSTeROGO.rate = 1.0;
-		ImageSTbROGO.rate = 1.2;
-		ImageChoiser.x = ImageSTbROGO.x + ImageSTbROGO.width / 2 + MAP_DIV_WIDTH / 2;
-		ImageChoiser.y = ImageSTbROGO.y + ImageSTbROGO.height / 4 - ImageChoiser.height / 2;
-	}
-
-	DrawScore intervalScore;
-	intervalScore.drawStop(secondtime, mintime, COINCnt);
-
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
-		if (Kchoice == TRUE)
-			ImageSTeROGO.rate = 0.8;
-		else
-			ImageSTbROGO.rate = 0.8;
-		ImageChoiser.x -= MAP_DIV_WIDTH / 2;
-	}
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
-		ImageSTeROGO.rate = 1.0;
-		ImageSTbROGO.rate = 1.0;
-		ImageChoiser.x += MAP_DIV_WIDTH / 2;
-	}
-	SetFontSize(30);
-
-	//DrawString((GAME_WIDTH - GetDrawStringWidth("_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", -1)) / 2, GAME_HEIGHT - 45, "_/_/仮背景・仮ロゴ（ストップ画面になる予定です） _/_/", GetColor(255, 255, 255));
-
-}
-//ランキング
-VOID MY_RNKING(VOID)
-{
-	MY_RNKING_PROC();
-	MY_RNKING_DRAW();
-	return;
-}
-
-VOID MY_RNKING_PROC(VOID)
-{
-	if (CheckSoundMem(BGM_RANKING.handle) == 0)
-	{
-		ChangeVolumeSoundMem(255 * 25 / 100, BGM_RANKING.handle);
-		PlaySoundMem(BGM_RANKING.handle, DX_PLAYTYPE_LOOP);
-	}
-
-	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
-		R_WRITE resetRnk;
-		resetRnk.ResetScore(fsArry);
-		RANKINGflag = TRUE;
-	}
-
-//選択音
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE && CLICK_M == TRUE)
-	{
-		PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
-		CLICK_M = FALSE;
-	}
-
-
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
-
-		/*SetMouseDispFlag(TRUE);*/
-		if (CheckSoundMem(BGM_RANKING.handle) != 0)
-		{
-			StopSoundMem(BGM_RANKING.handle);
-		}
-
-		GameScene = GAME_SCENE_START;
-		CLICK_M = TRUE;
-		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP, FALSE);
-
-		return;
-	}
-}
-
-VOID MY_RNKING_DRAW(VOID)
-{
-	static BOOL RNKBackDrawFlag = TRUE;
-	static int fSize = 0;
-	static int RBKdrawCnt = 0;
-	if (RNKBackDrawFlag) {
-		if (RBKdrawCnt < (GAME_FPS * 3)) {
-			DrawGraph(RNKBACK.x, RNKBACK.y, RNKBACK.handle, TRUE);
-			RBKdrawCnt++;
-		}
-		else
-		{
-			RBKdrawCnt = 0;
-			RNKBackDrawFlag = FALSE;
-		}
-	}
-	else {
-		if (RBKdrawCnt < (GAME_FPS / 2) ) {
-			DrawGraph(RNKBACKNone.x, RNKBACKNone.y, RNKBACKNone.handle, TRUE);
-			RBKdrawCnt++;
-		}
-		else
-		{
-			RBKdrawCnt = 0;
-			RNKBackDrawFlag = TRUE;
-		}
-	}
-
-	if (RANKINGflag)
-	{
-		if (!fsArry[CHECKEMPTY]) {
-			R_WRITE rankingWatch;
-			rankingWatch.Rread(fsArry);
-		}
-		RANKINGflag = FALSE;
-	}
-	fSize = 64;
-	for (int i = 0; i < FILE_NUM; i++)
-	{
-		SetFontSize(fSize);
-		DrawFormatString((GAME_WIDTH - GetDrawFormatStringWidth("%d位: %.2f", i+1, fsArry[i], -1)) / 2, GAME_HEIGHT/9 * 4 + 64 * i, GetColor(0, 0, 0), "%d位: %.2f", i+1, fsArry[i]);
-		fSize -= 4;
-	}
-
-	if (!RNKBackDrawFlag)
-	{
-		DrawGraph(RNKShadow.x, RNKShadow.y, RNKShadow.handle, TRUE);
-		SetFontSize(25);
-		DrawString((GAME_WIDTH - GetDrawFormatStringWidth("DELETE：スコア初期化", -1)), 0, "DELETE：スコア初期化", GetColor(255, 255, 255));
-	}
-	else
-	{
-		SetFontSize(25);
-		DrawString((GAME_WIDTH - GetDrawFormatStringWidth("DELETE：スコア初期化", -1)), 0, "DELETE：スコア初期化", GetColor(0, 0, 0));
-	}
-
-	
-	DrawRotaGraph(
-		ImageEndROGO.x, ImageEndROGO.y,
-		ImageEndROGO.rate,
-		ImageEndROGO.angle,
-		ImageEndROGO.handle, TRUE);
-	
-
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
-		ImageEndROGO.rate = 0.8;
-
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
-		FALL_RESON = FALSE;
-		ImageEndROGO.rate = 1.0;
-	}
-
-
 }
 
 
