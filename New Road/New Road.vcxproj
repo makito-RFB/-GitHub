@@ -153,11 +153,13 @@
   <ItemGroup>
     <ClCompile Include="image.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="music.cpp" />
     <ClCompile Include="score.cpp" />
     <ClCompile Include="setText.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="image.hpp" />
+    <ClInclude Include="music.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RnkingRW.hpp" />
     <ClInclude Include="score.hpp" />

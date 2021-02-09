@@ -4,6 +4,7 @@
 #include "image.hpp"
 #include "score.hpp"
 #include "setText.hpp"
+#include "music.hpp"
 #include <random>
 #include <iostream>
 #include <stdlib.h>
@@ -41,10 +42,11 @@
 #define CHAR_DIV_YOKO		4
 
 #define CHAR_DREC_NUM		4
- 
 
-#define VARNCE_CHAR  GAME_FPS * 0.25 //秒
+#define VARNCE_CHAR  GAME_FPS * 0.15 //秒
 #define TANKA_CHAR	GAME_FPS * 0.3 //秒
+
+#define CHAR_BAG_NUM		3 //キャラクターのバックの容量
 
 #define IMAGE_TITLE_WORK_CNT   1
 #define IMAGE_TITLE_WORK_CNT_MAX   20
@@ -53,23 +55,6 @@
 #define SPEED_UP_CNT	5
 #define SPEED_UP_TIME	3
 #define UP_SPEED		2
-
-#define MUSIC_LOAD_ERR_TITLE	TEXT("音楽読み込みエラー")
-
-#define MUSIC_BGM_PATH			TEXT(".\\MUSIC\\Taste_Hell.mp3")
-#define MUSIC_PLAYER_SHOT_PATH	TEXT(".\\MUSIC\\ショット音.mp3")
-
-#define MUSIC_BGM_TITLE_PATH	TEXT(".\\MUSIC\\荒涼の地.mp3")	//タイトルのBGM
-#define MUSIC_BGM_COMP_PATH		TEXT(".\\MUSIC\\Yours.mp3")				//コンプリートBGM
-#define MUSIC_BGM_FAIL_PATH		TEXT(".\\MUSIC\\Yours.mp3")					//フォールトBGM
-#define MUSIC_BGM_RANK_PATH		TEXT(".\\MUSIC\\深淵に眠るクトーニアン.mp3")//ランキングBGM
-
-#define MUSIC_CLOCK_BGM_PATH			TEXT(".\\MUSIC\\se_clock.mp3")			//時計
-#define MUSIC_COIN_BGM_PATH				TEXT(".\\MUSIC\\se_coin_get1.mp3")		//コインゲットしたとき
-#define MUSIC_BRAKE_BGM_PATH			TEXT(".\\MUSIC\\se_gareki01.mp3")		//障害物破壊
-#define MUSIC_STRAT_ROGO_BGM_PATH		TEXT(".\\MUSIC\\se_nanika01.mp3")		//何かが出る感じの音
-#define MUSIC_RANI_BGM_PATH				TEXT(".\\MUSIC\\se_rain2_loop.mp3")		//雨
-#define MUSIC_SCEN_SEN_BGM_PATH			TEXT(".\\MUSIC\\se_scene_seni02.mp3")	//シーン遷移
 
 #define GAME_MAP_TATE_MAX	9	//マップの縦の数
 #define GAME_MAP_YOKO_MAX	18	//マップの横の数
@@ -101,7 +86,7 @@
 #define GOAL2  TEXT("操作説明とアイテムについいて")
 #define GOAL3  TEXT("キャラ選択")
 
-#define STATUSTEMP		TEXT("名前　　：\nタイプ　：\nスピード：\nパワー　：")
+#define STATUSTEMP		TEXT("名前　　：\nタイプ　：\nスピード：\nバッグ　：")
 #define STATUS1		TEXT("アリス\nバランス\n★★★\n★")
 #define STATUS2		TEXT("リッキー\nタンク\n★\n★★★")
 #define CHARA_ARROW TEXT("十字キー\n←　　→")
@@ -169,15 +154,6 @@ typedef struct STRUCT_FONT
 	int bold;
 	int type;
 }FONT;
-
-
-
-typedef struct STRUCT_MUSIC
-{
-	char path[PATH_MAX];
-	int handle;
-}MUSIC;
-
 
 typedef struct STRUCT_MAP_IMAGE
 {
@@ -248,7 +224,8 @@ int ExDrawCnt = 1;
 //ストップフラグ
 bool StopFlg = false;
 
-//MOUSE mouse;
+//2枚の新しいマップを交互に読むためのフラグ
+bool MAPChoice = true;
 
 FONT FontTanu32;
 FONT FontGen32;
@@ -323,10 +300,13 @@ MUSIC musicShot;
 
 MUSIC se_clock;
 MUSIC se_coin_g;
-MUSIC se_breke;
+MUSIC se_brake;
 MUSIC se_rogo_draw;
 MUSIC se_rain;
 MUSIC se_scene_sen;
+MUSIC se_move;
+MUSIC se_pachin;
+
 
 GAME_MAP_KIND mapData[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,
@@ -363,7 +343,20 @@ GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_KAKU_YOKO_MAX]{ //3ブロック
 		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
 		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,l,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
 		k,l,t,t,l,k,g,k,l,t,l,t,c,l,l,t,l,t,l,k,l,t,k,t,k,g,t,k,t,t,	// 3
-		l,t,k,t,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
+		l,t,k,l,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
+		l,c,l,t,l,t,t,k,t,t,l,l,k,t,l,t,k,t,k,g,l,k,t,l,l,l,k,t,c,t,	// 5
+		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,g,t,l,k,l,g,k,t,l,t,t,k,t,	// 6
+		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,k,t,k,k,l,t,k,t,	// 7
+		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
+};
+
+GAME_MAP_KIND mapDataNEW2[GAME_MAP_TATE_MAX][GAME_MAP_KAKU_YOKO_MAX]{ //3ブロックづつ
+	//  0,1,2,3,4,5,6,7,8,9,1,1,2,3,4,5,6,7,8,9,2,1,2,3,4,5,6,7,8,9
+		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
+		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
+		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,l,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
+		k,l,t,t,l,k,g,k,l,t,l,t,c,l,l,t,l,t,l,k,l,t,k,t,k,g,t,k,t,t,	// 3
+		l,t,k,l,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
 		l,c,l,t,l,t,t,k,t,t,l,l,k,t,l,t,k,t,k,g,l,k,t,l,l,l,k,t,c,t,	// 5
 		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,g,t,l,k,l,g,k,t,l,t,t,k,t,	// 6
 		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,k,t,k,k,l,t,k,t,	// 7
@@ -833,6 +826,8 @@ VOID MY_START_PROC(VOID)
 	if (check == TRUE) {
 		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
 			Kchoice = !Kchoice;
+			ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
+			PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
 			check = FALSE;
 		}
 	}
@@ -1238,30 +1233,39 @@ VOID MY_PLAY_PROC(VOID)
 			player.CenterY -= MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
 			driecChar = 0;
+			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
 			MY_KEY_TF = FALSE;
 		}
 		else if (MY_KEY_DOWN(KEY_INPUT_A)) {
 			player.CenterX -= MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
 			driecChar = 3;
+			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
 			MY_KEY_TF = FALSE;
 		}
 		else if (MY_KEY_DOWN(KEY_INPUT_S)) {
 			player.CenterY += MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
 			driecChar = 2;
+			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
 			MY_KEY_TF = FALSE;
 		}
 		else if (MY_KEY_DOWN(KEY_INPUT_D)) {
 			player.CenterX += MOVE_ERIA;
 			ImageChar[driecChar].IsDraw = FALSE;
-			driecChar = 1;
+			driecChar = 1;		
+			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
 			MY_KEY_TF = FALSE;
 		}
 		if (!ImageChar[driecChar].IsDraw)
 		{
 			ImageChar[driecChar].IsDraw = TRUE;
 		}
+
 	}
 
 	//一回の入力判定（離したとき）
@@ -1380,6 +1384,9 @@ VOID MY_PLAY_PROC(VOID)
 				{
 					IsReMove = TRUE;
 					ITEMCnt--;
+
+						PlaySoundMem(se_brake.handle, DX_PLAYTYPE_BACK);
+
 				}
 			}
 			if (IsReMove == TRUE)
@@ -1410,9 +1417,12 @@ VOID MY_PLAY_PROC(VOID)
 		{
 		case g:
 			//アイテム取得とアイテムの当たり判定削除
-			mapData[y][x] = t;
-			map[y][x].kind = t;
-			ITEMCnt++;
+			if (PlayChar == CHARA_BALANCE && ITEMCnt >= CHAR_BAG_NUM) {}
+			else {
+				mapData[y][x] = t;
+				map[y][x].kind = t;
+				ITEMCnt++;
+			}
 			break;
 		case c:
 			//コイン取得とコインの当たり判定削除
@@ -1424,6 +1434,9 @@ VOID MY_PLAY_PROC(VOID)
 				COINflag = TRUE;
 
 			}
+			ChangeVolumeSoundMem(255 * 75 / 100, se_coin_g.handle);
+
+			PlaySoundMem(se_coin_g.handle, DX_PLAYTYPE_BACK);
 			break;
 		default:
 			break;
@@ -1860,13 +1873,19 @@ VOID MY_RNKING(VOID)
 
 VOID MY_RNKING_PROC(VOID)
 {
-	if (CheckSoundMem(BGM_RANKING.handle) == 0)
+	if (CheckSoundMem(se_rain.handle) == 0)
 	{
-		ChangeVolumeSoundMem(255 * 25 / 100, BGM_RANKING.handle);
-		PlaySoundMem(BGM_RANKING.handle, DX_PLAYTYPE_LOOP);
+		ChangeVolumeSoundMem(255 *85 / 100, se_rain.handle);
+		PlaySoundMem(se_rain.handle, DX_PLAYTYPE_LOOP);
 	}
-
+	if (CheckSoundMem(se_clock.handle) == 0)
+	{
+		ChangeVolumeSoundMem(255 * 40 / 100, se_clock.handle);
+		PlaySoundMem(se_clock.handle, DX_PLAYTYPE_LOOP);
+	}
 	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
+		//ChangeVolumeSoundMem(255 * 80 / 100, se_pachin.handle);
+		PlaySoundMem(se_pachin.handle, DX_PLAYTYPE_BACK);
 		R_WRITE resetRnk;
 		resetRnk.ResetScore(fsArry);
 		RANKINGflag = TRUE;
@@ -2123,6 +2142,8 @@ void CHAR_TYPE_SET()
 
 			}
 			if (MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) { //キャラの変更
+				ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
+				PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
 				PlayChar = CHARA_TANK;
 			}
 			break;
@@ -2146,6 +2167,8 @@ void CHAR_TYPE_SET()
 				Cnt = setText.findText(charstatus, STATUS2); 	//キャラの説明呼び出し
 			}
 			if (MY_KEY_UP(KEY_INPUT_RIGHT) || MY_KEY_UP(KEY_INPUT_LEFT)) {	//キャラの変更
+				ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
+				PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
 				PlayChar = CHARA_BALANCE;
 			}
 
@@ -2281,10 +2304,19 @@ VOID ROCKETMAP(VOID)
 		for (int yoko = GAME_MAP_YOKO_NEW; yoko < GAME_MAP_YOKO_MAX; yoko++)
 		{
 			newMapYoko = (yoko - GAME_MAP_YOKO_NEW) + rndInt * 3;
-			mapData[tate][yoko] = mapDataNEW[tate][newMapYoko];
-			map[tate][yoko].kind = mapDataNEW[tate][newMapYoko];
+			if (MAPChoice) {
+				mapData[tate][yoko] = mapDataNEW[tate][newMapYoko];
+				map[tate][yoko].kind = mapDataNEW[tate][newMapYoko];
+			}
+			else
+			{
+				mapData[tate][yoko] = mapDataNEW2[tate][newMapYoko];
+				map[tate][yoko].kind = mapDataNEW2[tate][newMapYoko];
+			}
+
 		}
 	}
+	MAPChoice = !MAPChoice;
 	return;
 }
 
@@ -2738,102 +2770,21 @@ VOID MY_DELETE_IMAGE(VOID)
 
 BOOL MY_LOAD_MUSIC(VOID)
 {
-	strcpy_s(BGM.path, MUSIC_BGM_PATH);
-	BGM.handle = LoadSoundMem(BGM.path);
-	if (BGM.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
-	strcpy_s(musicShot.path, MUSIC_PLAYER_SHOT_PATH);
-	musicShot.handle = LoadSoundMem(musicShot.path);
-	if (musicShot.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_PLAYER_SHOT_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
-	strcpy_s(BGM_TITLE.path, MUSIC_BGM_TITLE_PATH);
-	BGM_TITLE.handle = LoadSoundMem(BGM_TITLE.path);
-	if (BGM_TITLE.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_TITLE_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
-	strcpy_s(BGM_COMP.path, MUSIC_BGM_COMP_PATH);
-	BGM_COMP.handle = LoadSoundMem(BGM_COMP.path);
-	if (BGM_COMP.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_COMP_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
-	strcpy_s(BGM_FAIL.path, MUSIC_BGM_FAIL_PATH);
-	BGM_FAIL.handle = LoadSoundMem(BGM_FAIL.path);
-	if (BGM_FAIL.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
-	strcpy_s(BGM_RANKING.path, MUSIC_BGM_RANK_PATH);
-	BGM_RANKING.handle = LoadSoundMem(BGM_RANKING.path);
-	if (BGM_RANKING.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
-	strcpy_s(se_clock.path, MUSIC_BGM_RANK_PATH);
-	se_clock.handle = LoadSoundMem(se_clock.path);
-	if (se_clock.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}	
-	
-	strcpy_s(se_coin_g.path, MUSIC_BGM_RANK_PATH);
-	se_coin_g.handle = LoadSoundMem(se_coin_g.path);
-	if (se_coin_g.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}	
-	
-	strcpy_s(se_breke.path, MUSIC_BGM_RANK_PATH);
-	se_breke.handle = LoadSoundMem(se_breke.path);
-	if (se_breke.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}	
-	
-	strcpy_s(se_rogo_draw.path, MUSIC_BGM_RANK_PATH);
-	se_rogo_draw.handle = LoadSoundMem(se_rogo_draw.path);
-	if (se_rogo_draw.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}	
-	
-	strcpy_s(se_rain.path, MUSIC_BGM_RANK_PATH);
-	se_rain.handle = LoadSoundMem(se_rain.path);
-	if (se_rain.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}	
-	
-	strcpy_s(se_scene_sen.path, MUSIC_BGM_RANK_PATH);
-	se_scene_sen.handle = LoadSoundMem(se_scene_sen.path);
-	if (se_scene_sen.handle == -1)
-	{
-		MessageBox(GetMainWindowHandle(), MUSIC_BGM_FAIL_PATH, MUSIC_LOAD_ERR_TITLE, MB_OK);
-		return FALSE;
-	}
-
+	MUSIC RoadM;
+	if (!RoadM.RoadMusic(BGM, MUSIC_BGM_PATH)) { return FALSE; }					//プレイのBGM
+	if (!RoadM.RoadMusic(musicShot, MUSIC_PLAYER_SHOT_PATH)) { return FALSE; }		//選択音
+	if (!RoadM.RoadMusic(BGM_TITLE, MUSIC_BGM_TITLE_PATH)) { return FALSE; }		//タイトルのBGM
+	if (!RoadM.RoadMusic(BGM_COMP, MUSIC_BGM_COMP_PATH)) { return FALSE; }			//脱出のBGM（STOP画面からゲーム離脱したとき）
+	if (!RoadM.RoadMusic(BGM_FAIL, MUSIC_BGM_FAIL_PATH)) { return FALSE; }			//ゲームオーバーのBGM（画面外に出たとき）
+	if (!RoadM.RoadMusic(BGM_RANKING, MUSIC_BGM_RANK_PATH)) { return FALSE; }		//ランキングのBGM
+	if (!RoadM.RoadMusic(se_clock, MUSIC_CLOCK_BGM_PATH)) { return FALSE; }			//時計のSE
+	if (!RoadM.RoadMusic(se_coin_g, MUSIC_COIN_BGM_PATH)) { return FALSE; }			//コインゲットのSE
+	if (!RoadM.RoadMusic(se_brake, MUSIC_BRAKE_BGM_PATH)) { return FALSE; }			//はかいされたSE
+	if (!RoadM.RoadMusic(se_rogo_draw, MUSIC_STRAT_ROGO_BGM_PATH)) { return FALSE; }//何かが流れるのSE
+	if (!RoadM.RoadMusic(se_rain, MUSIC_RANI_BGM_PATH)) { return FALSE; }			//雨のSE
+	if (!RoadM.RoadMusic(se_scene_sen, MUSIC_SCEN_SEN_BGM_PATH)) { return FALSE; }	//シーン遷移のSE
+	if (!RoadM.RoadMusic(se_move, MUSIC_MOVE_BGM_PATH)) { return FALSE; }			//移動音
+	if (!RoadM.RoadMusic(se_pachin, MUSIC_PACHIN_BGM_PATH)) { return FALSE; }		//指パッチン
 	return TRUE;
 }
 
@@ -2847,11 +2798,12 @@ VOID MY_DELETE_MUSIC(VOID)
 	DeleteSoundMem(BGM_RANKING.handle);
 	DeleteSoundMem(se_clock.handle);
 	DeleteSoundMem(se_coin_g.handle);
-	DeleteSoundMem(se_breke.handle);
+	DeleteSoundMem(se_brake.handle);
 	DeleteSoundMem(se_rogo_draw.handle);
 	DeleteSoundMem(se_rain.handle);
 	DeleteSoundMem(se_scene_sen.handle);
-
+	DeleteSoundMem(se_move.handle);
+	DeleteSoundMem(se_pachin.handle);
 
 	return;
 }
