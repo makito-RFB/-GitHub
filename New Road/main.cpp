@@ -83,7 +83,7 @@
 
 
 #define GOAL1  TEXT("ゲーム目標とルール")
-#define GOAL2  TEXT("操作説明とアイテムについいて")
+#define GOAL2  TEXT("操作説明とアイテムについて")
 #define GOAL3  TEXT("キャラ選択")
 
 #define STATUSTEMP		TEXT("名前　　：\nタイプ　：\nスピード：\nバッグ　：")
@@ -278,6 +278,7 @@ IMG ImageEndFAIL;
 IMG ImageEndWD;
 
 IMG_BLINK ImageNextROGO;
+IMG_BLINK ImageBACKROGO;
 IMG_BLINK ImageEndROGO;
 IMG ImageChoiser;
 
@@ -993,12 +994,20 @@ VOID MY_EXPO_PROC(VOID) {
 		}
 		break;
 	case 2:		//操作説明
+		if (MY_KEY_UP(KEY_INPUT_BACK)) {
+			ExDrawCnt = 1;
+			CLICK_M = TRUE;
+		}
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 3;
 			CLICK_M = TRUE;
 		}
 		break;
 	case 3:
+		if (MY_KEY_UP(KEY_INPUT_BACK)) {
+			ExDrawCnt = 2;
+			CLICK_M = TRUE;
+		}
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 1;
 			CLICK_M = TRUE;
@@ -1044,7 +1053,7 @@ VOID MY_EXPO_PROC(VOID) {
 	}
 
 //選択音
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN)) {
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) || (MY_KEY_DOWN(KEY_INPUT_BACK)&& ExDrawCnt != 1)) {
 
 		if (CLICK_M == TRUE)
 		{
@@ -1099,6 +1108,20 @@ VOID MY_EXPO_DRAW(VOID) {
 		ImageNextROGO.rate = 1.0;
 	}
 
+	if (ExDrawCnt != 1) {
+		DrawRotaGraph(
+			ImageBACKROGO.x, ImageBACKROGO.y,
+			ImageBACKROGO.rate,
+			ImageBACKROGO.angle,
+			ImageBACKROGO.handle, TRUE);
+
+		if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+			ImageBACKROGO.rate = 0.8;
+	}
+	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+		FALL_RESON = FALSE;
+		ImageBACKROGO.rate = 1.0;
+	}
 	/*free(str);*/
 
 	return;
@@ -2326,40 +2349,16 @@ BOOL MY_LOAD_IMAGE(VOID)
 	//タイトル背景
 	IMG roadImage;
 	if (!roadImage.RoadImage(ImageTitleBK, IMAGE_TITLE_BK_PATH)) { return FALSE; }
-	//strcpy_s(ImageTitleBK.path, IMAGE_TITLE_BK_PATH);
-	//ImageTitleBK.handle = LoadGraph(ImageTitleBK.path);
-	//if (ImageTitleBK.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_BK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageTitleBK.handle, &ImageTitleBK.width, &ImageTitleBK.height);
 	ImageTitleBK.x = GAME_WIDTH / 2 - ImageTitleBK.width / 2;
 	ImageTitleBK.y = GAME_HEIGHT / 2 - ImageTitleBK.height / 2;
 
 	//タイトルロゴ
 	if (!roadImage.RoadImage(ImageTitleROGO, IMAGE_TITLE_ROGO_PATH)) { return FALSE; }
-	//strcpy_s(ImageTitleROGO.path, IMAGE_TITLE_ROGO_PATH);
-	//ImageTitleROGO.handle = LoadGraph(ImageTitleROGO.path);
-	//if (ImageTitleROGO.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageTitleROGO.handle, &ImageTitleROGO.width, &ImageTitleROGO.height);
 	ImageTitleROGO.x = GAME_WIDTH / 2 - ImageTitleROGO.width / 2;
 	ImageTitleROGO.y = GAME_HEIGHT / 2 - ImageTitleROGO.height / 2;
 
 	//タイトルスタート
 	if (!roadImage.RoadImage(ImageTitleSTART, IMAGE_TITLE_START_PATH)) { return FALSE; }
-	//strcpy_s(ImageTitleSTART.path, IMAGE_TITLE_START_PATH);
-	//ImageTitleSTART.handle = LoadGraph(ImageTitleSTART.path);
-	//if (ImageTitleSTART.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_START_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageTitleSTART.handle, &ImageTitleSTART.width, &ImageTitleSTART.height);
 	ImageTitleSTART.x = GAME_WIDTH / 2;
 	ImageTitleSTART.y = ImageTitleROGO.y + ImageTitleROGO.height + 32;
 	ImageTitleSTART.angle = 0;
@@ -2367,14 +2366,6 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	//ランキング選択
 	if (!roadImage.RoadImage(ImageTitleRNK, IMAGE_TITLE_RNK)) { return FALSE; }
-	//strcpy_s(ImageTitleRNK.path, IMAGE_TITLE_RNK);
-	//ImageTitleRNK.handle = LoadGraph(ImageTitleRNK.path);
-	//if (ImageTitleRNK.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_RNK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageTitleRNK.handle, &ImageTitleRNK.width, &ImageTitleRNK.height);
 	ImageTitleRNK.x = GAME_WIDTH / 2;
 	ImageTitleRNK.y = ImageTitleROGO.y + ImageTitleROGO.height + ImageTitleSTART.height + 40;
 	ImageTitleRNK.angle = 0;
@@ -2382,14 +2373,6 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	//ゲームやめるロゴ
 	if (!roadImage.RoadImage(ImageSTeROGO, IMAGE_ST_E_ROGO_PATH)) { return FALSE; }
-	//strcpy_s(ImageSTeROGO.path, IMAGE_ST_E_ROGO_PATH);
-	//ImageSTeROGO.handle = LoadGraph(ImageSTeROGO.path);
-	//if (ImageSTeROGO.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_ST_E_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageSTeROGO.handle, &ImageSTeROGO.width, &ImageSTeROGO.height);
 	ImageSTeROGO.x = GAME_WIDTH / 2;
 	ImageSTeROGO.y = ImageTitleROGO.y + ImageTitleROGO.height + 32;
 	ImageSTeROGO.angle = 0;
@@ -2397,14 +2380,6 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	//ゲーム戻るロゴ
 	if (!roadImage.RoadImage(ImageSTbROGO, IMAGE_ST_B_ROGO_PATH)) { return FALSE; }
-	//strcpy_s(ImageSTbROGO.path, IMAGE_ST_B_ROGO_PATH);
-	//ImageSTbROGO.handle = LoadGraph(ImageSTbROGO.path);
-	//if (ImageSTbROGO.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_ST_B_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageSTbROGO.handle, &ImageSTbROGO.width, &ImageSTbROGO.height);
 	ImageSTbROGO.x = GAME_WIDTH / 2;
 	ImageSTbROGO.y = ImageTitleROGO.y + ImageTitleROGO.height + ImageTitleSTART.height + 40;
 	ImageSTbROGO.angle = 0;
@@ -2412,118 +2387,46 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	//選択印
 	if (!roadImage.RoadImage(ImageChoiser, IMAGE_TITLE_CHI)) { return FALSE; }
-	//strcpy_s(ImageChoiser.path, IMAGE_TITLE_CHI);
-	//ImageChoiser.handle = LoadGraph(ImageChoiser.path);
-	//if (ImageChoiser.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_TITLE_CHI, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageChoiser.handle, &ImageChoiser.width, &ImageChoiser.height);
 	ImageChoiser.x = ImageTitleSTART.x + ImageTitleSTART.width / 2 + 32;
 	ImageChoiser.y = ImageTitleSTART.y + ImageTitleSTART.height / 4 - ImageChoiser.height / 2;
 
 	//ゲーム説明
 	if (!roadImage.RoadImage(ImageEXPOBK, IMAGE_EXPO_BACK)) { return FALSE; }
-	//strcpy_s(ImageEXPOBK.path, IMAGE_EXPO_BACK);
-	//ImageEXPOBK.handle = LoadGraph(ImageEXPOBK.path);
-	//if (ImageEXPOBK.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_EXPO_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageEXPOBK.handle, &ImageEXPOBK.width, &ImageEXPOBK.height);
 	ImageEXPOBK.x = GAME_WIDTH / 2 - ImageEXPOBK.width / 2;
 	ImageEXPOBK.y = GAME_HEIGHT / 2 - ImageEXPOBK.height / 2;
 
 	//ランキング背景
 	if (!roadImage.RoadImage(RNKBACK, IMAGE_RNK_BACK)) { return FALSE; }
-	//strcpy_s(RNKBACK.path, IMAGE_RNK_BACK);
-	//RNKBACK.handle = LoadGraph(RNKBACK.path);
-	//if (RNKBACK.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(RNKBACK.handle, &RNKBACK.width, &RNKBACK.height);
 	RNKBACK.x = GAME_WIDTH / 2 - RNKBACK.width / 2;
 	RNKBACK.y = GAME_HEIGHT / 2 - RNKBACK.height / 2;
 
 	//ランキング背景none
 	if (!roadImage.RoadImage(RNKBACKNone, IMAGE_RNK_BACK_NONE)) { return FALSE; }
-	//strcpy_s(RNKBACKNone.path, IMAGE_RNK_BACK_NONE);
-	//RNKBACKNone.handle = LoadGraph(RNKBACKNone.path);
-	//if (RNKBACKNone.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_RNK_BACK_NONE, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(RNKBACKNone.handle, &RNKBACKNone.width, &RNKBACKNone.height);
 	RNKBACKNone.x = GAME_WIDTH / 2 - RNKBACKNone.width / 2;
 	RNKBACKNone.y = GAME_HEIGHT / 2 - RNKBACKNone.height / 2;
 
 	//ランキング背景追加影
 	if (!roadImage.RoadImage(RNKShadow, IMAGE_RNK_SHADOW)) { return FALSE; }
-	//strcpy_s(RNKShadow.path, IMAGE_RNK_SHADOW);
-	//RNKShadow.handle = LoadGraph(RNKShadow.path);
-	//if (RNKShadow.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_RNK_SHADOW, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(RNKShadow.handle, &RNKShadow.width, &RNKShadow.height);
 	RNKShadow.x = GAME_WIDTH / 2 - RNKShadow.width / 2;
 	RNKShadow.y = GAME_HEIGHT / 2 - RNKShadow.height / 2;
 
 	//ストップ画面背景
 	if (!roadImage.RoadImage(stopBack, IMAGE_STOP_BACK)) { return FALSE; }
-	//strcpy_s(stopBack.path, IMAGE_STOP_BACK);
-	//stopBack.handle = LoadGraph(stopBack.path);
-	//if (stopBack.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_STOP_BACK, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(stopBack.handle, &stopBack.width, &stopBack.height);
 	stopBack.x = GAME_WIDTH / 2 - stopBack.width / 2;
 	stopBack.y = GAME_HEIGHT / 2 - stopBack.height / 2;
 
 //エンドフォール
 	if (!roadImage.RoadImage(ImageEndFAIL, IMAGE_END_FAIL_PATH)) { return FALSE; }
-	//strcpy_s(ImageEndFAIL.path, IMAGE_END_FAIL_PATH);
-	//ImageEndFAIL.handle = LoadGraph(ImageEndFAIL.path);
-	//if (ImageEndFAIL.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_END_FAIL_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageEndFAIL.handle, &ImageEndFAIL.width, &ImageEndFAIL.height);
 	ImageEndFAIL.x = GAME_WIDTH / 2 - ImageEndFAIL.width / 2;
 	ImageEndFAIL.y = GAME_HEIGHT / 2 - ImageEndFAIL.height / 2 - 32;
 
 	//エンド撤退
 	if (!roadImage.RoadImage(ImageEndWD, IMAGE_END_WITHDRAWAL_PATH)) { return FALSE; }
-	//strcpy_s(ImageEndWD.path, IMAGE_END_WITHDRAWAL_PATH);
-	//ImageEndWD.handle = LoadGraph(ImageEndWD.path);
-	//if (ImageEndWD.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_END_WITHDRAWAL_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageEndWD.handle, &ImageEndWD.width, &ImageEndWD.height);
 	ImageEndWD.x = GAME_WIDTH / 2 - ImageEndWD.width / 2;
 	ImageEndWD.y = GAME_HEIGHT / 2 - ImageEndWD.height / 2 - 32;
 
 	//エスケーププッシュ
 	if (!roadImage.RoadImage(ImageEndROGO, IMAGE_END_ROGO_PATH)) { return FALSE; }
-	//strcpy_s(ImageEndROGO.path, IMAGE_END_ROGO_PATH);
-	//ImageEndROGO.handle = LoadGraph(ImageEndROGO.path);
-	//if (ImageEndROGO.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_END_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageEndROGO.handle, &ImageEndROGO.width, &ImageEndROGO.height);
 	ImageEndROGO.x = GAME_WIDTH - 70;
 	ImageEndROGO.y = GAME_HEIGHT - 50;
 	ImageEndROGO.angle = 0;
@@ -2531,43 +2434,26 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	//NEXT PUSH
 	if (!roadImage.RoadImage(ImageNextROGO, IMAGE_NEXT_ROGO_PATH)) { return FALSE; }
-	//strcpy_s(ImageNextROGO.path, IMAGE_NEXT_ROGO_PATH);
-	//ImageNextROGO.handle = LoadGraph(ImageNextROGO.path);
-	//if (ImageNextROGO.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_NEXT_ROGO_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageNextROGO.handle, &ImageNextROGO.width, &ImageNextROGO.height);
 	ImageNextROGO.x = GAME_WIDTH - 70;
-	ImageNextROGO.y = GAME_HEIGHT - 50;
+	ImageNextROGO.y = 50;
 	ImageNextROGO.angle = 0;
 	ImageNextROGO.rate = 1.0;
 
+	//BACK PUSH
+	if (!roadImage.RoadImage(ImageBACKROGO, IMAGE_BACK_ROGO_PATH)) { return FALSE; }
+	ImageBACKROGO.x = 70;
+	ImageBACKROGO.y = 50;
+	ImageBACKROGO.angle = 0;
+	ImageBACKROGO.rate = 1.0;
+
 	//背景画像
 	if (!roadImage.RoadImage(ImageBack, IMAGE_BACK_PATH)) { return FALSE; }
-	//strcpy_s(ImageBack.path, IMAGE_BACK_PATH);
-	//ImageBack.handle = LoadGraph(ImageBack.path);
-	//if (ImageBack.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_BACK_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageBack.handle, &ImageBack.width, &ImageBack.height);
 	ImageBack.x = GAME_WIDTH / 2 - ImageBack.width / 2;
 	ImageBack.y = 0 - ImageBack.height * 0;
 	ImageBack.IsDraw = FALSE;
 
 	//shadow
 	if (!roadImage.RoadImage(ImageShadow, IMAGE_SHADOW_PATH)) { return FALSE; }
-	//strcpy_s(ImageShadow.path, IMAGE_SHADOW_PATH);
-	//ImageShadow.handle = LoadGraph(ImageShadow.path);
-	//if (ImageShadow.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_SHADOW_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageShadow.handle, &ImageShadow.width, &ImageShadow.height);
 	ImageShadow.x = GAME_WIDTH / 2 - ImageShadow.width / 2;
 	ImageShadow.y = 0 - ImageShadow.height * 0;
 	ImageShadow.IsDraw = FALSE;
@@ -2575,56 +2461,24 @@ BOOL MY_LOAD_IMAGE(VOID)
 
 	//背景画像END
 	if (!roadImage.RoadImage(ImageBackEND, IMAGE_BACK_ENDC_PATH)) { return FALSE; }
-	//strcpy_s(ImageBackEND.path, IMAGE_BACK_ENDC_PATH);
-	//ImageBackEND.handle = LoadGraph(ImageBackEND.path);
-	//if (ImageBackEND.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_BACK_ENDC_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageBackEND.handle, &ImageBackEND.width, &ImageBackEND.height);
 	ImageBackEND.x = GAME_WIDTH / 2 - ImageBackEND.width / 2;
 	ImageBackEND.y = 0 - ImageBackEND.height * 0;
 	ImageBackEND.IsDraw = FALSE;
 
 	//背景画像ENDF
 	if (!roadImage.RoadImage(ImageBackENDF, IMAGE_BACK_ENDF_PATH)) { return FALSE; }
-	//strcpy_s(ImageBackENDF.path, IMAGE_BACK_ENDF_PATH);
-	//ImageBackENDF.handle = LoadGraph(ImageBackENDF.path);
-	//if (ImageBackENDF.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_BACK_ENDF_PATH, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageBackENDF.handle, &ImageBackENDF.width, &ImageBackENDF.height);
 	ImageBackENDF.x = GAME_WIDTH / 2 - ImageBackENDF.width / 2;
 	ImageBackENDF.y = 0 - ImageBackENDF.height * 0;
 	ImageBackENDF.IsDraw = FALSE;
 
 	//説明画像１
 	if (!roadImage.RoadImage(ImageExNews1, IMAGE_EX_NEWS1)) { return FALSE; }
-	//strcpy_s(ImageExNews1.path, IMAGE_EX_NEWS1);
-	//ImageExNews1.handle = LoadGraph(ImageExNews1.path);
-	//if (ImageExNews1.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS1, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageExNews1.handle, &ImageExNews1.width, &ImageExNews1.height);
 	ImageExNews1.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
 	ImageExNews1.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
 	ImageExNews1.IsDraw = FALSE;
 
 	//説明画像2
 	if (!roadImage.RoadImage(ImageExNews2, IMAGE_EX_NEWS2)) { return FALSE; }
-	//strcpy_s(ImageExNews2.path, IMAGE_EX_NEWS2);
-	//ImageExNews2.handle = LoadGraph(ImageExNews2.path);
-	//if (ImageExNews2.handle == -1)
-	//{
-	//	MessageBox(GetMainWindowHandle(), IMAGE_EX_NEWS2, IMAGE_LOAD_ERR_TITLE, MB_OK);
-	//	return FALSE;
-	//}
-	//GetGraphSize(ImageExNews2.handle, &ImageExNews2.width, &ImageExNews2.height);
 	ImageExNews2.x = MAP_DIV_WIDTH + (MAP_DIV_WIDTH / 4 - 2);
 	ImageExNews2.y = MAP_DIV_HEIGHT * 2 + (MAP_DIV_HEIGHT / 4 * 3 - 2);
 	ImageExNews2.IsDraw = FALSE;
@@ -2756,11 +2610,12 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(ImageEndFAIL.handle);
 	DeleteGraph(ImageEndWD.handle);
 	DeleteGraph(ImageEndROGO.handle);
-	DeleteGraph(ImageNextROGO.handle);
+	DeleteGraph(ImageNextROGO.handle);	
+	DeleteGraph(ImageBACKROGO.handle);
 	DeleteGraph(ImageChoiser.handle);
 	DeleteGraph(ImageExNews1.handle);
 	DeleteGraph(ImageExNews2.handle);
-
+	
 
 	for (int i_num = 0; i_num < MAP_DIV_NUM; i_num++) { DeleteGraph(mapChip.handle[i_num]); }
 
