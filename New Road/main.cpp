@@ -340,26 +340,26 @@ GAME_MAP_KIND mapDataPR[GAME_MAP_TATE_MAX][GAME_MAP_YOKO_MAX]{
 GAME_MAP_KIND mapDataNEW[GAME_MAP_TATE_MAX][GAME_MAP_KAKU_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,1,1,2,3,4,5,6,7,8,9,2,1,2,3,4,5,6,7,8,9
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
-		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,l,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
+		k,t,t,k,t,l,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
+		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,g,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
 		k,l,t,t,l,k,g,k,l,t,l,t,c,l,l,t,l,t,l,k,l,t,k,t,k,g,t,k,t,t,	// 3
 		l,t,k,l,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
 		l,c,l,t,l,t,t,k,t,t,l,l,k,t,l,t,k,t,k,g,l,k,t,l,l,l,k,t,c,t,	// 5
-		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,g,t,l,k,l,g,k,t,l,t,t,k,t,	// 6
-		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,k,t,k,k,l,t,k,t,	// 7
+		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,t,t,l,k,l,k,k,t,l,t,t,k,t,	// 6
+		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,g,t,k,k,l,t,k,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
 };
 
 GAME_MAP_KIND mapDataNEW2[GAME_MAP_TATE_MAX][GAME_MAP_KAKU_YOKO_MAX]{ //3ブロックづつ
 	//  0,1,2,3,4,5,6,7,8,9,1,1,2,3,4,5,6,7,8,9,2,1,2,3,4,5,6,7,8,9
 		m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,m,	// 0
-		k,t,t,t,l,t,t,l,t,t,l,k,t,t,l,k,t,t,t,k,t,t,l,k,t,l,t,t,k,t,	// 1
-		t,t,t,l,t,l,k,l,l,k,t,t,l,l,t,t,l,l,k,t,k,t,c,l,t,k,l,t,t,l,	// 2
-		k,l,t,t,l,k,g,k,l,t,l,t,c,l,l,t,l,t,l,k,l,t,k,t,k,g,t,k,t,t,	// 3
-		l,t,k,l,k,t,l,t,t,k,l,t,k,t,t,k,k,t,t,l,t,t,t,k,t,k,t,g,t,k,	// 4
-		l,c,l,t,l,t,t,k,t,t,l,l,k,t,l,t,k,t,k,g,l,k,t,l,l,l,k,t,c,t,	// 5
-		t,k,t,k,t,l,c,k,l,t,k,t,k,g,k,t,k,g,t,l,k,l,g,k,t,l,t,t,k,t,	// 6
-		k,k,t,k,c,k,t,l,t,t,l,t,t,t,l,c,t,t,t,k,t,t,k,t,k,k,l,t,k,t,	// 7
+		l,k,t,t,l,t,t,l,k,t,t,l,k,t,c,k,t,l,k,t,l,t,g,t,t,l,t,t,k,t,	// 1
+		t,t,l,k,t,l,k,l,l,t,k,t,c,k,t,l,k,l,l,t,t,k,k,t,k,l,k,l,t,t,	// 2
+		k,l,t,t,l,k,g,k,l,l,t,l,t,l,t,k,t,l,t,k,l,l,k,k,t,t,k,g,t,k,	// 3
+		l,t,k,l,t,t,l,t,t,k,l,t,k,l,t,k,t,k,l,t,l,t,g,l,t,t,k,t,t,k,	// 4
+		l,c,l,t,l,k,k,t,k,t,l,t,l,t,l,t,l,t,t,g,c,l,t,k,l,t,l,l,c,l,	// 5
+		t,k,t,l,l,t,l,l,c,l,g,k,t,t,l,t,k,l,t,l,t,l,t,k,t,l,t,t,k,l,	// 6
+		k,g,t,k,l,t,k,t,t,l,k,l,t,l,k,t,g,l,k,t,k,t,t,k,k,l,t,t,k,t,	// 7
 		r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,
 };
 
@@ -1033,7 +1033,7 @@ VOID MY_EXPO_PROC(VOID) {
 			player.collBeforePt.y = player.CenterY;
 
 			ITEMCnt = 0;
-			COINCnt = 4;
+			COINCnt = 0;
 			driecChar = 2;
 			speedUPflg = false;
 			speedUpTime = 0;
@@ -1523,41 +1523,45 @@ VOID MY_PLAY_DRAW(VOID)
 	SetFontSize(25);
 
 	if (secondtime >= 60 || mintime >= 1) {
-		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%d分%.2f秒", mintime, secondtime);
+		DrawFormatString(0, 5, GetColor(0, 0, 200), " TIME:%d分%.2f秒", mintime, secondtime);
 	}
 	else
 	{
-		DrawFormatString(0, 5, GetColor(0, 0, 200), "TIME:%.2f秒", secondtime);
+		DrawFormatString(0, 5, GetColor(0, 0, 200), " TIME:%.2f秒", secondtime);
 
 	}
 
-	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("アイテム:% d個", ITEMCnt, -1), 5, GetColor(200, 0, 0), "アイテム:%d個", ITEMCnt);
-
-	//当たり判定の描画（デバッグ用）
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
-		{
-			//壁ならば
-			if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
-			}
-
-			//通路ならば
-			if (mapData[tate][yoko] == t)
-			{
-				DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
-			}
-		}
+	if (PlayChar == CHARA_BALANCE && ITEMCnt >= CHAR_BAG_NUM) {
+		DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("ピッケル: MAX ", ITEMCnt, -1), 5, GetColor(200, 0, 0), "ピッケル: MAX ", ITEMCnt);
 	}
-
-	//////ゴールの描画（デバッグ用）
-	////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
-
+	else
+	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("ピッケル:% d個 ", ITEMCnt, -1), 5, GetColor(255, 0, 0), "ピッケル:%d個 ", ITEMCnt);
 
 	////当たり判定の描画（デバッグ用）
-	DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
+	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
+	//{
+	//	for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+	//	{
+	//		//壁ならば
+	//		if (mapData[tate][yoko] == k || mapData[tate][yoko] == l)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(0, 0, 255), FALSE);
+	//		}
+
+	//		//通路ならば
+	//		if (mapData[tate][yoko] == t)
+	//		{
+	//			DrawBox(mapColl[tate][yoko].left, mapColl[tate][yoko].top, mapColl[tate][yoko].right, mapColl[tate][yoko].bottom, GetColor(255, 255, 0), FALSE);
+	//		}
+	//	}
+	//}
+
+	////////ゴールの描画（デバッグ用）
+	//////DrawBox(GoalRect.left, GoalRect.top, GoalRect.right, GoalRect.bottom, GetColor(255, 255, 0), TRUE);
+
+
+	//////当たり判定の描画（デバッグ用）
+	//DrawBox(player.coll.left, player.coll.top, player.coll.right, player.coll.bottom, GetColor(255, 0, 0), FALSE);
 
 
 
@@ -1716,11 +1720,6 @@ VOID MY_END_DRAW(VOID)
 		R_WRITE ranking;
 		COINCnt = COINCnt;
 		ranking.Rwrite(fsArry, Score);
-		/*for (int i = 0; i < FILE_NUM; i++)
-		{
-			fsArry[i] = ptr2[i];
-		}*/
-		//float *ptr = RANKIG_WRITE(fsArry, Score);
 		RANKINGflag = FALSE;
 	}
 	return;
@@ -1873,16 +1872,16 @@ VOID MY_RNKING(VOID)
 
 VOID MY_RNKING_PROC(VOID)
 {
-	if (CheckSoundMem(se_rain.handle) == 0)
+	if (CheckSoundMem(BGM_RANKING.handle) == 0)
 	{
-		ChangeVolumeSoundMem(255 *85 / 100, se_rain.handle);
-		PlaySoundMem(se_rain.handle, DX_PLAYTYPE_LOOP);
+		ChangeVolumeSoundMem(255 * 40 / 100, BGM_RANKING.handle);
+		PlaySoundMem(BGM_RANKING.handle, DX_PLAYTYPE_LOOP);
 	}
-	if (CheckSoundMem(se_clock.handle) == 0)
-	{
-		ChangeVolumeSoundMem(255 * 40 / 100, se_clock.handle);
-		PlaySoundMem(se_clock.handle, DX_PLAYTYPE_LOOP);
-	}
+	//if (CheckSoundMem(se_clock.handle) == 0)
+	//{
+	//	ChangeVolumeSoundMem(255 * 40 / 100, se_clock.handle);
+	//	PlaySoundMem(se_clock.handle, DX_PLAYTYPE_LOOP);
+	//}
 	if (MY_KEY_UP(KEY_INPUT_DELETE) == TRUE) {
 		//ChangeVolumeSoundMem(255 * 80 / 100, se_pachin.handle);
 		PlaySoundMem(se_pachin.handle, DX_PLAYTYPE_BACK);

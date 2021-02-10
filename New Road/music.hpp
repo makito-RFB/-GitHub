@@ -3,7 +3,7 @@
 
 
 #define MUSIC_BGM_PATH			TEXT(".\\MUSIC\\Taste_Hell.mp3")
-#define MUSIC_PLAYER_SHOT_PATH	TEXT(".\\MUSIC\\ショット音.mp3")
+#define MUSIC_PLAYER_SHOT_PATH	TEXT(".\\MUSIC\\se_pikon23.mp3")
 
 #define MUSIC_BGM_TITLE_PATH	TEXT(".\\MUSIC\\荒涼の地.mp3")	//タイトルのBGM
 #define MUSIC_BGM_COMP_PATH		TEXT(".\\MUSIC\\Yours.mp3")				//コンプリートBGM
@@ -17,7 +17,7 @@
 #define MUSIC_RANI_BGM_PATH				TEXT(".\\MUSIC\\se_rain2_loop.mp3")		//雨
 #define MUSIC_SCEN_SEN_BGM_PATH			TEXT(".\\MUSIC\\se_scene_seni02.mp3")	//シーン遷移
 #define MUSIC_MOVE_BGM_PATH				TEXT(".\\MUSIC\\se_chakuchi03.mp3") 	//移動音
-#define MUSIC_PACHIN_BGM_PATH			TEXT(".\\MUSIC\\se_finger1.mp3") 		//指パッチン
+#define MUSIC_PACHIN_BGM_PATH			TEXT(".\\MUSIC\\crrect_answer3.mp3") 	//ランキング消去音
 
 
 

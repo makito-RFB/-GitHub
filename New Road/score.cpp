@@ -4,9 +4,9 @@
 
 void SetScore::setS(float time_, int mintime_, int COINCnt_) {
 
-	TIMEScore = floor(100 * (time_ * 10 + mintime_ * 600 + 20)) / 100;
-	COINScore = COINCnt_ / 10 * 100;
-	Score = TIMEScore + COINScore;
+	TIMEScore = floor(100 * (time_ * 10 + mintime_ * 600 + 20)) / 100;	//秒×10pt
+	COINScore = COINCnt_ / 5 * 500;	//5枚で＋500pt
+	Score = TIMEScore + COINScore;	//上2つを足した合計がスコア
 
 	return;
 }
