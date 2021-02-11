@@ -64,7 +64,7 @@
 #define IMAGE_END_ROGO_PATH	TEXT(".\\IMAGE\\ENRE.png")					//タイトルに戻るロゴ
 #define IMAGE_NEXT_ROGO_PATH	TEXT(".\\IMAGE\\NEXT2.png")				//進むロゴ
 #define IMAGE_BACK_ROGO_PATH	TEXT(".\\IMAGE\\BACK.png")				//戻るロゴ
-
+#define IMAGE_START_ROGO_PATH	TEXT(".\\IMAGE\\スタート.png")			//スタートロゴ
 
 
 #define IMAGE_CHAR_PATH       TEXT(".\\IMAGE\\PLAYER_IMG\\player.png")	//プレイヤー（12分割）

@@ -198,7 +198,8 @@ char OldAllKeyState[256] = { '\0' };
 char direc; //向きのやつ
 int driecChar = 2;
 int PlayChar = 0;
-int cooltimeType = 0; 
+int cooltimeType = 0;
+int charDV = 1,charDT = 1;	//キャラ選択時の向いてる方向
 
 //マップのスピードアップと誤差フラグ
 bool speedUPflg = false;
@@ -279,6 +280,7 @@ IMG ImageEndWD;
 
 IMG_BLINK ImageNextROGO;
 IMG_BLINK ImageBACKROGO;
+IMG_BLINK ImageStartROGO;
 IMG_BLINK ImageEndROGO;
 IMG ImageChoiser;
 
@@ -303,7 +305,7 @@ MUSIC se_clock;
 MUSIC se_coin_g;
 MUSIC se_brake;
 MUSIC se_rogo_draw;
-MUSIC se_rain;
+MUSIC se_metal;
 MUSIC se_scene_sen;
 MUSIC se_move;
 MUSIC se_pachin;
@@ -1001,6 +1003,8 @@ VOID MY_EXPO_PROC(VOID) {
 		if (MY_KEY_UP(KEY_INPUT_RETURN)) {
 			ExDrawCnt = 3;
 			CLICK_M = TRUE;
+			charDV = 7;		//キャラの向き（後ろor前）
+			charDT = 1;
 		}
 		break;
 	case 3:
@@ -1093,19 +1097,32 @@ VOID MY_EXPO_DRAW(VOID) {
 	SetFontSize(44);
 	TEXT_DRAW();
 	
-	DrawRotaGraph(
-		ImageNextROGO.x, ImageNextROGO.y,
-		ImageNextROGO.rate,
-		ImageNextROGO.angle,
-		ImageNextROGO.handle, TRUE);
+	if (ExDrawCnt == 3)
+	{
+		DrawRotaGraph(
+			ImageStartROGO.x, ImageStartROGO.y,
+			ImageStartROGO.rate,
+			ImageStartROGO.angle,
+			ImageStartROGO.handle, TRUE);
+	}
+	else
+	{
+		DrawRotaGraph(
+			ImageNextROGO.x, ImageNextROGO.y,
+			ImageNextROGO.rate,
+			ImageNextROGO.angle,
+			ImageNextROGO.handle, TRUE);
+	}
 
 //選択（サイズ）
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
 		ImageNextROGO.rate = 0.8;
-
+		ImageStartROGO.rate = 0.8;
+	}
 	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 		FALL_RESON = FALSE;
 		ImageNextROGO.rate = 1.0;
+		ImageStartROGO.rate = 1.0;
 	}
 
 	if (ExDrawCnt != 1) {
@@ -1445,6 +1462,9 @@ VOID MY_PLAY_PROC(VOID)
 				mapData[y][x] = t;
 				map[y][x].kind = t;
 				ITEMCnt++;
+				ChangeVolumeSoundMem(255 * 75 / 100, se_metal.handle);
+				PlaySoundMem(se_metal.handle, DX_PLAYTYPE_BACK);
+
 			}
 			break;
 		case c:
@@ -1622,7 +1642,7 @@ VOID MY_END_PROC(VOID)
 	static BOOL MusicPass1 = TRUE;
 	if (BackBtnIsDraw)
 	{
-		if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+		if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
 		{
 			if (CLICK_M == TRUE)
 			{
@@ -1642,7 +1662,7 @@ VOID MY_END_PROC(VOID)
 			MusicPass1 = FALSE;
 		}
 
-		if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+		if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 			CLICK_M = TRUE;
 
 			SetMouseDispFlag(TRUE);
@@ -1729,10 +1749,10 @@ VOID MY_END_DRAW(VOID)
 			ImageEndROGO.handle, TRUE);
 	}
 
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
 		ImageEndROGO.rate = 0.8;
 
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 		FALL_RESON = FALSE;
 		ImageEndROGO.rate = 1.0;
 	}
@@ -1914,14 +1934,14 @@ VOID MY_RNKING_PROC(VOID)
 	}
 
 	//選択音
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE && CLICK_M == TRUE)
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && CLICK_M == TRUE)
 	{
 		PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
 		CLICK_M = FALSE;
 	}
 
 
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 
 		/*SetMouseDispFlag(TRUE);*/
 		if (CheckSoundMem(BGM_RANKING.handle) != 0)
@@ -2001,10 +2021,10 @@ VOID MY_RNKING_DRAW(VOID)
 		ImageEndROGO.handle, TRUE);
 
 
-	if (MY_KEY_DOWN(KEY_INPUT_BACK) == TRUE)
+	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
 		ImageEndROGO.rate = 0.8;
 
-	if (MY_KEY_UP(KEY_INPUT_BACK) == TRUE) {
+	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
 		FALL_RESON = FALSE;
 		ImageEndROGO.rate = 1.0;
 	}
@@ -2132,13 +2152,13 @@ void CHAR_TYPE_SET()
 		player.x = GAME_WIDTH / 4, player.y = play1y,
 		player.rate * 2,
 		player.angle,
-		player.handle2[1], TRUE);
+		player.handle2[charDV], TRUE);
 
 	DrawRotaGraph(
 		player2.x = GAME_WIDTH / 4 * 3, player2.y = play2y,
 		player2.rate * 2,
 		player2.angle,
-		player2.handle2[1], TRUE);
+		player2.handle2[charDT], TRUE);
 
 	if (charstatus[Template] == STATUSTEMP) {
 		switch (PlayChar)
@@ -2155,8 +2175,8 @@ void CHAR_TYPE_SET()
 				player2.rate = CHARRESIZE;
 
 				//文字の場所指定
-				DrawString((player.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
-				DrawString(player.x + 10, (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
+				DrawString((player.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 64));
+				DrawString(player.x + 10, (player.y + player.height / 2) + player.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 64));
 			}
 			else
 			{
@@ -2167,6 +2187,8 @@ void CHAR_TYPE_SET()
 				ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
 				PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
 				PlayChar = CHARA_TANK;
+				charDV = 1;		//キャラの向き（後ろor前）
+				charDT = 7;
 			}
 			break;
 		case CHARA_TANK:
@@ -2181,8 +2203,9 @@ void CHAR_TYPE_SET()
 				player.rate = CHARRESIZE;
 
 				//文字の場所指定
-				DrawString((player2.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 0));
-				DrawString(player2.x + 10, (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 0));
+				DrawString((player2.x - GetDrawStringWidth(charstatus[Template].c_str(), -1)), (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Template].c_str(), GetColor(255, 0, 64
+				));
+				DrawString(player2.x + 10, (player2.y + player2.height / 2) + player2.height * CHARBIGSIZE + MAP_DIV_TATE / 4, charstatus[Cnt].c_str(), GetColor(255, 0, 64));
 			}
 			else
 			{
@@ -2192,6 +2215,8 @@ void CHAR_TYPE_SET()
 				ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
 				PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
 				PlayChar = CHARA_BALANCE;
+				charDV = 7;		//キャラの向き（後ろor前）
+				charDT = 1;
 			}
 
 			break;
@@ -2446,6 +2471,13 @@ BOOL MY_LOAD_IMAGE(VOID)
 	ImageBACKROGO.angle = 0;
 	ImageBACKROGO.rate = 1.0;
 
+	//スタート PUSH
+	if (!roadImage.RoadImage(ImageStartROGO, IMAGE_START_ROGO_PATH)) { return FALSE; }
+	ImageStartROGO.x = GAME_WIDTH - 70;
+	ImageStartROGO.y = 50;
+	ImageStartROGO.angle = 0;
+	ImageStartROGO.rate = 1.0;
+
 	//背景画像
 	if (!roadImage.RoadImage(ImageBack, IMAGE_BACK_PATH)) { return FALSE; }
 	ImageBack.x = GAME_WIDTH / 2 - ImageBack.width / 2;
@@ -2612,6 +2644,7 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(ImageEndROGO.handle);
 	DeleteGraph(ImageNextROGO.handle);	
 	DeleteGraph(ImageBACKROGO.handle);
+	DeleteGraph(ImageStartROGO.handle);
 	DeleteGraph(ImageChoiser.handle);
 	DeleteGraph(ImageExNews1.handle);
 	DeleteGraph(ImageExNews2.handle);
@@ -2635,7 +2668,7 @@ BOOL MY_LOAD_MUSIC(VOID)
 	if (!RoadM.RoadMusic(se_coin_g, MUSIC_COIN_BGM_PATH)) { return FALSE; }			//コインゲットのSE
 	if (!RoadM.RoadMusic(se_brake, MUSIC_BRAKE_BGM_PATH)) { return FALSE; }			//はかいされたSE
 	if (!RoadM.RoadMusic(se_rogo_draw, MUSIC_STRAT_ROGO_BGM_PATH)) { return FALSE; }//何かが流れるのSE
-	if (!RoadM.RoadMusic(se_rain, MUSIC_RANI_BGM_PATH)) { return FALSE; }			//雨のSE
+	if (!RoadM.RoadMusic(se_metal, MUSIC_METAL_BGM_PATH)) { return FALSE; }			//雨のSE
 	if (!RoadM.RoadMusic(se_scene_sen, MUSIC_SCEN_SEN_BGM_PATH)) { return FALSE; }	//シーン遷移のSE
 	if (!RoadM.RoadMusic(se_move, MUSIC_MOVE_BGM_PATH)) { return FALSE; }			//移動音
 	if (!RoadM.RoadMusic(se_pachin, MUSIC_PACHIN_BGM_PATH)) { return FALSE; }		//指パッチン
@@ -2654,7 +2687,7 @@ VOID MY_DELETE_MUSIC(VOID)
 	DeleteSoundMem(se_coin_g.handle);
 	DeleteSoundMem(se_brake.handle);
 	DeleteSoundMem(se_rogo_draw.handle);
-	DeleteSoundMem(se_rain.handle);
+	DeleteSoundMem(se_metal.handle);
 	DeleteSoundMem(se_scene_sen.handle);
 	DeleteSoundMem(se_move.handle);
 	DeleteSoundMem(se_pachin.handle);
