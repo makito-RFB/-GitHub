@@ -1024,7 +1024,7 @@ VOID MY_EXPO_PROC(VOID) {
 				if (ImageChar[charS].IsDraw == TRUE)
 					ImageChar[charS].IsDraw = FALSE;
 			}
-			switch (PlayChar)
+			switch (PlayChar)	//キャラクターのタイプをとる処理
 			{
 				case CHARA_BALANCE:
 					cooltimeType = VARNCE_CHAR;
@@ -1562,6 +1562,7 @@ VOID MY_PLAY_DRAW(VOID)
 	//shadow
 	DrawGraph(ImageShadow.x, ImageShadow.y, ImageShadow.handle, TRUE);
 
+	//スピードアップ時の枠が赤くなる処理
 	if (speedUPflg && speedUpTime < (GAME_FPS * SPEED_UP_TIME))
 	{
 		DrawBoxAA(0, 0, 5, GAME_HEIGHT, GetColor(220, 0, 0), TRUE);
@@ -1618,7 +1619,7 @@ VOID MY_PLAY_DRAW(VOID)
 	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
 	DrawString((GAME_WIDTH - StrWidth )/ 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
 	SetFontSize(40);
-	if (COINflag)
+	if (COINflag) //コインゲットの表示
 	{
 		if (CdrawCnt < GAME_FPS / 2) {
 			DrawString(10, 80- CdrawCnt, "1C Get!!", GetColor(255, 255, 255));
@@ -2166,7 +2167,7 @@ void CHAR_TYPE_SET()
 		player2.angle,
 		player2.handle2[charDT], TRUE);
 
-	if (charstatus[Template] == STATUSTEMP) {
+	if (charstatus[Template] == STATUSTEMP) {		//キャラクター選択の時のキャラクターの大きさとキャラクターのステータスの表示
 		switch (PlayChar)
 		{
 		case CHARA_BALANCE:
@@ -2174,7 +2175,7 @@ void CHAR_TYPE_SET()
 			ly = (player.y - player.height / 2) - player.width;
 			rx = (player.x + player.width / 2) + player.width * 2;
 			ry = (player.y + player.height / 2) + player.height * 3.5;
-			if (charstatus[Cnt] == STATUS1) {
+			if (charstatus[Cnt] == STATUS1) {		//キャラクターのサイズとそれ基づいた文字描画座標の設定
 				play1y = GAME_HEIGHT / 5 * 2;
 				play2y = GAME_HEIGHT / 2;
 				player.rate = CHARBIGSIZE;
@@ -2234,6 +2235,7 @@ void CHAR_TYPE_SET()
 	{
 		Template = setText.findText(charstatus, STATUSTEMP); 	//キャラの説明テンプレート呼び出し
 	}
+	//中心にある操作説明
 	DrawString(GAME_WIDTH / 2 - GetDrawStringWidth(CHARA_ARROW, -1) / 2, GAME_HEIGHT / 2 - 44, CHARA_ARROW, GetColor(255, 255, 255));
 
 	return;
