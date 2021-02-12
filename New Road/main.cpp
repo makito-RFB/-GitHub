@@ -860,7 +860,7 @@ VOID MY_START_PROC(VOID)
 		timeCnt = 0;
 		secondtime = 0;
 		mintime = 0;
-		DrCharCnt = 0;
+		DrCharCnt = 1;
 
 		GameScene = GAME_SCENE_EXPO;
 
@@ -1561,6 +1561,12 @@ VOID MY_PLAY_DRAW(VOID)
 
 	//shadow
 	DrawGraph(ImageShadow.x, ImageShadow.y, ImageShadow.handle, TRUE);
+
+	if (speedUPflg && speedUpTime < (GAME_FPS * SPEED_UP_TIME))
+	{
+		DrawBoxAA(0, 0, 5, GAME_HEIGHT, GetColor(220, 0, 0), TRUE);
+		DrawBoxAA(GAME_WIDTH - 5, 0, GAME_WIDTH, GAME_HEIGHT, GetColor(220, 0, 0), TRUE);
+	}
 
 	//タイマーとアイテム描画
 	SetFontSize(25);
@@ -2284,7 +2290,7 @@ VOID GAME_RULE(VOID)
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5.5, "ゲームルール", GetColor(160, 0, 80));
 	SetFontSize(25);
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "長く生き残り、\n高スコアを叩きだせ！", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "流れるマップの障害物を\n避けて・動かして・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ！！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 6 + 5, "行く先にある壁を\n避けて・動かして・破壊して\n移動できる道を新たに開拓、\nより長く画面内ににとどまり\n生き残れ！！", GetColor(0, 0, 0));
 
 	return;
 }
@@ -2296,7 +2302,7 @@ VOID GAME_PILOT(VOID)
 	DrawString(MOVE_ERIA * 8, MOVE_ERIA * 5 + 5, "アイテムについて", GetColor(160, 0, 80));
 	SetFontSize(25);
 	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 3.5 + 5, "キャラの移動は「W A S D」\n一旦停止を行うには「ESCキー」", GetColor(0, 0, 0));
-	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているピッケル\nを使い可動障害物を破壊する\nことが可能。\nピッケルのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
+	DrawString(MOVE_ERIA * 8.5 - 10, MOVE_ERIA * 5.5 + 10, "マップ内に落ちているピッケル\nを使い動かせる壁を破壊する\nことが可能。\nピッケルのストックが可能で\n使うタイミング次第で危機を\n脱せる可能性も！！", GetColor(0, 0, 0));
 
 	return;
 }
