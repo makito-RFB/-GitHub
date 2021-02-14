@@ -1707,7 +1707,7 @@ VOID MY_END_PROC(VOID)
 
 		if (CheckSoundMem(BGM_FAIL.handle) == 0 && MusicPass1 == TRUE)
 		{
-			ChangeVolumeSoundMem(255 * 50 / 100, BGM_FAIL.handle);
+			ChangeVolumeSoundMem(255 * 75 / 100, BGM_FAIL.handle);
 			PlaySoundMem(BGM_FAIL.handle, DX_PLAYTYPE_LOOP);
 		}
 
