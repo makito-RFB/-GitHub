@@ -190,6 +190,7 @@ int speedUpTime = 0;
 
 //スタート画面関係
 int DrCharCnt = 0;
+bool Openingflag = true; //最初のオープニング
 
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
@@ -436,6 +437,8 @@ void CHAR_TYPE_SET();
 VOID GAME_RULE(VOID);
 VOID GAME_PILOT(VOID);
 VOID GAME_STR(VOID);
+
+VOID OPENING_DRAW(VOID);
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -763,209 +766,217 @@ VOID MY_START_PROC(VOID)
 	static BOOL MusicPass = TRUE; 
 	static BOOL check = TRUE;
 
-	if (CheckSoundMem(BGM_TITLE.handle) == 0 && MusicPass == TRUE)
-	{
-		ChangeVolumeSoundMem(255 * 50 / 100, BGM_TITLE.handle);
-		PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
-	}
-
-// 後ろ歩く処理
-	if (ImageChar[1].IsDraw == FALSE && MY_CHAR_MOVE_ST == TRUE) {
-		ImageChar[1].IsDraw = TRUE;
-		DrCharCnt = 0;
-		MY_CHAR_MOVE_ST = FALSE;
-	}
-
-	if (ImageWork.Cnt < ImageWork.CntMAX)
-	{
-		ImageWork.Cnt += IMAGE_TITLE_WORK_CNT;
-	}
-	else
-	{
-		if (ImageChar[1].IsDraw == TRUE)
+	if (!Openingflag) {
+		if (CheckSoundMem(BGM_TITLE.handle) == 0 && MusicPass == TRUE)
 		{
-			ImageChar[1].IsDraw = FALSE;
-
-			switch (DrCharCnt)
-			{
-			case 0:
-				ImageChar[0].IsDraw = TRUE;
-				DrCharCnt = 1;
-				break;
-			case 1:
-				ImageChar[2].IsDraw = TRUE;
-				DrCharCnt = 0;
-				break;
-			default:
-				break;
-			}
+			ChangeVolumeSoundMem(255 * 50 / 100, BGM_TITLE.handle);
+			PlaySoundMem(BGM_TITLE.handle, DX_PLAYTYPE_LOOP);
 		}
-		else if (ImageChar[0].IsDraw == TRUE || ImageChar[2].IsDraw == TRUE)//1
-		{
-			switch (DrCharCnt)
-			{
-			case 1:
-				ImageChar[0].IsDraw = FALSE;
-				break;
 
-			case 0:
-				ImageChar[2].IsDraw = FALSE;
-				break;
-			}
+		// 後ろ歩く処理
+		if (ImageChar[1].IsDraw == FALSE && MY_CHAR_MOVE_ST == TRUE) {
 			ImageChar[1].IsDraw = TRUE;
+			DrCharCnt = 0;
+			MY_CHAR_MOVE_ST = FALSE;
 		}
 
-
-		playerSt.x += MOVE_ERIA / 4;
-
-		if (playerSt.x > GAME_WIDTH) {
-			playerSt.x -= GAME_WIDTH + player.width;
-		}
-		ImageWork.Cnt = 0;
-
-	}
-
-//ゲームスタートorランキング選択キー移動処理
-	if (check == TRUE) {
-		if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
-			Kchoice = !Kchoice;
-			ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
-			PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
-			check = FALSE;
-		}
-	}
-	if (MY_KEY_UP(KEY_INPUT_DOWN) == TRUE || MY_KEY_UP(KEY_INPUT_UP) == TRUE)
-		check = TRUE;
-
-//選択決定
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
-	{
-		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		if (ImageWork.Cnt < ImageWork.CntMAX)
 		{
-		/*	StopSoundMem(BGM_TITLE.handle);*/
-			MusicPass = FALSE;
+			ImageWork.Cnt += IMAGE_TITLE_WORK_CNT;
 		}
-		SetMouseDispFlag(FALSE);
-
-		GameEndKind = GAME_END_FAIL;
-	}
-
-//ゲームスタートへ
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
-		//GameScene = GAME_SCENE_PLAY;
-		MusicPass = TRUE;
-		CLICK_M = TRUE;
-
-		//タイマ初期化
-		timeCnt = 0;
-		secondtime = 0;
-		mintime = 0;
-		DrCharCnt = 1;
-
-		GameScene = GAME_SCENE_EXPO;
-
-		MY_MAP_RELOAD = TRUE;
-		return;
-	}
-
-//ランキングへ
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
-	{
-
-		if (CheckSoundMem(BGM_TITLE.handle) != 0)
+		else
 		{
-			StopSoundMem(BGM_TITLE.handle);
-			MusicPass = FALSE;
+			if (ImageChar[1].IsDraw == TRUE)
+			{
+				ImageChar[1].IsDraw = FALSE;
+
+				switch (DrCharCnt)
+				{
+				case 0:
+					ImageChar[0].IsDraw = TRUE;
+					DrCharCnt = 1;
+					break;
+				case 1:
+					ImageChar[2].IsDraw = TRUE;
+					DrCharCnt = 0;
+					break;
+				default:
+					break;
+				}
+			}
+			else if (ImageChar[0].IsDraw == TRUE || ImageChar[2].IsDraw == TRUE)//1
+			{
+				switch (DrCharCnt)
+				{
+				case 1:
+					ImageChar[0].IsDraw = FALSE;
+					break;
+
+				case 0:
+					ImageChar[2].IsDraw = FALSE;
+					break;
+				}
+				ImageChar[1].IsDraw = TRUE;
+			}
+
+
+			playerSt.x += MOVE_ERIA / 4;
+
+			if (playerSt.x > GAME_WIDTH) {
+				playerSt.x -= GAME_WIDTH + player.width;
+			}
+			ImageWork.Cnt = 0;
+
 		}
-	}
 
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
-		MusicPass = TRUE;
-		Kchoice = TRUE;
-		CLICK_M = TRUE;
-		GameScene = GAME_SCENE_RNKING;
-		return;
-	}
+		//ゲームスタートorランキング選択キー移動処理
+		if (check == TRUE) {
+			if (MY_KEY_DOWN(KEY_INPUT_DOWN) == TRUE || MY_KEY_DOWN(KEY_INPUT_UP) == TRUE) {
+				Kchoice = !Kchoice;
+				ChangeVolumeSoundMem(255 * 80 / 100, se_scene_sen.handle);
+				PlaySoundMem(se_scene_sen.handle, DX_PLAYTYPE_BACK);
+				check = FALSE;
+			}
+		}
+		if (MY_KEY_UP(KEY_INPUT_DOWN) == TRUE || MY_KEY_UP(KEY_INPUT_UP) == TRUE)
+			check = TRUE;
 
-//選択音
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
-	{
-		if (CLICK_M == TRUE)
+		//選択決定
+		if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE)
 		{
-			PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
-			CLICK_M = FALSE;
+			if (CheckSoundMem(BGM_TITLE.handle) != 0)
+			{
+				/*	StopSoundMem(BGM_TITLE.handle);*/
+				MusicPass = FALSE;
+			}
+			SetMouseDispFlag(FALSE);
+
+			GameEndKind = GAME_END_FAIL;
+		}
+
+		//ゲームスタートへ
+		if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == TRUE) {
+			//GameScene = GAME_SCENE_PLAY;
+			MusicPass = TRUE;
+			CLICK_M = TRUE;
+
+			//タイマ初期化
+			timeCnt = 0;
+			secondtime = 0;
+			mintime = 0;
+			DrCharCnt = 1;
+
+			GameScene = GAME_SCENE_EXPO;
+
+			MY_MAP_RELOAD = TRUE;
+			return;
+		}
+
+		//ランキングへ
+		if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE)
+		{
+
+			if (CheckSoundMem(BGM_TITLE.handle) != 0)
+			{
+				StopSoundMem(BGM_TITLE.handle);
+				MusicPass = FALSE;
+			}
+		}
+
+		if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE && Kchoice == FALSE) {
+			MusicPass = TRUE;
+			Kchoice = TRUE;
+			CLICK_M = TRUE;
+			GameScene = GAME_SCENE_RNKING;
+			return;
+		}
+
+		//選択音
+		if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE)
+		{
+			if (CLICK_M == TRUE)
+			{
+				PlaySoundMem(musicShot.handle, DX_PLAYTYPE_BACK);
+				CLICK_M = FALSE;
+			}
+		}
+
+
+		//ランキング書き込み呼び出しフラグ
+		if (!RANKINGflag)
+		{
+			RANKINGflag = TRUE;
 		}
 	}
-
-	
-//ランキング書き込み呼び出しフラグ
-	if (!RANKINGflag)
-	{
-		RANKINGflag = TRUE;
-	}
-
 	return;
 }
 
 VOID MY_START_DRAW(VOID)
 {
-	DrawGraph(ImageTitleBK.x, ImageTitleBK.y, ImageTitleBK.handle, TRUE);
-
-//後ろのキャラクター描画
-	for (int num = 0, Pnum = 0; num < WORK_CHAR_NUM; num++)
+	if (Openingflag)
 	{
-		if (ImageChar[num].IsDraw == TRUE)
+		OPENING_DRAW();
+	}
+	if (!Openingflag)
+	{
+		DrawGraph(ImageTitleBK.x, ImageTitleBK.y, ImageTitleBK.handle, TRUE);
+
+		//後ろのキャラクター描画
+		for (int num = 0, Pnum = 0; num < WORK_CHAR_NUM; num++)
 		{
-			Pnum = num + 3;
-			DrawGraph(playerSt.x, playerSt.y, player.handle2[Pnum], TRUE);
+			if (ImageChar[num].IsDraw == TRUE)
+			{
+				Pnum = num + 3;
+				DrawGraph(playerSt.x, playerSt.y, player.handle2[Pnum], TRUE);
+			}
 		}
-	}
 
-//ロゴ
-	DrawGraph(ImageTitleROGO.x, ImageTitleROGO.y, ImageTitleROGO.handle, TRUE);
-	
-//スタートロゴ描画
-	DrawRotaGraph(
-		ImageTitleSTART.x, ImageTitleSTART.y,
-		ImageTitleSTART.rate,
-		ImageTitleSTART.angle,
-		ImageTitleSTART.handle, TRUE);
-//ランキングロゴ描画
-	DrawRotaGraph(
-		ImageTitleRNK.x, ImageTitleRNK.y,
-		ImageTitleRNK.rate,
-		ImageTitleRNK.angle,
-		ImageTitleRNK.handle, TRUE);
+		//ロゴ
+		DrawGraph(ImageTitleROGO.x, ImageTitleROGO.y, ImageTitleROGO.handle, TRUE);
 
-	DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
+		//スタートロゴ描画
+		DrawRotaGraph(
+			ImageTitleSTART.x, ImageTitleSTART.y,
+			ImageTitleSTART.rate,
+			ImageTitleSTART.angle,
+			ImageTitleSTART.handle, TRUE);
+		//ランキングロゴ描画
+		DrawRotaGraph(
+			ImageTitleRNK.x, ImageTitleRNK.y,
+			ImageTitleRNK.rate,
+			ImageTitleRNK.angle,
+			ImageTitleRNK.handle, TRUE);
 
-//上下選択の動き（サイズ変更）
-	if (Kchoice == TRUE) {
-		ImageTitleSTART.rate = 1.2; 
-		ImageTitleRNK.rate = 1.0;
-		ImageChoiser.x = ImageTitleSTART.x + ImageTitleSTART.width / 2 + 32;
-		ImageChoiser.y = ImageTitleSTART.y + ImageTitleSTART.height / 4 - ImageChoiser.height / 2 ;
-	}
-	else {
-		ImageTitleSTART.rate = 1.0;
-		ImageTitleRNK.rate = 1.2;
-		ImageChoiser.x = ImageTitleRNK.x + ImageTitleRNK.width / 2 + 32;
-		ImageChoiser.y = ImageTitleRNK.y + ImageTitleRNK.height / 4 - ImageChoiser.height / 2;
-	}
+		DrawGraph(ImageChoiser.x, ImageChoiser.y, ImageChoiser.handle, TRUE);
 
-	if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
-		if (Kchoice == TRUE) 
-			ImageTitleSTART.rate = 0.8; //0.8%
-		else 
-			ImageTitleRNK.rate = 0.8;
-		ImageChoiser.x -= MAP_DIV_WIDTH / 2;
+		//上下選択の動き（サイズ変更）
+		if (Kchoice == TRUE) {
+			ImageTitleSTART.rate = 1.2;
+			ImageTitleRNK.rate = 1.0;
+			ImageChoiser.x = ImageTitleSTART.x + ImageTitleSTART.width / 2 + 32;
+			ImageChoiser.y = ImageTitleSTART.y + ImageTitleSTART.height / 4 - ImageChoiser.height / 2;
+		}
+		else {
+			ImageTitleSTART.rate = 1.0;
+			ImageTitleRNK.rate = 1.2;
+			ImageChoiser.x = ImageTitleRNK.x + ImageTitleRNK.width / 2 + 32;
+			ImageChoiser.y = ImageTitleRNK.y + ImageTitleRNK.height / 4 - ImageChoiser.height / 2;
+		}
+
+		if (MY_KEY_DOWN(KEY_INPUT_RETURN) == TRUE) {
+			if (Kchoice == TRUE)
+				ImageTitleSTART.rate = 0.8; //0.8%
+			else
+				ImageTitleRNK.rate = 0.8;
+			ImageChoiser.x -= MAP_DIV_WIDTH / 2;
+		}
+		if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
+			ImageTitleSTART.rate = 1.0;
+			ImageTitleRNK.rate = 1.0;
+			ImageChoiser.x += MAP_DIV_WIDTH / 2;
+		}
+		//DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
 	}
-	if (MY_KEY_UP(KEY_INPUT_RETURN) == TRUE) {
-		ImageTitleSTART.rate = 1.0;
-		ImageTitleRNK.rate = 1.0;
-		ImageChoiser.x += MAP_DIV_WIDTH / 2;
-	}
-	//DrawString(0, 0, "スタート画面(エンターキーを押して下さい)", GetColor(255, 255, 255));
 	return;
 }
 
@@ -2372,6 +2383,39 @@ VOID ROCKETMAP(VOID)
 		}
 	}
 	MAPChoice = !MAPChoice;
+	return;
+}
+
+VOID OPENING_DRAW(VOID)
+{
+	// アルファ値の初期値を完全不透明にする
+	static int alpha = 0;
+
+	// 変化の向きをマイナスにする
+	static int add = 2;
+	// アルファ値を変化
+	alpha += add;
+
+	// アルファ値が 0 か 255 になったら変化の方向を反転する
+	if (alpha >= 254)
+	{
+		add = -add;
+	}
+	if (alpha == 0)
+	{
+		Openingflag = false;
+		WaitTimer(2000);
+	}
+
+	// 画像のアルファブレンドで描画
+	// ( 描画した後ブレンドモードを元に戻す )
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+	DrawGraph(GAME_WIDTH / 2 - ImageTitleROGO.width / 2, GAME_HEIGHT / 2 - ImageTitleROGO.height / 2, ImageTitleROGO.handle, TRUE);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	// 裏画面の内容を表画面に反映
+	ScreenFlip();
+
 	return;
 }
 
