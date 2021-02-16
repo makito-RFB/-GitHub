@@ -440,6 +440,7 @@ VOID GAME_STR(VOID);
 
 VOID OPENING_DRAW(VOID);
 
+BOOL EXIT_GAME(VOID);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -907,7 +908,13 @@ VOID MY_START_PROC(VOID)
 		{
 			RANKINGflag = TRUE;
 		}
+
+		if (MY_KEY_DOWN(KEY_INPUT_LSHIFT) || MY_KEY_DOWN(KEY_INPUT_RSHIFT) && MY_KEY_DOWN(KEY_INPUT_ESCAPE))
+		{
+			EXIT_GAME();
+		}
 	}
+
 	return;
 }
 
@@ -2392,19 +2399,20 @@ VOID OPENING_DRAW(VOID)
 	static int alpha = 0;
 
 	// 変化の向きをマイナスにする
-	static int add = 2;
+	static int add = 5;
 	// アルファ値を変化
 	alpha += add;
 
 	// アルファ値が 0 か 255 になったら変化の方向を反転する
-	if (alpha >= 254)
+	if (alpha >= 255)
 	{
+		WaitTimer(1500);
 		add = -add;
 	}
 	if (alpha == 0)
 	{
 		Openingflag = false;
-		WaitTimer(2000);
+		WaitTimer(1000);
 	}
 
 	// 画像のアルファブレンドで描画
@@ -2417,6 +2425,11 @@ VOID OPENING_DRAW(VOID)
 	ScreenFlip();
 
 	return;
+}
+
+BOOL EXIT_GAME(VOID)
+{
+	return FALSE;
 }
 
 
