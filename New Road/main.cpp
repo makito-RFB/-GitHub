@@ -192,6 +192,9 @@ int speedUpTime = 0;
 int DrCharCnt = 0;
 bool Openingflag = true; //最初のオープニング
 
+bool PlayStartflag = true; //プレイ画面の始まるまでのカウントフラグ
+int waitPlayTimer2 = 0;
+
 char AllKeyState[256] = { '\0' };
 char OldAllKeyState[256] = { '\0' };
 
@@ -440,7 +443,8 @@ VOID GAME_STR(VOID);
 
 VOID OPENING_DRAW(VOID);
 
-BOOL EXIT_GAME(VOID);
+VOID PLAY_START_DRAW(VOID);
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -909,10 +913,6 @@ VOID MY_START_PROC(VOID)
 			RANKINGflag = TRUE;
 		}
 
-		if (MY_KEY_DOWN(KEY_INPUT_LSHIFT) || MY_KEY_DOWN(KEY_INPUT_RSHIFT) && MY_KEY_DOWN(KEY_INPUT_ESCAPE))
-		{
-			EXIT_GAME();
-		}
 	}
 
 	return;
@@ -1174,362 +1174,366 @@ VOID MY_PLAY(VOID)
 
 VOID MY_PLAY_PROC(VOID)
 {
-	static int colltime = 0;
 
-	static bool dirDrwFlag = false;
-
-//難易度調整
-	if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0 && speedUPflg == false) {
-		speedUPflg = true;
-		speedUpTime = 0;
-	}
-	
-//スピードアップ処理
-	if (speedUPflg)
+	if (!PlayStartflag)
 	{
-		if (speedUpTime < (GAME_FPS * SPEED_UP_TIME)) {
-			gameSpeed = SCROLL_SPEED;
-			gameSpeed *= UP_SPEED;
-			speedUpTime++;
+		static int colltime = 0;
+
+		static bool dirDrwFlag = false;
+
+		//難易度調整
+		if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) == 0 && speedUPflg == false) {
+			speedUPflg = true;
+			speedUpTime = 0;
 		}
-		else if(speedUpTime >= (GAME_FPS * SPEED_UP_TIME))
+
+		//スピードアップ処理
+		if (speedUPflg)
 		{
-			gameSpeed = SCROLL_SPEED;
-			if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) != 0) {
-				speedUPflg = false;
+			if (speedUpTime < (GAME_FPS * SPEED_UP_TIME)) {
+				gameSpeed = SCROLL_SPEED;
+				gameSpeed *= UP_SPEED;
+				speedUpTime++;
+			}
+			else if (speedUpTime >= (GAME_FPS * SPEED_UP_TIME))
+			{
+				gameSpeed = SCROLL_SPEED;
+				if (COINCnt > 0 && (COINCnt % SPEED_UP_CNT) != 0) {
+					speedUPflg = false;
+				}
 			}
 		}
-	}
 
-	if (CheckSoundMem(BGM.handle) == 0)
-	{
-		ChangeVolumeSoundMem(255 * 50 / 100, BGM.handle);
-		PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP);
-	}
-
-//マップロード
-	MAP_LOAD();
-
-//タイマ処理
-	if (timeCnt >= 60)
-	{
-		secondtime = secondtime - 0.016 * timeCnt;
-		timeCnt = 0;
-		secondtime++;
-	}
-	if (secondtime >= 60)
-	{
-		secondtime = 0;
-		mintime++;
-	}
-	secondtime += 0.016;
-	timeCnt++;
-
-	//キャラのスクロール
-	player.CenterX -= gameSpeed;
-	player.collBeforePt.x -= gameSpeed;	//スクロールするまえの当たっていない位置と今の前の位置は違う
-
-	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
-	{
-		for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
+		if (CheckSoundMem(BGM.handle) == 0)
 		{
-			//マップを移動当たり判定も移動
-			map[tate][yoko].x -= gameSpeed;
-			mapColl[tate][yoko].left -= gameSpeed;
-			mapColl[tate][yoko].right -= gameSpeed;
-			//if (map[tate][yoko].x >= GAME_WIDTH)
-			//{
-			//	map[tate][yoko].IsDraw = FALSE;
-			//}
+			ChangeVolumeSoundMem(255 * 50 / 100, BGM.handle);
+			PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP);
 		}
 
-	}
-	//マップもここでスクロール
-	MAPmoveCnt += gameSpeed;
+		//マップロード
+		MAP_LOAD();
 
-	if (MAPmoveCnt >= MAP_DIV_WIDTH * 3)
-	{
-		if (MAPmoveCnt != MAP_DIV_WIDTH * 3) {
-			MAPmoveCnt--;
-			diffMarginFlg = true;
+		//タイマ処理
+		if (timeCnt >= 60)
+		{
+			secondtime = secondtime - 0.016 * timeCnt;
+			timeCnt = 0;
+			secondtime++;
 		}
+		if (secondtime >= 60)
+		{
+			secondtime = 0;
+			mintime++;
+		}
+		secondtime += 0.016;
+		timeCnt++;
+
+		//キャラのスクロール
+		player.CenterX -= gameSpeed;
+		player.collBeforePt.x -= gameSpeed;	//スクロールするまえの当たっていない位置と今の前の位置は違う
+
 		for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 		{
 			for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 			{
 				//マップを移動当たり判定も移動
-				map[tate][yoko].x += MAPmoveCnt;
-				mapColl[tate][yoko].left += MAPmoveCnt;
-				mapColl[tate][yoko].right += MAPmoveCnt;
+				map[tate][yoko].x -= gameSpeed;
+				mapColl[tate][yoko].left -= gameSpeed;
+				mapColl[tate][yoko].right -= gameSpeed;
+				//if (map[tate][yoko].x >= GAME_WIDTH)
+				//{
+				//	map[tate][yoko].IsDraw = FALSE;
+				//}
 			}
 
 		}
-		ROCKETMAP();
-		MAPmoveCnt = diffMarginFlg ? 1 : 0; 
-		//マップ配列の描画誤差フラグを下す
-		if (diffMarginFlg)
-			diffMarginFlg = !diffMarginFlg;
-	}
+		//マップもここでスクロール
+		MAPmoveCnt += gameSpeed;
 
-//ストップ画面移行
-	if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
-	{
-		if (CheckSoundMem(BGM.handle) != 0)
+		if (MAPmoveCnt >= MAP_DIV_WIDTH * 3)
 		{
-			StopSoundMem(BGM.handle);
-		}
-		GameScene = GAME_SCENE_STOP;
-	}
-	if (StopFlg)
-		StopFlg = false;
-
-
-
-//一回の入力判定（押したととき）
-	if (MY_KEY_TF == TRUE) {
-		if (MY_KEY_DOWN(KEY_INPUT_W)) {
-			player.CenterY -= MOVE_ERIA;
-			ImageChar[driecChar].IsDraw = FALSE;
-			driecChar = 0;
-			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
-			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
-			MY_KEY_TF = FALSE;
-		}
-		else if (MY_KEY_DOWN(KEY_INPUT_A)) {
-			player.CenterX -= MOVE_ERIA;
-			ImageChar[driecChar].IsDraw = FALSE;
-			driecChar = 3;
-			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
-			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
-			MY_KEY_TF = FALSE;
-		}
-		else if (MY_KEY_DOWN(KEY_INPUT_S)) {
-			player.CenterY += MOVE_ERIA;
-			ImageChar[driecChar].IsDraw = FALSE;
-			driecChar = 2;
-			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
-			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
-			MY_KEY_TF = FALSE;
-		}
-		else if (MY_KEY_DOWN(KEY_INPUT_D)) {
-			player.CenterX += MOVE_ERIA;
-			ImageChar[driecChar].IsDraw = FALSE;
-			driecChar = 1;		
-			ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
-			PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
-			MY_KEY_TF = FALSE;
-		}
-		if (!ImageChar[driecChar].IsDraw)
-		{
-			ImageChar[driecChar].IsDraw = TRUE;
-		}
-
-	}
-
-	//一回の入力判定（離したとき）
-	if (MY_KEY_TF == FALSE) {		//プレイヤーの移動入力のクールタイム設定
-		if (colltime >= cooltimeType)
-		{
-			if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
-			else {
-				MY_KEY_TF = TRUE;
-				colltime = 0;
+			if (MAPmoveCnt != MAP_DIV_WIDTH * 3) {
+				MAPmoveCnt--;
+				diffMarginFlg = true;
 			}
-		}
-		else
-			colltime++;
-
-	}
-
-	if (MY_KEY_UP(KEY_INPUT_W) || MY_KEY_UP(KEY_INPUT_A) || MY_KEY_UP(KEY_INPUT_S) || MY_KEY_UP(KEY_INPUT_D)) {
-		//プレイヤーの向き取り
-		if (DrCharCnt < 3 && DrCharCnt > -1) {
-			if (!dirDrwFlag)
-				DrCharCnt++;
-			else
-				DrCharCnt--;
-		}
-		if (DrCharCnt >= 3 || DrCharCnt <= -1) {
-			if (!dirDrwFlag)
-				DrCharCnt -= 2;
-			else
-				DrCharCnt += 2;
-			dirDrwFlag = !dirDrwFlag;
-		}
-	}
-
-
-
-	player.coll.left = player.CenterX - mapChip.width / 2 + 5;
-	player.coll.top = player.CenterY - mapChip.height / 2 + 5;
-	player.coll.right = player.CenterX + mapChip.width / 2 - 5;
-	player.coll.bottom = player.CenterY + mapChip.height / 2 - 5;
-
-//向きを入れる
-	direc = MY_DIRECTION(player.CenterX, player.CenterY, player.collBeforePt.x, player.collBeforePt.y);
-
-	BOOL IsMove = TRUE;
-
-	RECT PlayerRect;
-	int CollRange = 5;
-	PlayerRect.left = player.x + player.width / 2 - CollRange;
-	PlayerRect.top = player.y + player.height / 2 - CollRange;
-	PlayerRect.right = player.x + player.width / 2 + CollRange;
-	PlayerRect.bottom = player.y + player.height / 2 + CollRange;
-
-
-	if (MY_CHECK_MAP1_PLAYER_COLL(player.coll) == TRUE)
-	{
-		IsMove = FALSE;
-
-		newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
-		newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
-
-		if (map[newY][newX].kind == l)
-		{
-			//マップの更新
-
-
-			if (IsReMove == FALSE)
+			for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
 			{
-				int reN = 0;
-				switch (direc)
+				for (int yoko = 0; yoko < GAME_MAP_YOKO_MAX; yoko++)
 				{
-				case 'W':
-					reN = newY - 1;
-					if (mapData[reN][newX] == t)
-					{
-						mapData[reN][newX] = mapData[newY][newX];
-						map[reN][newX].kind = map[newY][newX].kind;
-						IsReMove = TRUE;
-					}
-					break;
-				case 'S':
-					reN = newY + 1;
-					if (mapData[reN][newX] == t)
-					{
-						mapData[reN][newX] = mapData[newY][newX];
-						map[reN][newX].kind = map[newY][newX].kind;
-						IsReMove = TRUE;
-					}
-					break;
-				case 'A':
-					reN = newX - 1;
-					if (mapData[newY][reN] == t)
-					{
-						mapData[newY][reN] = mapData[newY][newX];
-						map[newY][reN].kind = map[newY][newX].kind;
-						IsReMove = TRUE;
-					}
-					break;
-				case 'D':
-					reN = newX + 1;
-					if (mapData[newY][reN] == t)
-					{
-						mapData[newY][reN] = mapData[newY][newX];
-						map[newY][reN].kind = map[newY][newX].kind;
-						IsReMove = TRUE;
-					}
-					break;
-				default:
-					break;
-
+					//マップを移動当たり判定も移動
+					map[tate][yoko].x += MAPmoveCnt;
+					mapColl[tate][yoko].left += MAPmoveCnt;
+					mapColl[tate][yoko].right += MAPmoveCnt;
 				}
 
+			}
+			ROCKETMAP();
+			MAPmoveCnt = diffMarginFlg ? 1 : 0;
+			//マップ配列の描画誤差フラグを下す
+			if (diffMarginFlg)
+				diffMarginFlg = !diffMarginFlg;
+		}
 
-			//障害物をアイテムで破壊
-				if (ITEMCnt > 0 && IsReMove == FALSE)
+		//ストップ画面移行
+		if (MY_KEY_UP(KEY_INPUT_ESCAPE) == TRUE)
+		{
+			if (CheckSoundMem(BGM.handle) != 0)
+			{
+				StopSoundMem(BGM.handle);
+			}
+			GameScene = GAME_SCENE_STOP;
+		}
+		if (StopFlg)
+			StopFlg = false;
+
+
+
+		//一回の入力判定（押したととき）
+		if (MY_KEY_TF == TRUE) {
+			if (MY_KEY_DOWN(KEY_INPUT_W)) {
+				player.CenterY -= MOVE_ERIA;
+				ImageChar[driecChar].IsDraw = FALSE;
+				driecChar = 0;
+				ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+				PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
+				MY_KEY_TF = FALSE;
+			}
+			else if (MY_KEY_DOWN(KEY_INPUT_A)) {
+				player.CenterX -= MOVE_ERIA;
+				ImageChar[driecChar].IsDraw = FALSE;
+				driecChar = 3;
+				ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+				PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
+				MY_KEY_TF = FALSE;
+			}
+			else if (MY_KEY_DOWN(KEY_INPUT_S)) {
+				player.CenterY += MOVE_ERIA;
+				ImageChar[driecChar].IsDraw = FALSE;
+				driecChar = 2;
+				ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+				PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
+				MY_KEY_TF = FALSE;
+			}
+			else if (MY_KEY_DOWN(KEY_INPUT_D)) {
+				player.CenterX += MOVE_ERIA;
+				ImageChar[driecChar].IsDraw = FALSE;
+				driecChar = 1;
+				ChangeVolumeSoundMem(255 * 80 / 100, se_move.handle);
+				PlaySoundMem(se_move.handle, DX_PLAYTYPE_BACK);
+				MY_KEY_TF = FALSE;
+			}
+			if (!ImageChar[driecChar].IsDraw)
+			{
+				ImageChar[driecChar].IsDraw = TRUE;
+			}
+
+		}
+
+		//一回の入力判定（離したとき）
+		if (MY_KEY_TF == FALSE) {		//プレイヤーの移動入力のクールタイム設定
+			if (colltime >= cooltimeType)
+			{
+				if (MY_KEY_DOWN(KEY_INPUT_W) || MY_KEY_DOWN(KEY_INPUT_A) || MY_KEY_DOWN(KEY_INPUT_S) || MY_KEY_DOWN(KEY_INPUT_D)) {}
+				else {
+					MY_KEY_TF = TRUE;
+					colltime = 0;
+				}
+			}
+			else
+				colltime++;
+
+		}
+
+		if (MY_KEY_UP(KEY_INPUT_W) || MY_KEY_UP(KEY_INPUT_A) || MY_KEY_UP(KEY_INPUT_S) || MY_KEY_UP(KEY_INPUT_D)) {
+			//プレイヤーの向き取り
+			if (DrCharCnt < 3 && DrCharCnt > -1) {
+				if (!dirDrwFlag)
+					DrCharCnt++;
+				else
+					DrCharCnt--;
+			}
+			if (DrCharCnt >= 3 || DrCharCnt <= -1) {
+				if (!dirDrwFlag)
+					DrCharCnt -= 2;
+				else
+					DrCharCnt += 2;
+				dirDrwFlag = !dirDrwFlag;
+			}
+		}
+
+
+
+		player.coll.left = player.CenterX - mapChip.width / 2 + 5;
+		player.coll.top = player.CenterY - mapChip.height / 2 + 5;
+		player.coll.right = player.CenterX + mapChip.width / 2 - 5;
+		player.coll.bottom = player.CenterY + mapChip.height / 2 - 5;
+
+		//向きを入れる
+		direc = MY_DIRECTION(player.CenterX, player.CenterY, player.collBeforePt.x, player.collBeforePt.y);
+
+		BOOL IsMove = TRUE;
+
+		RECT PlayerRect;
+		int CollRange = 5;
+		PlayerRect.left = player.x + player.width / 2 - CollRange;
+		PlayerRect.top = player.y + player.height / 2 - CollRange;
+		PlayerRect.right = player.x + player.width / 2 + CollRange;
+		PlayerRect.bottom = player.y + player.height / 2 + CollRange;
+
+
+		if (MY_CHECK_MAP1_PLAYER_COLL(player.coll) == TRUE)
+		{
+			IsMove = FALSE;
+
+			newX = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
+			newY = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+
+			if (map[newY][newX].kind == l)
+			{
+				//マップの更新
+
+
+				if (IsReMove == FALSE)
 				{
-					IsReMove = TRUE;
-					ITEMCnt--;
+					int reN = 0;
+					switch (direc)
+					{
+					case 'W':
+						reN = newY - 1;
+						if (mapData[reN][newX] == t)
+						{
+							mapData[reN][newX] = mapData[newY][newX];
+							map[reN][newX].kind = map[newY][newX].kind;
+							IsReMove = TRUE;
+						}
+						break;
+					case 'S':
+						reN = newY + 1;
+						if (mapData[reN][newX] == t)
+						{
+							mapData[reN][newX] = mapData[newY][newX];
+							map[reN][newX].kind = map[newY][newX].kind;
+							IsReMove = TRUE;
+						}
+						break;
+					case 'A':
+						reN = newX - 1;
+						if (mapData[newY][reN] == t)
+						{
+							mapData[newY][reN] = mapData[newY][newX];
+							map[newY][reN].kind = map[newY][newX].kind;
+							IsReMove = TRUE;
+						}
+						break;
+					case 'D':
+						reN = newX + 1;
+						if (mapData[newY][reN] == t)
+						{
+							mapData[newY][reN] = mapData[newY][newX];
+							map[newY][reN].kind = map[newY][newX].kind;
+							IsReMove = TRUE;
+						}
+						break;
+					default:
+						break;
+
+					}
+
+
+					//障害物をアイテムで破壊
+					if (ITEMCnt > 0 && IsReMove == FALSE)
+					{
+						IsReMove = TRUE;
+						ITEMCnt--;
 
 						PlaySoundMem(se_brake.handle, DX_PLAYTYPE_BACK);
 
+					}
 				}
-			}
-			if (IsReMove == TRUE)
-			{
-				//当たり判定更新＆画像削除
-				mapData[newY][newX] = t;
-				map[newY][newX].kind = t;
-				IsReMove = FALSE;
-			}//マップ更新ここまで
+				if (IsReMove == TRUE)
+				{
+					//当たり判定更新＆画像削除
+					mapData[newY][newX] = t;
+					map[newY][newX].kind = t;
+					IsReMove = FALSE;
+				}//マップ更新ここまで
 
-			
+
+			}
+
+			////元の位置に戻る
+			player.CenterX = player.collBeforePt.x;	//スクロールするまえの当たっていない位置と今の前の位置は違う
+			player.CenterY = player.collBeforePt.y;
 		}
 
-		////元の位置に戻る
-		player.CenterX = player.collBeforePt.x;	//スクロールするまえの当たっていない位置と今の前の位置は違う
-		player.CenterY = player.collBeforePt.y;
-	}
+		/*if (MY_CHECK_RECT_COLL(PlayerRect, itemRect) == TRUE)*/
 
-	/*if (MY_CHECK_RECT_COLL(PlayerRect, itemRect) == TRUE)*/
-	
 
-	if (IsMove == TRUE)
-	{
-
-		int x = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
-		int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
-		switch (map[y][x].kind)
+		if (IsMove == TRUE)
 		{
-		case g:
-			//アイテム取得とアイテムの当たり判定削除
-			if (PlayChar == CHARA_BALANCE && ITEMCnt >= CHAR_BAG_NUM) {}
-			else {
+
+			int x = ((player.CenterX + MAPmoveCnt) - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;  //移動分プラス
+			int y = (player.CenterY - MAP_DIV_WIDTH / 2) / MAP_DIV_WIDTH;
+			switch (map[y][x].kind)
+			{
+			case g:
+				//アイテム取得とアイテムの当たり判定削除
+				if (PlayChar == CHARA_BALANCE && ITEMCnt >= CHAR_BAG_NUM) {}
+				else {
+					mapData[y][x] = t;
+					map[y][x].kind = t;
+					ITEMCnt++;
+					ChangeVolumeSoundMem(255 * 75 / 100, se_metal.handle);
+					PlaySoundMem(se_metal.handle, DX_PLAYTYPE_BACK);
+
+				}
+				break;
+			case c:
+				//コイン取得とコインの当たり判定削除
 				mapData[y][x] = t;
 				map[y][x].kind = t;
-				ITEMCnt++;
-				ChangeVolumeSoundMem(255 * 75 / 100, se_metal.handle);
-				PlaySoundMem(se_metal.handle, DX_PLAYTYPE_BACK);
+				COINCnt++;
+				if (!COINflag)
+				{
+					COINflag = TRUE;
+
+				}
+				ChangeVolumeSoundMem(255 * 75 / 100, se_coin_g.handle);
+
+				PlaySoundMem(se_coin_g.handle, DX_PLAYTYPE_BACK);
+				break;
+			default:
+				break;
 
 			}
-			break;
-		case c:
-			//コイン取得とコインの当たり判定削除
-			mapData[y][x] = t;
-			map[y][x].kind = t;
-			COINCnt++;
-			if (!COINflag)
-			{
-				COINflag = TRUE;
 
-			}
-			ChangeVolumeSoundMem(255 * 75 / 100, se_coin_g.handle);
+			//プレイヤー前の位置書き換え
+			player.x = player.CenterX - player.width / 2;
+			player.y = player.CenterY - player.height / 2;
 
-			PlaySoundMem(se_coin_g.handle, DX_PLAYTYPE_BACK);
-			break;
-		default:
-			break;
-			
+			player.collBeforePt.x = player.CenterX;
+			player.collBeforePt.y = player.CenterY;
 		}
-	
-	//プレイヤー前の位置書き換え
-		player.x = player.CenterX - player.width / 2;
-		player.y = player.CenterY - player.height / 2;
-
-		player.collBeforePt.x = player.CenterX;
-		player.collBeforePt.y = player.CenterY;
-	}
 
 
 
-	if (player.x > GAME_WIDTH || player.y > GAME_HEIGHT
-		|| player.x + player.width < 0 || player.y + player.height < 0)
-	{
-
-		if (CheckSoundMem(BGM.handle) != 0)
+		if (player.x > GAME_WIDTH || player.y > GAME_HEIGHT
+			|| player.x + player.width < 0 || player.y + player.height < 0)
 		{
-			StopSoundMem(BGM.handle);
+
+			if (CheckSoundMem(BGM.handle) != 0)
+			{
+				StopSoundMem(BGM.handle);
+			}
+
+			SetMouseDispFlag(TRUE);
+
+			GameEndKind = GAME_END_FAIL;
+
+			GameScene = GAME_SCENE_END;
+
+			return;
 		}
-
-		SetMouseDispFlag(TRUE);
-
-		GameEndKind = GAME_END_FAIL;
-
-		GameScene = GAME_SCENE_END;
-
-		return;
 	}
 
 	return;
@@ -1539,8 +1543,10 @@ VOID MY_PLAY_DRAW(VOID)
 {
 	static int StrWidth = 0;
 	static int CdrawCnt = 0;
-//背景スクロール
-		MAP_DRAW();
+
+	//背景スクロール
+	MAP_DRAW();
+
 	//DrawGraph(ImageBack.image.x, ImageBack.image.y, ImageBack.image.handle, TRUE);
 
 	for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1600,10 +1606,10 @@ VOID MY_PLAY_DRAW(VOID)
 	}
 
 	if (PlayChar == CHARA_BALANCE && ITEMCnt >= CHAR_BAG_NUM) {
-		DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("ピッケル: MAX ", ITEMCnt, -1), 5, GetColor(200, 0, 0), "ピッケル: MAX ", ITEMCnt);
+		DrawString(GAME_WIDTH - GetDrawFormatStringWidth("ピッケル: MAX ", -1), 5, "ピッケル: MAX ", GetColor(200, 0, 0));
 	}
 	else
-	DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("ピッケル:% d個 ", ITEMCnt, -1), 5, GetColor(255, 0, 0), "ピッケル:%d個 ", ITEMCnt);
+		DrawFormatString(GAME_WIDTH - GetDrawFormatStringWidth("ピッケル:% d個 ", ITEMCnt, -1), 5, GetColor(255, 0, 0), "ピッケル:%d個 ", ITEMCnt);
 
 	////当たり判定の描画（デバッグ用）
 	//for (int tate = 0; tate < GAME_MAP_TATE_MAX; tate++)
@@ -1635,12 +1641,12 @@ VOID MY_PLAY_DRAW(VOID)
 
 	SetFontSize(30);
 	StrWidth = GetDrawStringWidth("_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", -1);//中央寄せ
-	DrawString((GAME_WIDTH - StrWidth )/ 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
+	DrawString((GAME_WIDTH - StrWidth) / 2, GAME_HEIGHT - 45, "_/_/ 移動キー：W【↑】A【←】S【↓】D【→】| 停止:ESC _/_/", GetColor(255, 255, 255));
 	SetFontSize(40);
 	if (COINflag) //コインゲットの表示
 	{
 		if (CdrawCnt < GAME_FPS / 2) {
-			DrawString(10, 80- CdrawCnt, "1C Get!!", GetColor(255, 255, 255));
+			DrawString(10, 80 - CdrawCnt, "1C Get!!", GetColor(255, 255, 255));
 			CdrawCnt++;
 		}
 		else
@@ -1650,6 +1656,12 @@ VOID MY_PLAY_DRAW(VOID)
 		}
 	}
 	//DrawString((GAME_WIDTH - GetDrawStringWidth("※制作途中のため「画面端に出る」もしくは「停止画面」から脱出してください※", -1)) / 2, GAME_HEIGHT - 64, "※制作途中のため画面端に出るもしくは停止画面からゴールへ行ってください※", GetColor(255, 0, 0));
+	
+	if (PlayStartflag)
+	{
+		PLAY_START_DRAW();
+	}
+
 	return;
 }
 
@@ -2350,7 +2362,7 @@ VOID MAP_DRAW()
 	//一番下までスクロールしたら初期値に戻す
 	if (ImageBack.x <= -(GAME_WIDTH + 10))
 		ImageBack.x = -10;
-	if (!StopFlg)
+	if (!StopFlg && !PlayStartflag)
 		ImageBack.x -= gameSpeed;
 
 	return;
@@ -2427,10 +2439,20 @@ VOID OPENING_DRAW(VOID)
 	return;
 }
 
-BOOL EXIT_GAME(VOID)
+VOID PLAY_START_DRAW(VOID)
 {
-	return FALSE;
+	int restTime;
+	restTime = 3 - waitPlayTimer2 / 60;
+	++waitPlayTimer2;
+	DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
+	DrawFormatString(GAME_WIDTH /2 - GetDrawFormatStringWidth("開始まで：%d秒", restTime, -1) /2, GAME_HEIGHT / 2, GetColor(255, 255, 255), "開始まで：%d秒", restTime);
+
+
+	if(waitPlayTimer2 >= 180)
+	PlayStartflag = false;
+	return;
 }
+
 
 
 /*----------------------------------画像等読み込み系------------------------------------------------------*/
