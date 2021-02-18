@@ -1063,6 +1063,9 @@ VOID MY_EXPO_PROC(VOID) {
 			player.collBeforePt.x = player.CenterX;
 			player.collBeforePt.y = player.CenterY;
 
+			PlayStartflag = true;
+			waitPlayTimer2 = 0;
+
 			ITEMCnt = 0;
 			COINCnt = 0;
 			driecChar = 2;
@@ -1210,8 +1213,6 @@ VOID MY_PLAY_PROC(VOID)
 			PlaySoundMem(BGM.handle, DX_PLAYTYPE_LOOP);
 		}
 
-		//マップロード
-		MAP_LOAD();
 
 		//タイマ処理
 		if (timeCnt >= 60)
@@ -1534,6 +1535,11 @@ VOID MY_PLAY_PROC(VOID)
 
 			return;
 		}
+	}
+	if (PlayStartflag)
+	{
+		//マップロード
+		MAP_LOAD();
 	}
 
 	return;
