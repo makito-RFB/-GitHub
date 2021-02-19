@@ -2414,31 +2414,27 @@ VOID ROCKETMAP(VOID)
 
 VOID OPENING_DRAW(VOID)
 {
-	// アルファ値の初期値を完全不透明にする
-	static int alpha = 0;
+	static int alpha = 0;	//0は透明　255が色あり
 
-	// 変化の向きをマイナスにする
-	static int add = 5;
-	// アルファ値を変化
+	static int add = 5;	// アルファ値を変化量
+
 	alpha += add;
 
 	// アルファ値が 0 か 255 になったら変化の方向を反転する
 	if (alpha >= 255)
 	{
-		WaitTimer(1500);
-		add = -add;
+		WaitTimer(1500);		//1.5秒待つ
+		add = -add;		//最大まで言ったらマイナス
 	}
 	if (alpha == 0)
 	{
 		Openingflag = false;
-		WaitTimer(1000);
+		WaitTimer(1000);	//ロゴが消えてから1秒待つ
 	}
 
-	// 画像のアルファブレンドで描画
-	// ( 描画した後ブレンドモードを元に戻す )
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);	//描画される時の不透明度設定
 	DrawGraph(GAME_WIDTH / 2 - ImageOpeningROGO.width / 2, GAME_HEIGHT / 2 - ImageOpeningROGO.height / 2, ImageOpeningROGO.handle, TRUE);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);		//ほかに影響しないように戻す
 
 	// 裏画面の内容を表画面に反映
 	ScreenFlip();
@@ -2446,16 +2442,16 @@ VOID OPENING_DRAW(VOID)
 	return;
 }
 
-VOID PLAY_START_DRAW(VOID)
+VOID PLAY_START_DRAW(VOID) //ゲーム開始までのカウント追加処理
 {
 	int restTime;
-	restTime = 3 - waitPlayTimer2 / 60;
+	restTime = 3 - waitPlayTimer2 / 60; //カウントが3から０に減っていく計算
 	++waitPlayTimer2;
 	DrawGraph(stopBack.x, stopBack.y, stopBack.handle, TRUE);
 	DrawFormatString(GAME_WIDTH /2 - GetDrawFormatStringWidth("開始まで：%d秒", restTime, -1) /2, GAME_HEIGHT / 2, GetColor(255, 255, 255), "開始まで：%d秒", restTime);
 
 
-	if(waitPlayTimer2 >= 180)
+	if(waitPlayTimer2 >= 180) //3秒
 	PlayStartflag = false;
 	return;
 }
