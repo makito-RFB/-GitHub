@@ -37,6 +37,7 @@
 
 #define IMAGE_TITLE_BK_PATH		TEXT(".\\IMAGE\\STRAT_IMG\\strat背景.png")		//stratScene背景--------
 #define IMAGE_TITLE_ROGO_PATH	TEXT(".\\IMAGE\\STRAT_IMG\\rogo2.png")			//ロゴ
+#define IMAGE_TITLE_OROGO_PATH	TEXT(".\\IMAGE\\STRAT_IMG\\rogo3.png")			//オープニングのロゴ
 #define IMAGE_TITLE_START_PATH	TEXT(".\\IMAGE\\STRAT_IMG\\GAME_start.png")		//ゲーム始める画像
 #define IMAGE_TITLE_RNK	TEXT(".\\IMAGE\\STRAT_IMG\\ranking.png")				//ランキング行く画像
 #define IMAGE_TITLE_CHI	TEXT(".\\IMAGE\\STRAT_IMG\\Choies.png")					//選択を指す画像

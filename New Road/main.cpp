@@ -267,6 +267,7 @@ IMG RNKShadow;
 IMG stopBack;
 
 IMG ImageTitleROGO;
+IMG ImageOpeningROGO;
 
 IMG_BLINK ImageSTeROGO;
 IMG_BLINK ImageSTbROGO;
@@ -2436,7 +2437,7 @@ VOID OPENING_DRAW(VOID)
 	// 画像のアルファブレンドで描画
 	// ( 描画した後ブレンドモードを元に戻す )
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-	DrawGraph(GAME_WIDTH / 2 - ImageTitleROGO.width / 2, GAME_HEIGHT / 2 - ImageTitleROGO.height / 2, ImageTitleROGO.handle, TRUE);
+	DrawGraph(GAME_WIDTH / 2 - ImageOpeningROGO.width / 2, GAME_HEIGHT / 2 - ImageOpeningROGO.height / 2, ImageOpeningROGO.handle, TRUE);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	// 裏画面の内容を表画面に反映
@@ -2474,6 +2475,11 @@ BOOL MY_LOAD_IMAGE(VOID)
 	if (!roadImage.RoadImage(ImageTitleROGO, IMAGE_TITLE_ROGO_PATH)) { return FALSE; }
 	ImageTitleROGO.x = GAME_WIDTH / 2 - ImageTitleROGO.width / 2;
 	ImageTitleROGO.y = GAME_HEIGHT / 2 - ImageTitleROGO.height / 2;
+
+	//オープニングロゴ
+	if (!roadImage.RoadImage(ImageOpeningROGO, IMAGE_TITLE_OROGO_PATH)) { return FALSE; }
+	ImageOpeningROGO.x = GAME_WIDTH / 2 - ImageOpeningROGO.width / 2;
+	ImageOpeningROGO.y = GAME_HEIGHT / 2 - ImageOpeningROGO.height / 2;
 
 	//タイトルスタート
 	if (!roadImage.RoadImage(ImageTitleSTART, IMAGE_TITLE_START_PATH)) { return FALSE; }
@@ -2728,6 +2734,7 @@ VOID MY_DELETE_IMAGE(VOID)
 	DeleteGraph(RNKShadow.handle);
 	DeleteGraph(stopBack.handle);
 	DeleteGraph(ImageTitleROGO.handle);
+	DeleteGraph(ImageOpeningROGO.handle);
 	DeleteGraph(ImageTitleSTART.handle);
 	DeleteGraph(ImageTitleRNK.handle);
 	DeleteGraph(ImageSTeROGO.handle);
